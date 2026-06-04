@@ -1,0 +1,132 @@
+# Xcode and Apple platforms
+#
+# Baseline for iOS, iPadOS, macOS, tvOS, visionOS, watchOS, Swift,
+# Swift Package Manager, CocoaPods, Carthage, fastlane, signing, and local tools.
+
+# macOS filesystem
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# Xcode build output
+build/
+Build/
+DerivedData/
+*.xcresult
+*.xcactivitylog
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Xcode user state
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.xcuserdata/
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+.package.resolved
+
+# Keep dependency lockfiles tracked by default.
+!Package.resolved
+
+# CocoaPods
+Pods/
+DerivedData/Pods/
+
+# Keep CocoaPods manifests and lockfiles tracked by default.
+!Podfile
+!Podfile.lock
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# Keep Carthage lockfiles tracked by default.
+!Cartfile
+!Cartfile.resolved
+
+# Accio
+.accio/
+Dependencies/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# Code coverage and test output
+coverage/
+*.profraw
+*.profdata
+TestResults/
+*.junit
+
+# Archives, exports, and distribution artifacts
+*.xcarchive
+*.app.dSYM/
+*.framework.dSYM/
+*.appex.dSYM/
+*.export/
+ExportOptions.plist
+
+# Signing, certificates, and secrets
+*.mobileprovision
+*.provisionprofile
+*.cer
+*.p12
+*.p8
+*.pem
+*.key
+*.csr
+*.developerprofile
+*.entitlements.local
+*.xcconfig.local
+*.local.xcconfig
+
+# Simulator and device logs
+*.crash
+*.ips
+*.diag
+*.trace
+*.logarchive
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace/
+
+# AppCode, VS Code, and editor state
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+.cache/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Generated documentation and reports
+docs/generated/
+reports/

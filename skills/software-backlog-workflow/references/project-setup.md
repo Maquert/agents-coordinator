@@ -1,0 +1,65 @@
+# Minimal Project Setup
+
+Use this reference when a repository wants to adopt `software-backlog-workflow` with the default file layout.
+
+## Baseline Layout
+
+The skill works best when the repository exposes a lightweight task lifecycle under `tasks/`:
+
+```text
+tasks/
+  intake.md
+  tasks.md
+  pending/
+  wip/
+  blocked/
+  finished/
+```
+
+Recommended supporting files:
+
+- `AGENTS.md`: Repository-specific task rules, formatting, validation, and git expectations
+- `scripts/run_unit_tests_ci.sh`: Default validation command for cleanup or task completion when the repo uses one
+- `references/intake-template.md`: Seed template to copy when `tasks/intake.md` does not exist yet
+- `references/tasks-index-template.md`: Seed template to copy when `tasks/tasks.md` does not exist yet
+
+## File Roles
+
+- `tasks/intake.md`: Raw backlog intake items, usually a checklist or plain bullet list. If the file is missing, create it from `references/intake-template.md`.
+- `tasks/tasks.md`: Human-readable backlog index used for duplicate checks and backlog visibility. If the file is missing, create it from `references/tasks-index-template.md`.
+- `tasks/pending/`: Task detail files that are ready to be started
+- `tasks/wip/`: Task detail files currently being executed
+- `tasks/blocked/`: Task detail files waiting on an external dependency or decision
+- `tasks/finished/`: Completed task detail files with brief notes about what was done
+
+## Minimal Task File Shape
+
+The skill does not require one exact template, but WIP-capable task files should be able to hold:
+
+- Task title
+- Short summary
+- Acceptance criteria
+- Constraints or dependencies
+- Current status
+- Branch ownership, typically a `branch:` field
+- Completion notes or blocker notes
+
+Front matter is recommended because it makes branch ownership and status extraction easier and more consistent.
+
+## Minimal Release Notes Setup
+
+For `release-notes` mode, define at least:
+
+- A release comparison marker such as a git tag
+- A file or localization destination where release notes are written
+- A version location the automation can update safely
+
+## When The Repository Is Not Ready
+
+If one of these structures is missing, the automation should stop and explain:
+
+1. Which path is missing
+2. Which mode requires it
+3. Whether the user should create the baseline structure or remap the automation to existing paths
+
+Use `references/path-mapping.md` for non-standard repositories.

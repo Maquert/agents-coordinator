@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xcode Test"
+  short_description: "Run deterministic parallel Xcode test workflows"
+  default_prompt: "Use this skill to assist agents testing Xcode projects with deterministic macOS and iPhone phases."

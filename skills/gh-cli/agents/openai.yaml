@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub CLI"
+  short_description: "Set up and use gh for GitHub workflows, PR templates, and repo label conventions"
+  default_prompt: "Use $gh-cli to verify GitHub CLI setup, inspect PR templates and label definitions under .github, and maintain my pull request."

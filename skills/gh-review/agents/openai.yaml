@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Review"
+  short_description: "Review PR comments and address requested fixes"
+  default_prompt: "Use $gh-review to find the current pull request, address reviewer comments in code, and commit and push the fixes."

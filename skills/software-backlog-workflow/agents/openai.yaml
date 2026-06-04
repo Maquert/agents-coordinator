@@ -1,0 +1,4 @@
+interface:
+  display_name: "Software Backlog Workflow"
+  short_description: "Backlog, WIP, cleanup, and release workflows"
+  default_prompt: "Use $software-backlog-workflow to run a repository backlog or release automation safely."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xcode Project Creator"
+  short_description: "Create lean SwiftUI Xcode app projects"
+  default_prompt: "Use $xcode-project-creator to create a new SwiftUI Xcode app project with minimal entitlements."

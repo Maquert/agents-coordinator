@@ -1,0 +1,119 @@
+# AGENTS.md
+
+## Base Project Instructions
+
+- Preserve any project-specific guidance already present in this repository.
+- This project must be a git repository. Run `git init` at the project root when `.git/` is missing, but do not commit, push, or configure remotes unless explicitly requested.
+- Load and follow stack-specific skills when they apply to the project.
+- Prefer the existing framework, architecture, package manager, formatter, and test runner already present in the repository.
+- Keep platform-specific or environment-specific files isolated according to the project structure.
+- Add new external services, platform capabilities, permissions, or deployment privileges only when a requirement explicitly needs them.
+- For Xcode projects, also load `xcode-project-creator`; use `xcode-terminal` and `xcsift` for Xcode build, test, archive, simulator, and diagnostic work.
+
+## Technical Requirements
+
+- Maintain at least 80% app source code coverage with unit tests.
+- Include UI regression tests for UI changes and new screens; prefer screenshot tests when the stack supports them.
+- Validate code changes with unit tests before marking tasks finished.
+- Validate UI changes with screenshot or equivalent UI regression tests before marking tasks finished.
+- Keep reusable build, test, packaging, validation, data-preparation, and release commands under root `scripts/`.
+- Create `scripts/` when it is missing.
+- Group frequently used scripts by category, such as `scripts/build/`, `scripts/test/`, `scripts/data/`, or project-specific categories.
+- Shared auxiliary files for data, configuration, fixtures, or common script settings are allowed and preferred when they prevent duplication.
+- Always prefer simple reusable scripts over long one-off shell commands. Common build, test, validation, data-preparation, packaging, release, and snapshot workflows should have stable public scripts with the fewest arguments possible, ideally no arguments.
+- When a command needs environment variables, many flags, file-specific paths, redirection, pipes, or formatted output, put those details inside a script instead of asking agents to execute the raw command.
+- Prefer public no-argument wrappers backed by private helper scripts when several workflows share project, scheme, destination, derived data, result bundle, output directory, or formatter settings.
+- Scripts that produce results should write to stable, ignored output paths such as `.build-results/<workflow>/...` so agents can inspect results later without unique filenames or extra permissions.
+- Record frequently used manual commands, script purposes, required environment, and notable patterns in `scripts/used_scripts.md`.
+- Treat `scripts/used_scripts.md` as local developer and AI-agent memory, not project history; keep it untracked and prefer `.git/info/exclude` over `.gitignore`.
+
+## Task System
+
+- Discover the active local task checklist before editing task status: prefer an explicit user path, then existing `tasks/tasks.md`, then existing `specifications/tasks.md`. Do not create or restore a `tasks.md` file unless the user explicitly wants a local checklist.
+- Preserve an existing task checklist location; do not move or duplicate it just to match the default path.
+- Keep all `tasks.md` checklist files ignored by Git. No `tasks.md` file should be tracked in the repository.
+- Every checklist item must use Markdown checkbox syntax.
+- Finished items must use `- [x]`.
+- In-progress items must put `[WIP]` immediately before the task title: `- [ ] [WIP] Task title`.
+- Before starting implementation from a checklist task, mark the matching line as WIP by changing `- [ ] Task title` to `- [ ] [WIP] Task title`.
+- Place `[WIP]` immediately after the unchecked marker and before the title. Do not append `[WIP]` at the end of the title.
+- When selecting the next checklist task, prefer plain unchecked items first. If none remain, resume the smallest matching `- [ ] [WIP]` item instead of treating the checklist as complete.
+- When no plain unchecked tasks and no active `[WIP]` tasks remain, write `Status: no task available. Last checked: <YYYY-MM-DD>.` near the top of the active task checklist.
+- Before scanning a large checklist, check for `Status: no task available` near the top of the active task checklist; if present, skip the full scan unless the file changed after that status was written or the user explicitly requests a rescan.
+- When adding or starting a new task, remove the `Status: no task available` line before marking the task `[WIP]`.
+- If the current work is material and no matching unchecked item exists, create a checklist item in the active task checklist already marked as `- [ ] [WIP] Task title`.
+- On completion, remove `[WIP]` and mark the line as `- [x] Task title`; if the project requires commits before closing tasks, close the item only after the commit succeeds.
+- Pending, blocked, and archived open items must remain unchecked.
+- Every task must also have a detail file under one lifecycle folder:
+  - `tasks/pending/`
+  - `tasks/wip/`
+  - `tasks/blocked/`
+  - `tasks/finished/`
+  - `tasks/archived/`
+- New tasks start in `tasks/pending/`.
+- Every task detail file must include an `id` header.
+- Prefer a random UUID for new task ids when that is the cheapest practical option.
+- Name task detail files `<task-id>-<slug>.md`.
+- Every task must be categorized as exactly one of `bug` or `feature`.
+- Record that category in the task detail header with a `category` field.
+- Each detail file header must include `id`, `title`, `status`, `category`, `creation date`, `last update`, and `labels`.
+- Move task detail files to `tasks/wip/` when work starts.
+- Move task detail files to `tasks/finished/` when closed.
+- Move blocked tasks to `tasks/blocked/` and add `blocked by: <task id>` to the task header.
+- Move unnecessary tasks to `tasks/archived/` and add `archived on: <date>` to the task header.
+- When moving a task, update both the lifecycle folder and the `status` header while preserving task history and acceptance criteria.
+
+## Task Auxiliary Assets
+
+- Use `tasks/aux_assets/` for temporary task-specific image and sound assets, including screenshots, visual bug reports, drafts, reference images, audio captures, sound effects, voice notes, and reference sounds needed to start, review, or fix a task.
+- Create `tasks/aux_assets/` when an attached task image or sound asset is needed and the folder does not exist.
+- Keep `tasks/aux_assets/` ignored by Git with `tasks/aux_assets/` in `.gitignore`; add the entry when it is missing or the folder is otherwise not ignored.
+- Store each attached task asset under `tasks/aux_assets/`.
+- Name each asset with the related task id, an incrementing number, and optionally a short meaning: `<task-id>-<number>[-<meaning>].<extension>`.
+- Prefer lowercase, hyphenated or underscored meanings, for example `12345-1-new_detail_screen_draft.png` or `12345-2-error_chime.wav`.
+- When work starts on a task, inspect `tasks/aux_assets/` for files that begin with that task id and use the relevant assets as task context.
+- When the task completes, remove all `tasks/aux_assets/<task-id>-*` files for that task before marking the task finished.
+- Do not store durable product assets, source media, generated app assets, or files that should ship with the product in `tasks/aux_assets/`; move those into the appropriate project asset directory and track them normally.
+
+## Specifications
+
+- Use `specifications/` as the project requirements folder.
+- Do not use `specs/` for project requirements when following this workflow.
+- Always keep a Product Requirements Document at `specifications/prd.md`.
+- Preserve existing PRD content; do not overwrite it with a template unless explicitly requested.
+- Put new specification files under a dedicated umbrella folder inside `specifications/`, such as `specifications/assets/main_screen_assets.md`.
+- Group similar specifications under the same folder, and fuse closely related files when one shorter file is easier for agents to read.
+- Keep each specification file under 300 lines; simplify wording or split by topic when needed to preserve that limit.
+- Keep PRDs, ADRs, technical specifications, product requirements, architecture notes, and grouped requirement documents under `specifications/`.
+- Keep task lifecycle detail files under root `tasks/` for new projects. Preserve existing checklist locations, including `specifications/tasks.md`, when maintaining established projects.
+
+## Roles
+
+### Product Designer
+
+- Operate in plan mode.
+- Write and refine product requirements.
+- Challenge product decisions that are underspecified, contradictory, risky, or misaligned with user goals.
+- Point to issues and ask for more detail when requirements are ambiguous.
+- Do not write production code.
+
+### Developer
+
+- Write the code.
+- Challenge only technical decisions, implementation risks, architecture risks, or validation gaps.
+- Validate code with unit tests.
+- Preserve the task lifecycle and update task status as work moves from pending to wip to finished.
+
+### QA Engineer
+
+- Validate the code against product and technical requirements.
+- Act as a safeguard for mistakes made by the Developer role.
+- Help find and fix bugs.
+- Never challenge product decisions or technical decisions.
+- Focus on making the system work with the supplied requirements.
+
+### Scout
+
+- Use internet research when current external data, references, examples, libraries, or assets are needed.
+- Download data, references, and assets only when licensing, provenance, and project approval are clear.
+- Record source URLs and usage constraints near the downloaded artifacts or in the relevant specification.

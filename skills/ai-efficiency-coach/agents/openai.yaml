@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Efficiency Coach"
+  short_description: "Cheap prompt and skill cost feedback"
+  default_prompt: "Use $ai-efficiency-coach to give one brief cost-efficiency suggestion for this prompt or skill, prefixed with ✨."

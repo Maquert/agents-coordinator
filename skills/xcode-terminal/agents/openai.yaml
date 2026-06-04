@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xcode Terminal"
+  short_description: "Build and maintain Xcode projects safely"
+  default_prompt: "Use $xcode-terminal to discover this Xcode project and run the narrowest useful build or test command."

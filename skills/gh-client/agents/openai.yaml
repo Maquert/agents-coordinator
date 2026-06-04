@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Client"
+  short_description: "Connect to GitHub with gh and fetch PR data"
+  default_prompt: "Use $gh-client to verify GitHub access, identify the active repository pull request, and fetch structured PR metadata."

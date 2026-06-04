@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Planning Docs"
+  short_description: "Write ADRs, RFDs, and technical specs"
+  default_prompt: "Use $project-planning-docs to draft a technical specification for this project idea."

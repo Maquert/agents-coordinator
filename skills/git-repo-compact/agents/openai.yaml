@@ -1,0 +1,7 @@
+interface:
+  display_name: "Git Repo Compact"
+  short_description: "Shrink Git repos and purge large blobs"
+  default_prompt: "Use $git-repo-compact to inspect this repository and propose a safe compaction plan."
+
+policy:
+  allow_implicit_invocation: true

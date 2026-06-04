@@ -1,0 +1,4 @@
+interface:
+  display_name: "Software Project Workflow"
+  short_description: "Scaffold AGENTS roles and task checklist workflow"
+  default_prompt: "Use $software-project-workflow to initialize AGENTS.md, discover the active task checklist, maintain WIP task tracking, and mark no-task-available backlog states for a software project."
