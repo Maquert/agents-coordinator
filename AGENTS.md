@@ -35,3 +35,5 @@
 - When markdown output is requested, return it in code format.
 
 @/Users/mhjaso/.codex/RTK.md
+
+## Imported Claude Cowork project instructions

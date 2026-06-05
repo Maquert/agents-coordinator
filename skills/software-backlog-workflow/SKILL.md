@@ -23,6 +23,48 @@ Choose one mode first:
 
 If the automation does not name the mode explicitly, infer it from the prompt and state the chosen mode in the response.
 
+## Agent Task-Lock Protocol
+
+Before picking any task, every agent must consult `~/.agents/tasks/` to avoid collisions with agents running in parallel (Claude, Codex, Gemini, or any other). This directory acts as a lightweight distributed lock: one file per in-flight task.
+
+### Lock file location and naming
+
+- Directory: `~/.agents/tasks/`
+- Filename: `<task-id>.md` — the task id alone, no prefix, no suffix other than `.md`.
+
+### Lock file template
+
+```markdown
+---
+task_id: <task-id>
+task_name: <human-readable task title>
+status: <wip | finished | blocked>
+project: <repository name>
+branch: <git branch name>
+worktree: <absolute path to the worktree, or "main" if working in the main checkout>
+last_updated: <HH:MM DD/MM/YYYY>
+agent: <agent identity, e.g. claude, codex, gemini>
+---
+```
+
+### Claim rules
+
+1. Before selecting a task, list all files under `~/.agents/tasks/`. Any task id present there is already claimed — skip it.
+2. Immediately after selecting a task, write the lock file with `status: wip` and the current timestamp. Do this **before** touching any code.
+3. Update `last_updated` whenever the task status changes (e.g. moving from wip to blocked).
+4. When the task reaches `finished` **and** the branch is merged into main, **delete** the lock file. A finished task must not remain in `~/.agents/tasks/`.
+5. If the agent is blocked and stops, set `status: blocked` in the lock file and leave it — do not delete it. Another agent will see it and skip the task.
+6. Never delete a lock file that belongs to a different agent unless explicitly instructed by the user.
+
+### Lock file lifecycle summary
+
+```
+[task selected] → write lock (status: wip)
+                → [work in progress] → update last_updated as needed
+                → [task finished + merged] → DELETE lock file
+                → [task blocked] → update status: blocked, leave file
+```
+
 ## Shared Operating Rules
 
 Apply these rules in every mode unless the automation overrides them:
@@ -132,12 +174,14 @@ Required inputs:
 
 Execution pattern:
 
-1. Inspect the pending task directory and collect eligible pending task files.
-   - Eligible means the task file is under `pending/` and its status is `pending` or the repository equivalent.
-2. Read only the pending task files needed to determine priority and choose the highest-priority eligible task.
-3. Resolve ties by oldest creation date when available, otherwise by smallest stable id or filename order.
-4. Read the selected pending task file before reading broader code.
-5. Verify the task is truly not started:
+1. Read `~/.agents/tasks/` and collect all claimed task ids. These are off-limits for the entire run.
+2. Inspect the pending task directory and collect eligible pending task files.
+   - Eligible means the task file is under `pending/`, its status is `pending` or the repository equivalent, **and its id is not in the claimed set**.
+3. Read only the pending task files needed to determine priority and choose the highest-priority eligible task.
+4. Resolve ties by oldest creation date when available, otherwise by smallest stable id or filename order.
+5. Read the selected pending task file before reading broader code.
+6. Immediately write the lock file to `~/.agents/tasks/<task-id>.md` with `status: wip` before touching any code.
+7. Verify the task is truly not started:
    - Task file location is under `pending/`.
    - Task status is `pending` (or the repository’s equivalent).
    - Missing priority is treated with the repository fallback, which is `Trivial` unless overridden.
@@ -150,8 +194,8 @@ Execution pattern:
    - Read only the code, docs, scripts, and tests required for the selected task.
    - Follow repository technical requirements, PRD/specifications, and `AGENTS.md` instructions.
 9. Validate the task using the repository’s preferred validation scripts and runners (prefer `scripts/` wrappers over raw commands).
-10. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, then move the task file to `finished/`.
-11. If blocked, record the blocker and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
+10. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
+11. If blocked, record the blocker, update the lock file to `status: blocked`, and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
 12. Stop after the first pending task that required action.
 
 Default output:
@@ -181,19 +225,21 @@ If the repository has WIP work tracked elsewhere, explain how to map that struct
 
 Execution pattern:
 
-1. Inspect only the WIP task directory named by the caller.
-2. If no WIP task exists, stop.
-3. Pick the oldest WIP task unless the memory file provides a better reason to skip it.
-4. Read that task file before reading broader code.
-5. Resolve branch ownership from the task file.
+1. Read `~/.agents/tasks/` and collect all claimed task ids. Any id with `status: wip` claimed by a **different agent** is off-limits for this run.
+2. Inspect only the WIP task directory named by the caller.
+3. If no WIP task exists, stop.
+4. Pick the oldest WIP task (not already locked by another agent) unless the memory file provides a better reason to skip it.
+5. Read that task file before reading broader code.
+6. If no lock file exists yet for this task, write one to `~/.agents/tasks/<task-id>.md` with `status: wip` before making changes.
+7. Resolve branch ownership from the task file.
 6. If the task declares a branch, verify the current branch matches it.
 7. If the declared branch does not yet exist locally, create it from the current base state and switch to it.
 8. If no branch is declared, create a task branch using the caller's preferred prefix, record it in the task file, and continue on that branch.
 9. Read only the code, docs, scripts, and tests needed for that task.
 10. Decide whether the task is already complete, incomplete, or blocked.
-11. If complete, add concise completion notes and move it to the finished state requested by the repository workflow.
+11. If complete, add concise completion notes, move it to the finished state requested by the repository workflow, and **delete** `~/.agents/tasks/<task-id>.md`.
 12. If incomplete, continue the task end-to-end.
-13. If blocked, record the blocker in the task file and keep or move the task to the appropriate blocked/WIP state.
+13. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
 14. Validate only what is necessary to close the task safely.
 15. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
 16. After a validated task commit, push the branch and open or reuse a pull request by default. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
