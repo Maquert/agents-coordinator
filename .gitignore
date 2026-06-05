@@ -1,2 +1,5 @@
-worktrees/
+worktrees/**
+!worktrees/.git-keep
+tasks/**
+!tasks/.git-keep
 .DS_Store
