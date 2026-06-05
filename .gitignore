@@ -1,5 +1,5 @@
 worktrees/**
 !worktrees/.gitkeep
 tasks/**
-!tasks/.gitkeep
+!tasks/README.md
 .DS_Store
