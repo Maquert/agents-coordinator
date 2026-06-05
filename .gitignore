@@ -2,4 +2,5 @@ worktrees/**
 !worktrees/README.md
 tasks/**
 !tasks/README.md
+skills/.system/
 .DS_Store
