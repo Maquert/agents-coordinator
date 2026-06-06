@@ -1,4 +1,4 @@
-# mhjaso-agents
+# agents-coordinator
 
 Personal agent workspace for Codex and Claude automation assets.
 
