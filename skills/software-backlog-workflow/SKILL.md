@@ -9,6 +9,8 @@ Use this skill as the workflow engine for repository automations. Keep each auto
 
 Default remote behavior for implementation workflows is to push the working branch and create or update a pull request after a successful local validation and focused commit. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
+For UI-relevant work, pull request descriptions should include a `## Visual Changes` section with at least one relevant screenshot when a screenshot is available and useful. This section is optional for non-UI work and may be omitted when no meaningful screenshot applies. If the repository PR template does not already include `## Visual Changes`, the agent should add that section to the template the first time it prepares a PR description that uses it.
+
 If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use [references/project-setup.md](/Users/mhjaso/.codex/skills/software-backlog-workflow/references/project-setup.md) for the baseline layout and [references/path-mapping.md](/Users/mhjaso/.codex/skills/software-backlog-workflow/references/path-mapping.md) for alternate structures and path overrides.
 
 ## Workflow Selection
@@ -86,6 +88,7 @@ Apply these rules in every mode unless the automation overrides them:
 12. When a task has an assigned branch, always report the PR location in the final output:
    - include the PR URL when one exists
    - otherwise state explicitly that no PR exists yet and why, such as not pushed, blocked before PR creation, or remote access failure
+13. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
 
 Before executing a mode, verify that the required project structure exists. If it does not:
 
@@ -194,7 +197,7 @@ Execution pattern:
    - Read only the code, docs, scripts, and tests required for the selected task.
    - Follow repository technical requirements, PRD/specifications, and `AGENTS.md` instructions.
 9. Validate the task using the repository’s preferred validation scripts and runners (prefer `scripts/` wrappers over raw commands).
-10. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
+10. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, ensure the PR description uses `## Visual Changes` with at least one relevant screenshot for UI-relevant work and add that section to the repository PR template if needed, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
 11. If blocked, record the blocker, update the lock file to `status: blocked`, and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
 12. Stop after the first pending task that required action.
 
@@ -242,7 +245,7 @@ Execution pattern:
 13. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
 14. Validate only what is necessary to close the task safely.
 15. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
-16. After a validated task commit, push the branch and open or reuse a pull request by default. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
+16. After a validated task commit, push the branch and open or reuse a pull request by default. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable, and add that section to the repository PR template the first time it is needed if the template lacks it. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
 17. Stop after the first WIP task that required action.
 
 Default output:
