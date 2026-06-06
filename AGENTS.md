@@ -1,5 +1,9 @@
 # Summary
 
+## Global Resource Routing
+- The source of truth is under `~/.agents`.
+- Commands, skills, worktrees, and any other agent resources must be checked under `~/.agents` first unless stated otherwise.
+
 ## Response Metadata
 - At the end of every response, include a compact Markdown table with columns `Item` and `Value`.
 - The table must include whether a skill was used (which ones).
@@ -9,9 +13,9 @@
   `| Skill | No skill used. |`
 
 ## AI Efficiency Coaching
-- Always load and use the `ai-efficiency-coach` skill in every conversation/session.
+- Load and use the `ai-efficiency-coach` skill when I reply, give more instructions or adjust a prompt. Do not load it in the initial prompt.
 - Treat references to `ai-efficiency-skill` as references to `ai-efficiency-coach`.
-- Include one brief `AI efficiency feedback:` note when it can help improve the user's prompts, Codex skills, or AI workflows without distracting from the main task.
+- Include one brief `AI efficiency feedback:` note when it can help improve the user's prompts, AI agent skills, or AI workflows without distracting from the main task.
 - Keep this feedback cheap, varied, and specific to the current request.
 
 ## Skill Routing
