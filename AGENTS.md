@@ -7,6 +7,10 @@
 ## Response Metadata
 - At the end of every response, include a compact Markdown table with columns `Item` and `Value`.
 - The table must include whether a skill was used (which ones).
+- If the session knows from the start that it will load a skill, the first message must clearly include a Markdown table with columns `skill` and `why`.
+- Use this template for the first-message skill table:
+  `| skill | why |`
+- Keep the `why` column very brief and telegraphic, using labels or keywords rather than sentences.
 - Preferred final-response format:
   `| Item | Value |`
   `| --- | --- |`
