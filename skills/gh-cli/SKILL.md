@@ -59,6 +59,15 @@ When the user asks to push changes or branches:
 7. If the sandbox blocks network access or reports `Could not resolve host`, `Could not resolve hostname`, SSH remote read failures caused by name resolution, or package/network-style DNS errors, rerun the same `git push` with `sandbox_permissions: "require_escalated"` and `prefix_rule: ["git", "push"]`.
 8. Report the pushed branch and remote URL or PR URL when available.
 
+When the user asks to create a GitHub repository:
+
+1. Verify `gh auth status` and identify the target owner, repository name, and visibility.
+2. Prefer `gh repo create <owner>/<name> --public` or `--private` with any other needed explicit flags such as `--description`.
+3. Do not use `gh repo create --confirm`; that flag is deprecated.
+4. If non-interactive confirmation bypass is needed, pass any extra positional argument instead of `--confirm`.
+5. After creation, verify the returned URL or inspect the repository with `gh repo view`.
+6. If the user wants the local repository connected, add or update `origin` and push with upstream tracking.
+
 When the user asks to open or update a PR:
 
 1. Verify the branch is pushed.
