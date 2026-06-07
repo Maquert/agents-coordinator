@@ -146,10 +146,11 @@ Execution pattern:
 6. For each non-duplicate item, create a new pending task record that follows repository task conventions.
 7. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
 8. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
-9. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
-10. Remove each source item only after the task was created successfully or confirmed as a duplicate.
-11. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
-12. Do not implement the tasks.
+9. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
+10. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
+11. Remove each source item only after the task was created successfully or confirmed as a duplicate.
+12. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
+13. Do not implement the tasks.
 
 Default output:
 

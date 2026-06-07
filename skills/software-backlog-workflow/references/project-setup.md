@@ -43,8 +43,24 @@ The skill does not require one exact template, but WIP-capable task files should
 - Current status
 - Branch ownership, typically a `branch:` field
 - Completion notes or blocker notes
+- Optional task dependency metadata, typically a `depends on:` field when one task must wait on another
 
 Front matter is recommended because it makes branch ownership and status extraction easier and more consistent.
+
+Example front matter header:
+
+```yaml
+---
+id: TASK-123
+title: Example task
+status: pending
+priority: Medium
+branch: feat/task-123
+depends on: TASK-101
+---
+```
+
+Treat `depends on:` as optional. Use it only when the task is blocked on another task, issue, or equivalent tracked dependency.
 
 ## Minimal Release Notes Setup
 
