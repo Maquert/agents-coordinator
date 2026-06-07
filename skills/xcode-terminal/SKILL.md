@@ -23,10 +23,11 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
    - distribution: `archive` then `-exportArchive`
 6. Use explicit workspace/project, scheme, configuration, destination, and derived data path.
 7. Use `-resultBundlePath` for tests and substantial builds.
-8. If unit tests run, also run the relevant screenshot tests because screenshot tests are part of the validation contract.
-9. Run screenshot tests in record mode so new baseline images are written into the repository for review.
-10. Keep and commit the recorded screenshot image changes with the related code changes so the user can review them in the pull request.
-11. Summarize xcsift output by errors, failing tests, warnings, timing, and next action.
+8. If SwiftUI UI changes are in scope, add or update screenshot tests and baselines for every impacted platform contract; do not treat screenshot coverage as optional.
+9. If unit tests run, also run the relevant screenshot tests because screenshot tests are part of the validation contract.
+10. Run screenshot tests in record mode so new baseline images are written into the repository for review.
+11. Keep and commit the recorded screenshot image changes with the related code changes so the user can review them in the pull request.
+12. Summarize xcsift output by errors, failing tests, warnings, timing, and next action.
 
 ## Agent Rules
 

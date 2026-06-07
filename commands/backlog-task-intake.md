@@ -6,7 +6,6 @@ Use the `software-backlog-workflow` skill in `backlog-task-intake` mode.
 - Every new task must be assigned a canonical branch slug during intake, stored in the task file without an agent prefix.
 - Format branch slugs as lowercase words joined by underscores, for example `increase_padding`.
 - Agents will turn that stored value into the concrete git branch `<agent>/<slug>`, for example `claude/increase_padding` or `codex/increase_padding`.
-- Update `tasks/tasks.md` as the backlog index, preserving source order.
 - De-duplicate against existing task detail files and `tasks/tasks.md`.
 - Remove each source item from `tasks/intake.md` only after successful task creation or confirmed duplication.
 - Leave ambiguous or unprocessable items in `tasks/intake.md` and report the blocker.
@@ -18,4 +17,3 @@ Output expectations:
 - Briefly list created task ids and titles.
 - Briefly list skipped duplicates.
 - Briefly list any items left in `tasks/intake.md` with the reason.
-- `tasks/tasks.md` should be modified, gitignored but kept on disk with all the changes.
