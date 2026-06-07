@@ -9,6 +9,8 @@ Use this skill as the workflow engine for repository automations. Keep each auto
 
 Default remote behavior for implementation workflows is to push the working branch and create or update a pull request after a successful local validation and focused commit. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
+Task records must carry an assigned branch name from intake onward. Store the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent starts the task, it should create or use the concrete git branch `<agent>/<branch>`, such as `claude/increase_padding` or `codex/increase_padding`.
+
 For UI-relevant work, pull request descriptions should include a `## Visual Changes` section with at least one relevant screenshot when a screenshot is available and useful. This section is optional for non-UI work and may be omitted when no meaningful screenshot applies. If the repository PR template does not already include `## Visual Changes`, the agent should add that section to the template the first time it prepares a PR description that uses it.
 
 If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use [references/project-setup.md](/Users/mhjaso/.codex/skills/software-backlog-workflow/references/project-setup.md) for the baseline layout and [references/path-mapping.md](/Users/mhjaso/.codex/skills/software-backlog-workflow/references/path-mapping.md) for alternate structures and path overrides.
@@ -133,6 +135,7 @@ Required inputs:
 - A backlog intake source file
 - A task detail destination directory
 - A backlog index file or another duplicate-check source
+- A task file shape that can store an assigned branch name
 
 If one of those is missing, stop and explain the setup using the references files.
 
@@ -143,14 +146,17 @@ Execution pattern:
 3. Stop immediately if there are no eligible items.
 4. Rewrite each item into a concise task title suitable for a task detail file.
 5. Check for duplicates against the existing task detail files and any duplicate-check source named by the caller.
-6. For each non-duplicate item, create a new pending task record that follows repository task conventions.
-7. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
-8. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
-9. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
-10. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
-11. Remove each source item only after the task was created successfully or confirmed as a duplicate.
-12. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
-13. Do not implement the tasks.
+6. For each non-duplicate item, derive a canonical branch slug from the normalized task title.
+7. The slug must be lowercase, use underscores between words, and omit any agent prefix. Example: `increase_padding`.
+8. Ensure the derived branch slug is unique among existing task records and any duplicate-check source. If needed, append a short deterministic suffix.
+9. For each non-duplicate item, create a new pending task record that follows repository task conventions and stores that assigned branch name.
+10. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
+11. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
+12. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
+13. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
+14. Remove each source item only after the task was created successfully or confirmed as a duplicate.
+15. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
+16. Do not implement the tasks.
 
 Default output:
 
@@ -189,10 +195,11 @@ Execution pattern:
    - Task file location is under `pending/`.
    - Task status is `pending` (or the repository’s equivalent).
    - Missing priority is treated with the repository fallback, which is `Trivial` unless overridden.
-6. Resolve branch ownership from the task file:
-   - If the task declares an assigned branch, verify the current branch matches it before doing work.
-   - If the declared branch does not exist locally, create it from the repository’s base branch and switch to it.
-   - If **no branch is declared**, do **not** silently proceed: warn the user with a leading `⚠️` and invent a branch name for this run using the caller’s preferred prefix, then record that branch name into the task file before continuing.
+8. Resolve branch ownership from the task file:
+   - The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
+   - The working git branch for this run must be `<agent>/<branch>`, such as `codex/increase_padding`.
+   - If the current branch does not match that concrete branch name, create or switch to it from the repository’s base branch before doing work.
+   - If the task file does not declare a branch, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
 7. Move the task detail file from `pending/` to `wip/` (and update its status field) before making implementation changes.
 8. Execute the task end-to-end:
    - Read only the code, docs, scripts, and tests required for the selected task.
@@ -236,18 +243,19 @@ Execution pattern:
 5. Read that task file before reading broader code.
 6. If no lock file exists yet for this task, write one to `~/.agents/tasks/<task-id>.md` with `status: wip` before making changes.
 7. Resolve branch ownership from the task file.
-6. If the task declares a branch, verify the current branch matches it.
-7. If the declared branch does not yet exist locally, create it from the current base state and switch to it.
-8. If no branch is declared, create a task branch using the caller's preferred prefix, record it in the task file, and continue on that branch.
-9. Read only the code, docs, scripts, and tests needed for that task.
-10. Decide whether the task is already complete, incomplete, or blocked.
-11. If complete, add concise completion notes, move it to the finished state requested by the repository workflow, and **delete** `~/.agents/tasks/<task-id>.md`.
-12. If incomplete, continue the task end-to-end.
-13. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
-14. Validate only what is necessary to close the task safely.
-15. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
-16. After a validated task commit, push the branch and open or reuse a pull request by default. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable, and add that section to the repository PR template the first time it is needed if the template lacks it. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
-17. Stop after the first WIP task that required action.
+8. The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
+9. The working git branch for this run must be `<agent>/<branch>`, such as `claude/increase_padding`.
+10. If the current branch does not match that concrete branch name, create or switch to it from the current base state.
+11. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
+12. Read only the code, docs, scripts, and tests needed for that task.
+13. Decide whether the task is already complete, incomplete, or blocked.
+14. If complete, add concise completion notes, move it to the finished state requested by the repository workflow, and **delete** `~/.agents/tasks/<task-id>.md`.
+15. If incomplete, continue the task end-to-end.
+16. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
+17. Validate only what is necessary to close the task safely.
+18. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
+19. After a validated task commit, push the branch and open or reuse a pull request by default. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable, and add that section to the repository PR template the first time it is needed if the template lacks it. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
+20. Stop after the first WIP task that required action.
 
 Default output:
 
