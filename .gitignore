@@ -4,3 +4,4 @@ tasks/**
 !tasks/README.md
 skills/.system/
 .DS_Store
+projects.local.json
