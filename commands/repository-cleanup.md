@@ -4,16 +4,16 @@ Use the `software-backlog-workflow` skill in `repository-cleanup` mode.
 - Refresh refs with `git fetch --prune origin`.
 - Protect `main`, `release/*`, and `hotfix/*` branches.
 - Parse `tasks/wip/*.md` and protect any declared task branch from local or remote deletion.
-- Delete only branches that are safe to remove after checking both Git reachability and GitHub merge state. Treat a branch as eligible if it is either merged into `main`/`origin/main` or confirmed merged on GitHub for that head branch (including squash/rebase merges that do not remain reachable from `main`).
+- Delete only local branches that are safe to remove after checking both Git reachability and GitHub merge state. Treat a branch as eligible if it is either merged into `main`/`origin/main` or confirmed merged on GitHub for that head branch (including squash/rebase merges that do not remain reachable from `main`).
 - Prefer `gh pr list --state merged --head <branch>` or equivalent GitHub merge verification for branches not reachable from `main` but may still be merged.
-- Remove or prune worktrees tied to deleted branches.
+- Do not delete any branches on the `origin` remote. Local branch deletion only.
+- Remove or prune worktrees tied to deleted local branches.
 - If a `Localizable.xcstrings` file exists, remove stale localization markers by deleting all `"extractionState" : "stale"` entries.
 - If the repository contains Xcode projects (`.xcodeproj`/`.xcworkspace`), remove any `DerivedData` folders found within the repo (e.g. `**/DerivedData`, `.tmp-swift/**/DerivedData`).
 - Validate with `./scripts/run_unit_tests_ci.sh` when available; otherwise use the primary existing test command for the stack.
 
 Output format:
 - Deleted local branches: <list or none>
-- Deleted remote branches: <list or none>
 - Deleted worktrees: <list or none>
 - Localization cleanup: <changed/no-op/not-applicable>
 - DerivedData cleanup: <removed paths/no-op/not-applicable>
