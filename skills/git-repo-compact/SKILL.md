@@ -9,7 +9,43 @@ metadata:
 
 Use this skill to reduce repository size without losing useful history or surprising collaborators. Treat history rewriting as destructive: inspect first, back up or use a fresh clone, explain impact, and get explicit user confirmation before force-pushing or deleting original refs.
 
-## Default Workflow
+There are two distinct modes. Always try **Light Mode** first — it is non-destructive and often resolves the user's complaint (stale branches, dangling worktrees, loose objects) without ever touching commit SHAs. Only escalate to **Hard Mode** when the diagnosis shows large blobs reachable from history, since that is the only case ordinary maintenance cannot fix.
+
+## Light Mode — housekeeping (no SHA changes, safe to run freely)
+
+Targets: unused local/remote branches, stale worktrees, loose/unreachable objects, stale remote-tracking refs. None of this rewrites history, so it needs no force-push and no collaborator coordination.
+
+1. Survey state:
+   ```sh
+   git branch -a -v
+   git worktree list
+   git status --short
+   du -sh .git && git count-objects -vH
+   ```
+2. Find safe-to-delete branches: `git branch --merged main` (merged → safe) vs `--no-merged` (has unmerged work → confirm before deleting). Cross-check with `gh pr list --state all --head <branch>` — a branch tied only to **MERGED** PRs with no open PRs depending on it is safe to delete both locally (`git branch -D`) and on the remote (`git push origin --delete <branch>`).
+3. Prune stale remote-tracking refs and dangling worktrees:
+   ```sh
+   git remote prune origin
+   git worktree prune
+   ```
+4. Reclaim loose/unreachable object space:
+   ```sh
+   git gc
+   # or, only when no other Git process is writing to the repo:
+   git reflog expire --expire=now --all && git gc --prune=now --aggressive
+   ```
+5. **Check for non-standard local refs** that silently keep old history alive — these are easy to miss and were the actual cause of ~760MB staying resident in one real cleanup even after all branches/worktrees were pruned:
+   ```sh
+   git for-each-ref   # look for refs outside refs/heads, refs/tags, refs/remotes
+   ```
+   Tooling (e.g. Codex CLI) can leave refs like `refs/codex/snapshots/<id>` pointing at old worktree-snapshot commits. If they reference superseded history and the user confirms they're disposable backups, delete with `git update-ref -d <ref>` then re-run step 4. Also watch for stray files like `.git/refs/.DS_Store` (Finder artifacts) that make `git fsck` complain — harmless, but mention them; only remove if the user wants to.
+   - Re-run `du -sh .git` after each deletion+gc pass to confirm space is actually reclaimed — the number won't move until the *last* keep-alive ref is gone.
+
+If `du -sh .git` is still large after Light Mode and `git rev-list --objects --all | git cat-file --batch-check ...` (see Diagnose below) shows big blobs reachable from history, escalate to Hard Mode.
+
+## Hard Mode — history rewrite (destroys & recreates SHAs, force-push required)
+
+Targets: large blobs baked into reachable history (e.g. repeatedly re-recorded snapshot-test images, committed binaries, accidentally-committed datasets/secrets) that ordinary `git gc` cannot remove because they're still reachable.
 
 1. Identify the repository and current state.
    - Run `git rev-parse --show-toplevel`, `git status --short`, `du -sh .git`, and `git count-objects -vH`.
@@ -28,33 +64,17 @@ Use this skill to reduce repository size without losing useful history or surpri
      sort -nr |
      head -50
    ```
+   - Aggregate by path/directory to see whether the bloat is one-off large files (good candidates for `--strip-blobs-bigger-than`) or a *churned path* — many historical versions of the same file(s), e.g. re-recorded screenshots or generated reports (better candidates for `--path ... --invert-paths` + re-adding the current version fresh, since a size threshold would also catch unrelated legitimate large files like audio/video assets).
 
-3. Choose the smallest safe remedy.
-   - If space is mostly loose or unreachable objects, run ordinary maintenance:
-
-   ```sh
-   git gc
-   ```
-
-   - To reclaim space after a confirmed local-only rewrite or abandoned refs, and only when no other Git process is writing to the repo:
+3. Choose the rewrite strategy — get explicit user sign-off on which one before touching anything:
+   - **Path-based removal + re-add** (preferred for churned, regenerable artifacts like snapshot-test images): strips every historical version of a path from all history, then the current version is re-committed fresh on top in the rewritten clone — net effect is zero working-tree change, history just stops carrying the old copies.
 
    ```sh
-   git reflog expire --expire=now --all
-   git gc --prune=now --aggressive
+   git filter-repo --path path/to/dir --invert-paths --force
+   # then in the resulting clone: copy back the current files and commit them as one new commit
    ```
 
-   - If large blobs are reachable from history, ordinary `git gc` will not remove them. Use `git-filter-repo` in a fresh clone or mirror clone.
-
-4. Rewrite history only when necessary.
-   - Install or verify `git-filter-repo` with `git filter-repo --version` or `git-filter-repo --version`.
-   - Work in a fresh clone or mirror clone, not the user's only working copy.
-   - Remove a specific path from all history:
-
-   ```sh
-   git filter-repo --path path/to/large-file --invert-paths
-   ```
-
-   - Remove every blob larger than a threshold:
+   - **Size-based stripping** (preferred for one-off oversized blobs, e.g. an accidentally committed video or DB dump): only safe when you've confirmed no legitimate files sit near the threshold.
 
    ```sh
    git filter-repo --strip-blobs-bigger-than 100M
@@ -62,13 +82,25 @@ Use this skill to reduce repository size without losing useful history or surpri
 
    - If removing secrets or sensitive files, use the host-specific sensitive-data process and rotate credentials. Do not present repository compaction as sufficient secret remediation.
 
+4. Work in a disposable mirror clone, never the user's only working copy:
+   ```sh
+   git clone --mirror <original-path-or-url> <repo>-mirror-rewrite
+   cd <repo>-mirror-rewrite && git filter-repo ...
+   ```
+   Then clone *from the rewritten mirror* into a normal working clone to verify and (if doing path-based removal) re-add current files:
+   ```sh
+   git clone <repo>-mirror-rewrite <repo>-rewritten
+   ```
+   `git filter-repo` strips the `origin` remote as a safety measure — this is expected. Before pushing for real, `git remote set-url origin <real-remote-url>` to point at the actual host (not the local mirror clone), and verify with `git remote -v`.
+
 5. Verify before publishing.
    - Re-run `du -sh .git`, `git count-objects -vH`, and `git filter-repo --analyze`.
+   - `diff -rq` the rewritten working tree against the original to confirm content is unchanged (aside from intended removals).
    - Confirm important branches and tags still exist.
    - Run the repository's normal tests or at least a build/smoke check when practical.
    - Preserve `filter-repo/commit-map` if the user needs traceability from old commits to new commits.
 
-6. Publish only after explicit approval.
+6. Publish only after explicit approval — confirm twice: once for the rewrite plan, once immediately before the force-push naming the exact remote URL and old/new SHAs.
    - Explain that collaborators must rebase or reclone; merging old branches can reintroduce removed history.
    - Force-push branches and tags only after user approval and after checking branch/tag protections:
 
@@ -78,6 +110,11 @@ Use this skill to reduce repository size without losing useful history or surpri
    ```
 
    - For GitHub sensitive-data removal, coordinate cached PR refs and server-side cleanup through GitHub Support. For GitLab, run the project cleanup/housekeeping process after pushing rewritten history.
+
+7. Reconcile every other clone of the repo, including the user's original working copy:
+   - `git fetch origin` then `git reset --hard origin/<branch>` if the working tree is clean and content-identical (confirm with the user — this discards the now-orphaned old local commit chain).
+   - Other branches that still point at pre-rewrite history (e.g. open PR branches, automation branches) keep the old blobs reachable and will make `du -sh .git` stay large even after the rewritten branch is pushed and reset locally. Identify them with `git branch -r` and `gh pr list --state all --head <branch>`; branches tied only to merged/closed PRs are safe to delete (Light Mode step 2). Branches with open PRs need rebase/recreation — coordinate with their owners.
+   - After deleting/rewriting all branches that reference old history, `git fetch --prune`, then run Light Mode step 5 (check for stray non-standard refs) before the final `gc --prune=now`. The size will not drop until literally every keep-alive ref pointing at old history is gone.
 
 ## Prevention
 

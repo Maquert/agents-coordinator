@@ -8,6 +8,7 @@ Use the `software-backlog-workflow` skill in `repository-cleanup` mode.
 - Prefer `gh pr list --state merged --head <branch>` or equivalent GitHub merge verification for branches not reachable from `main` but may still be merged.
 - Remove or prune worktrees tied to deleted branches.
 - If a `Localizable.xcstrings` file exists, remove stale localization markers by deleting all `"extractionState" : "stale"` entries.
+- If the repository contains Xcode projects (`.xcodeproj`/`.xcworkspace`), remove any `DerivedData` folders found within the repo (e.g. `**/DerivedData`, `.tmp-swift/**/DerivedData`).
 - Validate with `./scripts/run_unit_tests_ci.sh` when available; otherwise use the primary existing test command for the stack.
 
 Output format:
@@ -15,5 +16,6 @@ Output format:
 - Deleted remote branches: <list or none>
 - Deleted worktrees: <list or none>
 - Localization cleanup: <changed/no-op/not-applicable>
+- DerivedData cleanup: <removed paths/no-op/not-applicable>
 - Validation: <pass/fail/not-run + key failing test if any>
 - Proposed commit message if repo changes exist.
