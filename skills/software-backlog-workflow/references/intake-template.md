@@ -11,4 +11,4 @@ Use this file to capture raw ideas that should be reviewed and converted into no
 
 ## Intake Items
 
-- [ ] Placeholder task: replace this line with the next backlog idea to analyze and convert into a task.
+- Placeholder task: replace this line with the next backlog idea to analyze and convert into a task.

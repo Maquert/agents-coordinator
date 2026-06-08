@@ -141,7 +141,7 @@ If one of those is missing, stop and explain the setup using the references file
 
 Execution pattern:
 
-1. Open the source file and collect unchecked checklist items or plain list items.
+1. Open the source file and collect unordered list items.
 2. Ignore headings, blank lines, and already-processed items.
 3. Stop immediately if there are no eligible items.
 4. Rewrite each item into a concise task title suitable for a task detail file.
