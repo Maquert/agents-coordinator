@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Cleanup"
+  short_description: "Safe branch, worktree, and file hygiene for a repository"
+  default_prompt: "Use $repository-cleanup to remove merged branches and stale worktrees safely."

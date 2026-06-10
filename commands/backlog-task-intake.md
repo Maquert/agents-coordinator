@@ -1,4 +1,4 @@
-Use the `software-backlog-workflow` skill in `backlog-task-intake` mode.
+Use the `backlog-task-intake` skill.
 
 - Read backlog items from `tasks/intake.md`.
 - Generate each task ID as the current Unix epoch second (`date +%s`). When multiple tasks are created in the same batch, increment by 1 for each subsequent task so IDs stay unique and ordered.

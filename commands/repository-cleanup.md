@@ -1,4 +1,4 @@
-Use the `software-backlog-workflow` skill in `repository-cleanup` mode.
+Use the `repository-cleanup` skill.
 
 - Read the accompanying `memory.md` file first, if present, and avoid repeating already-completed deletions.
 - Refresh refs with `git fetch --prune origin`.

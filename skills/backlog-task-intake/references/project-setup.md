@@ -1,10 +1,10 @@
 # Minimal Project Setup
 
-Use this reference when a repository wants to adopt `software-backlog-workflow` with the default file layout.
+Use this reference when a repository wants to adopt the backlog skills (`backlog-task-intake` and `backlog-task-execution`) with the default file layout.
 
 ## Baseline Layout
 
-The skill works best when the repository exposes a lightweight task lifecycle under `tasks/`:
+The backlog skills work best when the repository exposes a lightweight task lifecycle under `tasks/`:
 
 ```text
 tasks/
@@ -34,7 +34,7 @@ Recommended supporting files:
 
 ## Minimal Task File Shape
 
-The skill does not require one exact template, but WIP-capable task files should be able to hold:
+The backlog skills do not require one exact template, but WIP-capable task files should be able to hold:
 
 - Task title
 - Short summary
@@ -62,20 +62,12 @@ depends on: TASK-101
 
 Treat `depends on:` as optional. Use it only when the task is blocked on another task, issue, or equivalent tracked dependency.
 
-## Minimal Release Notes Setup
-
-For `release-notes` mode, define at least:
-
-- A release comparison marker such as a git tag
-- A file or localization destination where release notes are written
-- A version location the automation can update safely
-
 ## When The Repository Is Not Ready
 
 If one of these structures is missing, the automation should stop and explain:
 
 1. Which path is missing
-2. Which mode requires it
+2. Which skill or mode requires it
 3. Whether the user should create the baseline structure or remap the automation to existing paths
 
 Use `references/path-mapping.md` for non-standard repositories.

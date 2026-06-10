@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backlog Task Execution"
+  short_description: "Execute one pending or WIP backlog task end-to-end"
+  default_prompt: "Use $backlog-task-execution to pick and finish one backlog task safely."
