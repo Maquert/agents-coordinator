@@ -1,4 +1,4 @@
-Use the `software-backlog-workflow` skill as the workflow engine.
+Use the `backlog-task-execution` skill as the workflow engine.
 
 Workflow:
 - Read `tasks/project-maintenance.md` and take the first unchecked tech-debt item.

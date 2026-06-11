@@ -1,4 +1,4 @@
-Use the `software-backlog-workflow` skill in `release-notes` mode.
+Use the `release-notes` skill.
 
 - The app uses semver and is still on `0.x`.
 - New features bump the minor version; fixes bump the patch version; majors are not allowed.

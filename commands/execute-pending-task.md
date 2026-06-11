@@ -1,4 +1,4 @@
-Use the `software-backlog-workflow` skill.
+Use the `backlog-task-execution` skill.
 
 Mode: `pending-task-execution`.
 

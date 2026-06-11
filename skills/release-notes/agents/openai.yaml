@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release Notes"
+  short_description: "Customer-facing release notes with versioning and tagging"
+  default_prompt: "Use $release-notes to generate release notes and complete release bookkeeping."

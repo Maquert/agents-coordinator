@@ -48,23 +48,9 @@ If the repository stores all tasks in one directory:
 
 If the repository only has issue text, TODO comments, or project board references:
 
-- Explain that `backlog-task-intake` and `wip-task-execution` need either task detail files or an agreed target format
+- Explain that `backlog-task-intake` and `backlog-task-execution` need either task detail files or an agreed target format
 - Recommend creating the baseline `tasks/` structure first
 - If `tasks/intake.md` is missing, recommend seeding it from `references/intake-template.md`
-
-### Cleanup without task files
-
-If the repository has no active-task directory:
-
-- Provide another protected-branch source in the automation prompt
-- Examples: a maintained keep-list file, branch naming rules, or a project board export committed in the repo
-
-### Release notes without localization catalogs
-
-If the repository stores release notes in markdown, JSON, or store metadata files:
-
-- Point the automation to those destinations explicitly
-- Omit string-catalog cleanup unless the repository actually has one
 
 ## Automation Prompt Additions
 
@@ -76,15 +62,12 @@ When the repository differs from the baseline layout, add explicit path configur
 - WIP task directory
 - blocked task directory
 - finished task directory
-- protected branch source
-- release notes destination
-- version file location
 
 ## Fallback Response Pattern
 
 When required paths are missing, the automation should respond with:
 
-1. The selected workflow mode
+1. The selected skill or workflow mode
 2. The missing path or missing concept
 3. The minimum repository setup needed
 4. The exact prompt fields or files the user should add
