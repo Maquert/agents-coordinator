@@ -1,4 +1,0 @@
-interface:
-  display_name: "Attendee feature test bypass"
-  short_description: "Enable or revert temporary Android/iOS feature test check bypass"
-  default_prompt: "Use $attendee-feature-test-bypass to revert the temporary feature test bypass in this repository."
