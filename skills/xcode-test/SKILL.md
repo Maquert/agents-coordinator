@@ -108,6 +108,46 @@ fi
 - If only one platform is testable in the current repo, state that explicitly and run the single applicable phase.
 - If the user asks for both macOS and iPhone coverage, do not mark the run complete until both phases have finished.
 
+## macOS Snapshot Rendering
+
+`ImageRenderer` does not correctly render interactive AppKit-backed SwiftUI controls (`TextField`, `TextEditor`, `Picker`, `Toggle`, etc.) on macOS. It produces visual artifacts such as yellow bars, missing text, or broken chrome. Only use `ImageRenderer` for views composed entirely of non-interactive elements (`Text`, `Image`, shapes, layout containers).
+
+For snapshot tests that include interactive controls, use `NSHostingView` + `NSBitmapImageRep`:
+
+```swift
+let hostingView = NSHostingView(
+    rootView: content
+        .frame(width: size.width, height: size.height)
+        .background(Color(nsColor: .windowBackgroundColor))
+        .environment(\.colorScheme, .light)
+)
+hostingView.frame = CGRect(origin: .zero, size: size)
+hostingView.appearance = NSAppearance(named: .aqua)
+hostingView.setFrameSize(size)
+hostingView.layoutSubtreeIfNeeded()
+
+guard let bitmap = NSBitmapImageRep(
+    bitmapDataPlanes: nil,
+    pixelsWide: Int(size.width),
+    pixelsHigh: Int(size.height),
+    bitsPerSample: 8,
+    samplesPerPixel: 4,
+    hasAlpha: true,
+    isPlanar: false,
+    colorSpaceName: .deviceRGB,
+    bytesPerRow: 0,
+    bitsPerPixel: 0
+) else { return nil }
+
+bitmap.size = size
+hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
+
+let image = NSImage(size: size)
+image.addRepresentation(bitmap)
+```
+
+This goes through the proper AppKit rendering pipeline and produces correct output for all control types. When reviewing or writing macOS snapshot tests, check whether the view under test contains interactive controls and choose the renderer accordingly.
+
 ## UI Completion Rule
 
 When the change affects UI:
