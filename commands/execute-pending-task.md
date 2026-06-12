@@ -1,4 +1,5 @@
 Use the `backlog-task-execution` skill.
+If screenshot verification fails only because affected baselines are stale, rerun the relevant screenshot record workflow, update the references, rerun verification, and continue the task instead of marking it blocked.
 
 Mode: `pending-task-execution`.
 

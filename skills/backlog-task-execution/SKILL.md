@@ -92,6 +92,8 @@ Use this small screenshot-debug protocol when a screenshot assertion fails:
 3. Confirm the asserted region is still targeting the intended control.
 4. Update snapshot references only after the first three checks pass.
 
+When the assertion is failing because the UI change is intentional and the rendered output is correct, rerun the relevant record workflow immediately, update every affected baseline for the impacted platform contracts, rerun screenshot verification, and continue the task. Do not move the task to blocked for stale-but-correct baselines alone.
+
 ## Mode: pending-task-execution
 
 Use this mode when the caller wants one not-yet-started task taken from the backlog and finished end-to-end in priority order.
