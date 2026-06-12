@@ -19,3 +19,5 @@ PR labeling:
 - If multiple agents worked on the task (detectable from the git log or co-authorship in commits), apply one label per agent.
 - Use `gh pr edit <number> --add-label "<agent>"` to apply each label.
 
+Pre-work:
+- Pull from the main branch before creating any worktree.
