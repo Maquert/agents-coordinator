@@ -160,6 +160,13 @@ When a caller needs remote mutation:
 - use `gh pr view` or `gh pr edit` for PR metadata changes
 - use `gh api graphql` mutations only when a structured PR action such as thread resolution is required
 
+When updating PR bodies that include screenshots:
+
+- if the screenshots are tracked files in a public repository, `raw.githubusercontent.com` links are acceptable
+- if the screenshots are tracked files in a private repository, do not use `raw.githubusercontent.com` because GitHub renders those images via anonymous fetches and they return `404`
+- for tracked screenshot files in a private repository, prefer GitHub blob URLs with `?raw=1`, for example `https://github.com/owner/repo/blob/branch/path/to/image.png?raw=1`
+- if the image is not tracked in the repository, prefer a GitHub-hosted uploaded attachment instead of a local or inaccessible path
+
 Resolve review threads only when the caller explicitly decides the code change is complete.
 
 ## Safety
@@ -169,3 +176,4 @@ Resolve review threads only when the caller explicitly decides the code change i
 - Never force-push unless explicitly requested.
 - Never assume the branch has exactly one PR without checking.
 - Distinguish clearly between missing PR, stale comments, and unresolved comments.
+- When diagnosing broken PR screenshots, check whether the repository is private before blaming the branch or file path. A private-repo `raw.githubusercontent.com` image link returning `404` can still point to a real file.

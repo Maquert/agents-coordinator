@@ -13,6 +13,8 @@ Task records must carry an assigned branch name from intake onward. The task fil
 
 For UI-relevant work, pull request descriptions should include a `## Visual Changes` section with at least one relevant screenshot when a screenshot is available and useful. SwiftUI UI changes must also add or update screenshot coverage for every impacted platform contract before the task is considered complete. This section is optional for non-UI work and may be omitted when no meaningful screenshot applies. If the repository PR template does not already include `## Visual Changes`, the agent should add that section to the template the first time it prepares a PR description that uses it.
 
+When linking screenshots from files already committed in the repository, do not use `raw.githubusercontent.com` URLs for private repositories because GitHub renders those as anonymous fetches and they return `404`. Prefer authenticated GitHub blob URLs with `?raw=1`, or GitHub-uploaded attachments when the image is not tracked in the repo.
+
 If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use the `backlog-task-intake` skill references (`references/project-setup.md` for the baseline layout and `references/path-mapping.md` for alternate structures and path overrides) as the setup guidance.
 
 ## Workflow Selection
@@ -49,7 +51,10 @@ Apply these rules in both modes unless the automation overrides them:
 12. When a task has an assigned branch, always report the PR location in the final output:
    - include the PR URL when one exists
    - otherwise state explicitly that no PR exists yet and why, such as not pushed, blocked before PR creation, or remote access failure
-13. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
+13. Always report the task id and concrete branch name in a compact Markdown table in the final output.
+   - use columns `task id` and `branch`
+   - include exactly the selected task id and the concrete working branch name such as `codex/increase_padding`
+14. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
 
 Before executing a mode, verify that the required project structure exists. If it does not:
 
@@ -128,7 +133,7 @@ Execution pattern:
    - Read only the code, docs, scripts, and tests required for the selected task.
    - Follow repository technical requirements, PRD/specifications, and `AGENTS.md` instructions.
 11. Validate the task using the repository’s preferred validation scripts and runners (prefer `scripts/` wrappers over raw commands).
-12. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, ensure the PR description uses `## Visual Changes` with at least one relevant screenshot for UI-relevant work and add that section to the repository PR template if needed, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
+12. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, set the pull request title to begin with the task id in square brackets such as `[1234] My PR title`, ensure the PR description uses `## Visual Changes` with at least one relevant screenshot for UI-relevant work, use GitHub blob URLs with `?raw=1` for tracked screenshot files in private repositories, and add that section to the repository PR template if needed, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
 13. If blocked, record the blocker, update the lock file to `status: blocked`, and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
 14. Stop after the first pending task that required action.
 
@@ -136,6 +141,7 @@ Default output:
 
 - Selected task (title + id + priority)
 - Selected task file path
+- Task id / branch table
 - Branch used or created (and whether a `⚠️` warning was emitted)
 - Work completed
 - Validation run
@@ -177,12 +183,13 @@ Execution pattern:
 16. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
 17. Validate only what is necessary to close the task safely.
 18. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
-19. After a validated task commit, push the branch and open or reuse a pull request by default. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable, and add that section to the repository PR template the first time it is needed if the template lacks it. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
+19. After a validated task commit, push the branch and open or reuse a pull request by default. Set the pull request title to begin with the task id in square brackets such as `[1234] My PR title`. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable. For tracked screenshot files in private repositories, use GitHub blob URLs with `?raw=1` instead of `raw.githubusercontent.com`, and add that section to the repository PR template the first time it is needed if the template lacks it. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
 20. Stop after the first WIP task that required action.
 
 Default output:
 
 - Selected WIP task
+- Task id / branch table
 - Branch used or created
 - Work completed
 - Validation run
