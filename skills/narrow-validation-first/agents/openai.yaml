@@ -1,0 +1,4 @@
+interface:
+  display_name: "Narrow Validation First"
+  short_description: "Choose the smallest safe validation scope."
+  default_prompt: "Use $narrow-validation-first to choose the smallest sufficient validation plan for this change."
