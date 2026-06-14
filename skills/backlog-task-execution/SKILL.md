@@ -36,6 +36,7 @@ Apply these rules in both modes unless the automation overrides them:
 
 1. Read only the files needed for the selected mode. Avoid broad repo scans.
    - When the selected task file already names relevant files, treat that list as the default narrowing scope and widen only if those files no longer explain the work.
+   - Prefer task file, lock state, memory file, and directly named source/tests before reading repo-wide maps or broad project instructions a second time.
 2. Read the automation memory file first when one is provided and reuse it to avoid duplicate work.
 3. When a concrete approach fails, record a short memory note before ending the run or changing direction:
    - use a `Don't retry this:` label for the failed path
@@ -47,6 +48,8 @@ Apply these rules in both modes unless the automation overrides them:
 7. Keep edits scoped to the selected task.
 8. Use the narrowest sufficient validation first.
    - For UI work, prefer dedicated component or screen snapshot tests before broader screenshot suites unless the task changes shared shell chrome or the focused contract is missing.
+   - If a focused validation path exists, do not run broad wrapper scripts until the focused path fails for a scope-related reason.
+   - When a broad wrapper fails with many unrelated errors, treat that as a signal to return to focused validation rather than expanding the task.
 9. Do not fix unrelated repository issues.
 10. Respect repository instructions from `AGENTS.md` and any task-lifecycle files.
 11. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
@@ -77,6 +80,7 @@ If the run stops or becomes blocked after making relevant file changes:
 5. Report the blocker clearly and leave the repository ready for another agent.
 
 If validation fails because of likely concurrent or unrelated changes, retry once after a short wait only when that is cheap and safe.
+Avoid parallel validation commands that share derived data, package resolution, snapshot baselines, or other mutable build state.
 
 ## Screenshot Validation
 
@@ -138,6 +142,7 @@ Execution pattern:
    - Read only the code, docs, scripts, and tests required for the selected task.
    - Follow repository technical requirements, PRD/specifications, and `AGENTS.md` instructions.
 11. Validate the task using the repository’s preferred validation scripts and runners (prefer `scripts/` wrappers over raw commands).
+   - If the repository wrapper is much broader than the changed surface and a stable focused command is obvious, use the focused command first and keep the wrapper as fallback.
 12. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, set the pull request title to begin with the task id (#123) such as `#1234 My PR title`, ensure the PR description uses `## Visual Changes` with at least one relevant screenshot for UI-relevant work, use GitHub blob URLs with `?raw=1` for tracked screenshot files in private repositories, and add that section to the repository PR template if needed, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
 13. If blocked, record the blocker, update the lock file to `status: blocked`, and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
 14. Stop after the first pending task that required action.

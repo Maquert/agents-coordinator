@@ -21,6 +21,7 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
    - full test: `test`
    - CI split: `build-for-testing` then `test-without-building`
    - distribution: `archive` then `-exportArchive`
+   - if a focused test or screenshot method exists for the changed surface, start there before repo wrappers or full suites
 6. Use explicit workspace/project, scheme, configuration, destination, and derived data path.
 7. Use `-resultBundlePath` for tests and substantial builds.
 8. If SwiftUI UI changes are in scope, add or update screenshot tests and baselines for every impacted platform contract; do not treat screenshot coverage as optional.
@@ -28,6 +29,9 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
 10. Run screenshot tests in record mode so new baseline images are written into the repository for review.
 11. Keep and commit the recorded screenshot image changes with the related code changes so the user can review them in the pull request.
 12. Summarize xcsift output by errors, failing tests, warnings, timing, and next action.
+13. Poll long-running builds sparingly.
+   - Do not repeatedly poll a running xcodebuild unless you expect a state change, timeout decision, or new actionable output.
+14. Avoid overlapping Xcode validations that share package resolution, derived data, simulators, or snapshot outputs unless the repository explicitly supports that concurrency.
 
 ## Agent Rules
 
@@ -38,6 +42,7 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
 - Prefer a repo-local derived data path such as `.derivedData/<scheme>` for reproducibility and cleanup.
 - Prefer stable simulator IDs from `simctl` or `-showdestinations` over ambiguous device names.
 - Capture result bundles under `.build-results/` or another repo-local ignored path.
+- When a wrapper script is much broader than the changed surface, prefer an equivalent focused `xcodebuild test -only-testing:...` command first and use the wrapper as fallback.
 - Do not treat screenshot diffs as disposable local noise when tests were run for validation; record the updated images, keep them in the worktree, and commit them with the task so review happens in the PR.
 - Do not hand-edit `.pbxproj` unless no safer project-management path exists. If editing is unavoidable, preserve ordering, inspect diffs carefully, and run `xcodebuild -list -json` afterward.
 - Keep command output token-efficient: use `xcsift`, JSON flags, `--jq`, or focused file reads instead of raw logs.
