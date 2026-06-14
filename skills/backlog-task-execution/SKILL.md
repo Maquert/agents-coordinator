@@ -35,6 +35,7 @@ Before picking any task, every agent must consult `~/.agents/tasks/` to avoid co
 Apply these rules in both modes unless the automation overrides them:
 
 1. Read only the files needed for the selected mode. Avoid broad repo scans.
+   - When the selected task file already names relevant files, treat that list as the default narrowing scope and widen only if those files no longer explain the work.
 2. Read the automation memory file first when one is provided and reuse it to avoid duplicate work.
 3. When a concrete approach fails, record a short memory note before ending the run or changing direction:
    - use a `Don't retry this:` label for the failed path
@@ -45,6 +46,7 @@ Apply these rules in both modes unless the automation overrides them:
 6. Do not silently switch to a different branch once work begins.
 7. Keep edits scoped to the selected task.
 8. Use the narrowest sufficient validation first.
+   - For UI work, prefer dedicated component or screen snapshot tests before broader screenshot suites unless the task changes shared shell chrome or the focused contract is missing.
 9. Do not fix unrelated repository issues.
 10. Respect repository instructions from `AGENTS.md` and any task-lifecycle files.
 11. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
@@ -93,6 +95,7 @@ Use this small screenshot-debug protocol when a screenshot assertion fails:
 4. Update snapshot references only after the first three checks pass.
 
 When the assertion is failing because the UI change is intentional and the rendered output is correct, rerun the relevant record workflow immediately, update every affected baseline for the impacted platform contracts, rerun screenshot verification, and continue the task. Do not move the task to blocked for stale-but-correct baselines alone.
+When the repository provides a canonical script that refreshes all definitive platform baselines sequentially, prefer that script over ad hoc multi-command record sequences whenever the task needs the full baseline set updated.
 
 ## Mode: pending-task-execution
 
