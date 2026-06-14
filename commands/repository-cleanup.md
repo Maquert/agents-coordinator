@@ -4,8 +4,10 @@ Use the `repository-cleanup` skill.
 - Refresh refs with `git fetch --prune origin`.
 - Protect `main`, `release/*`, and `hotfix/*` branches.
 - Parse `tasks/wip/*.md` and protect any declared task branch from local or remote deletion.
-- Delete only local branches that are safe to remove after checking both Git reachability and GitHub merge state. Treat a branch as eligible if it is either merged into `main`/`origin/main` or confirmed merged on GitHub for that head branch (including squash/rebase merges that do not remain reachable from `main`).
-- Prefer `gh pr list --state merged --head <branch>` or equivalent GitHub merge verification for branches not reachable from `main` but may still be merged.
+- If a branch is not reachable from `main`/`origin/main`, resolve the ambiguity before deleting it by checking GitHub and `~/.agents/tasks`.
+- Use `gh pr list --state merged --head <branch>` or equivalent GitHub merge verification to confirm a merged PR when Git reachability does not prove safety.
+- If there is no open PR for the branch and GitHub does not prove it merged, consult `~/.agents/tasks` to determine whether the branch is currently assigned to an in-progress task. Treat any branch referenced by a `wip` task as protected.
+- Only delete a branch when both GitHub and `~/.agents/tasks` support that it is stale or already merged.
 - Do not delete any branches on the `origin` remote. Local branch deletion only.
 - Remove or prune worktrees tied to deleted local branches.
 - If a `Localizable.xcstrings` file exists, remove stale localization markers by deleting all `"extractionState" : "stale"` entries.
