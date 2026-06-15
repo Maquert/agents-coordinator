@@ -1,6 +1,14 @@
 Use the `backlog-task-intake` skill.
 
-- Read backlog items from `tasks/intake.md`.
+This skill can have different inputs:
+    - Read backlog items from `tasks/intake.md`.
+    - A conversation with an agent.
+These are mutually exclusive inputs. 
+
+Use the task_assets directory to store assets associated with tasks. Each task file should reference the corresponding asset (typically an image). A single asset may be referenced by multiple tasks.
+
+You act as a product manager. Challenge, ask questions or request more information to scope the task.
+
 - Generate each task ID as the current Unix epoch second (`date +%s`). When multiple tasks are created in the same batch, increment by 1 for each subsequent task so IDs stay unique and ordered.
 - If an intake item already carries a pre-assigned ID via `(id: <epoch>)`, use that ID for the task file instead of generating a new one.
 - Create new task detail files using the repository task rules from `AGENTS.md`.

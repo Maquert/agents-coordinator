@@ -1,6 +1,6 @@
 ---
 name: backlog-task-intake
-description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when Codex needs to process a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs, deduplicating against existing task records.
+description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when processing a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs. Automatically handles task asset images, placing them in task_assets/ with proper naming ({task_id}_{task_slug}_{sequence}.png). Use whenever you need to convert backlog items to tasks, especially with attached screenshots or reference images.
 ---
 
 # Backlog Task Intake
@@ -32,8 +32,11 @@ Before executing, verify that the required project structure exists. If it does 
 - A task detail destination directory
 - A backlog index file or another duplicate-check source
 - A task file shape that can store an assigned branch name
+- Optional: image files to attach as task assets (e.g., screenshots, reference images)
 
-If one of those is missing, stop and explain the setup using the references files. Seed missing files from [references/intake-template.md](references/intake-template.md) and [references/tasks-index-template.md](references/tasks-index-template.md) when the user wants the baseline layout.
+If the required inputs are missing, stop and explain the setup using the references files. Seed missing files from [references/intake-template.md](references/intake-template.md) and [references/tasks-index-template.md](references/tasks-index-template.md) when the user wants the baseline layout.
+
+**Image Asset Handling**: When image files are provided (via the automation prompt or discovered in the conversation), create a `task_assets/` directory if it doesn't exist and automatically place each image with the naming pattern `{task_id}_{task_slug}_{sequence}.png`, where `sequence` is an incrementing number starting from 0 for multiple images per task.
 
 ## Execution Pattern
 
@@ -49,10 +52,11 @@ If one of those is missing, stop and explain the setup using the references file
 10. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
 11. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
 12. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
-13. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
-14. Remove each source item only after the task was created successfully or confirmed as a duplicate.
-15. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
-16. Do not implement the tasks.
+13. **Image Assets**: When image files are provided in the automation prompt, create the `task_assets/` directory if needed. For each image file, move or copy it to `task_assets/{task_id}_{task_slug}_{sequence}.png` where `sequence` is 0 for the first image, 1 for the second, etc. Update the task file's `Notes` section to reference the asset, e.g., "See task_assets/{task_id}_{task_slug}_{sequence}.png for reference screenshot."
+14. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
+15. Remove each source item only after the task was created successfully or confirmed as a duplicate.
+16. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
+17. Do not implement the tasks.
 
 ## Default Output
 
@@ -69,6 +73,17 @@ Keep automation prompts short and supply only:
 - The backlog source file and task destination paths
 - Task id and priority rules that differ from the default
 - Any path overrides when the repository does not use the baseline `tasks/` layout
+- **Optional**: image files to attach as assets (e.g., `images: ["/path/to/screenshot.png"]`)
 - Required final output or finish message
 
 Do not restate the full workflow in each automation unless the repository has a real exception to this skill.
+
+**Example with images:**
+```
+source: tasks/intake.md
+destination: tasks/pending/
+images:
+  - /path/to/screenshot1.png
+  - /path/to/screenshot2.png
+output: Created task IDs and placed images in task_assets/.
+```
