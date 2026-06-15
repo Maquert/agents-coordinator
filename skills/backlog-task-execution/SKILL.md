@@ -94,7 +94,9 @@ When screenshot validation or baseline refresh work is involved, use this checkl
 Use this small screenshot-debug protocol when a screenshot assertion fails:
 
 1. Confirm the chosen host renders the intended control on each covered platform.
+   - On macOS, if the view contains interactive controls such as `Button`, `TextField`, `Picker`, `Toggle`, `Stepper`, or other AppKit-backed chrome, do not use `ImageRenderer`; use `NSHostingView`-based rendering instead.
 2. Compare the current baseline image with the newly rendered temporary image.
+   - Inspect the actual control glyphs, not only overall layout. Reject updated baselines that show placeholder or corrupted control chrome such as prohibited/orange warning symbols, missing SF Symbols, yellow/orange bars, or dropped button labels.
 3. Confirm the asserted region is still targeting the intended control.
 4. Update snapshot references only after the first three checks pass.
 
