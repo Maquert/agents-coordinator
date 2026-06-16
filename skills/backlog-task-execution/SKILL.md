@@ -1,5 +1,6 @@
 ---
 name: backlog-task-execution
+model: claude-sonnet-4-6
 description: Select and execute one backlog task end-to-end in a software repository. Use when Codex needs to pick a pending task from the backlog and finish it, or advance and finish a single WIP task, including agent task-lock claiming, branch ownership, validation, focused commits, push, and pull request creation or update.
 ---
 

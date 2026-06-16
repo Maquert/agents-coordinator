@@ -1,5 +1,6 @@
 ---
 name: xcode-project-creator
+model: claude-sonnet-4-6
 description: Create new Xcode app projects with SwiftUI, minimal entitlements, local Xcode and SDK discovery, simulator selection, Apple .gitignore setup, mirrored filesystem and Xcode group layout, and explicit platform support decisions for iPhone, iPad, Apple TV, visionOS, macOS, and related Apple app targets.
 ---
 
