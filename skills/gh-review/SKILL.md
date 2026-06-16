@@ -1,5 +1,6 @@
 ---
 name: gh-review
+model: claude-sonnet-4-6
 description: Review GitHub pull request feedback and address requested code changes. Use when Codex needs to find the active PR for the current branch, read PR review comments with file and line context, decide whether reviewer feedback requires a code change, apply fixes, validate them, and commit and push the result back to the PR branch. Trigger on requests such as "review the PR comments" and similar prompts about addressing pull request review feedback.
 ---
 

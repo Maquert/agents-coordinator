@@ -1,5 +1,6 @@
 ---
 name: ai-efficiency-coach
+model: claude-haiku-4-5-20251001
 description: Prompt, ChatGPT context, and skill cost-efficiency coaching for Codex. Use on every session or whenever Codex writes, reviews, improves, or responds to prompts, ChatGPT conversations, custom GPT instructions, AGENTS.md instructions, Codex skills, AI workflows, LLM API usage, context-window packing, token budgets, prompt caching, structured prompt data, TOON, RTK Query-like caching/deduplication, retrieval, memory hygiene, or model/cost tradeoffs. Provides one cheap, practical, varied suggestion for making the user's AI prompts, ChatGPT context, skills, and workflows more cost-efficient without taking over the main task.
 ---
 

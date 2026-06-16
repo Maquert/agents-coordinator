@@ -1,5 +1,6 @@
 ---
 name: git-sandbox-worktree-troubleshooting
+model: claude-sonnet-4-6
 description: Use when git work is blocked by sandbox permissions, worktree metadata writes, index locks, non-interactive GPG signing, patch transfer between worktrees, or push/PR flows that fail because the current workspace cannot mutate the required git metadata.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: gh-cli
+model: claude-sonnet-4-6
 description: Set up, verify, and use the GitHub CLI (`gh`) for GitHub workflows. Use when Codex needs to verify GitHub CLI installation or authentication, configure GitHub CLI access, push commits or branches to remotes, create or inspect pull requests, check GitHub Actions or commit status, fetch repository metadata, or handle prompts such as "push my changes", "push this branch", "open a PR", "check PR status", "use gh", or "GitHub CLI". When maintaining PRs, also inspect repository PR templates and project label definitions stored under `.github/`, including non-canonical label files.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: release-notes
+model: claude-haiku-4-5-20251001
 description: Generate and publish customer-facing release notes for a software repository, including the associated versioning, tagging, commit, push, and pull request bookkeeping. Use when Codex needs to derive release notes from recent product changes, update release-note destinations or localization catalogs, bump versions, or move release marker tags.
 ---
 

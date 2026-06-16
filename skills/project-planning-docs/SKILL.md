@@ -1,5 +1,6 @@
 ---
 name: project-planning-docs
+model: claude-opus-4-8
 description: Assist with planning new technical projects and writing stakeholder-ready Architecture Decision Records (ADRs), Requests for Discussion/Comments (RFDs/RFCs), technical specifications, architecture design documents, decision logs, and related project-planning documents. Use when Codex needs to analyze a new technical project, gather context, dependencies, risks, alternatives, sources, and trade-offs, or draft/review one focused project document at a time.
 ---
 

@@ -1,5 +1,6 @@
 ---
 name: lylat---tech-debt
+model: claude-sonnet-4-6
 description: Takes only technical debt tasks for maintenance reasons
 ---
 
