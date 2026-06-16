@@ -1,5 +1,6 @@
 ---
 name: automation-creator
+model: claude-haiku-4-5-20251001
 description: Create or update Codex automations under ~/.codex/automations (automation.toml). Use whenever the user asks to create, add, set up, modify, update, fix, or troubleshoot an automation entry, or when an automation is missing from the Automations list.
 ---
 

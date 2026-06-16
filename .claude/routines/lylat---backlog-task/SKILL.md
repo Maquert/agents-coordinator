@@ -1,5 +1,6 @@
 ---
 name: lylat---backlog-task
+model: claude-sonnet-4-6
 description: Picks a backlog task, implements it and pushes the result to a Pull Request
 ---
 

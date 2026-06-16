@@ -1,5 +1,6 @@
 ---
 name: test-modernizer
+model: claude-sonnet-4-6
 description: "Modernize test suites to use modern Swift Testing features or migrate from XCTest."
 ---
 # Test Modernizer
