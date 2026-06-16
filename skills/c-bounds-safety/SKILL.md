@@ -1,6 +1,6 @@
 ---
 name: c-bounds-safety
-model: claude-sonnet-4-6
+models: gpt-5.5, claude-sonnet-4-6
 description: |
   Guide for the C -fbounds-safety language extension. Covers the language model, pointer annotations, adopting bounds-safety in existing C code, compiler build settings and modes, and runtime debugging of bounds violations.
 when_to_use: |

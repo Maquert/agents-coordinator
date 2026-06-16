@@ -1,6 +1,6 @@
 ---
 name: swiftui-scrollview
-model: claude-sonnet-4-6
+models: gpt-5.4-mini, claude-sonnet-4-6
 description: >
   Expert guidance on SwiftUI ScrollView tips and tricks, with a focus on
   magnetic/snapping scroll effects. Use this skill whenever the user asks about

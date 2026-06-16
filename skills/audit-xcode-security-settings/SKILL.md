@@ -1,6 +1,6 @@
 ---
 name: audit-xcode-security-settings
-model: claude-sonnet-4-6
+models: gpt-5.4-mini, claude-sonnet-4-6
 description: |
   Audit and enable security-oriented Xcode build settings. Progressively enables compiler warnings, static analyzer checkers, and Enhanced Security features. Use when: user wants to secure their Xcode project, audit security settings, enable hardening, review security posture of build configuration, set up security-focused static analysis, enable static analysis, improve warning coverage, harden diagnostics, or catch more bugs at compile time in C/C++/Objective-C/Swift. SKIP: network security (TLS/ATS), code signing, privacy APIs.
 ---

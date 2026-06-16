@@ -1,6 +1,6 @@
 ---
 name: device-interaction
-model: claude-sonnet-4-6
+models: gpt-5.4-mini, claude-sonnet-4-6
 description: "Verify iOS app behavior on device or simulator via screenshots, UI hierarchy, and touch interactions."
 ---
 # Device Interaction

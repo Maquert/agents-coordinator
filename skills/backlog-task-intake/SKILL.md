@@ -1,6 +1,6 @@
 ---
 name: backlog-task-intake
-model: claude-haiku-4-5-20251001
+models: gpt-5.4-nano, claude-haiku-4-5-20251001
 description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when processing a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs. Automatically handles task asset images, placing them in task_assets/ with proper naming ({task_id}_{task_slug}_{sequence}.png). Use whenever you need to convert backlog items to tasks, especially with attached screenshots or reference images.
 ---
 

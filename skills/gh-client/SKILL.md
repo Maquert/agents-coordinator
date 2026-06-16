@@ -1,6 +1,6 @@
 ---
 name: gh-client
-model: claude-sonnet-4-6
+models: gpt-5.4-mini, claude-sonnet-4-6
 description: Connect to GitHub from a local git repository by using the GitHub CLI (`gh`) and git. Use when Codex needs to verify GitHub access, identify the repository and current branch, locate the active pull request, fetch structured PR metadata, retrieve review threads or line comments with file and line information, or perform follow-up PR operations such as pushing branch updates or resolving clearly addressed review threads.
 ---
 
