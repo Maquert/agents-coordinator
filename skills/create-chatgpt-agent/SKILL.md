@@ -1,5 +1,6 @@
 ---
 name: create-chatgpt-agent
+model: claude-sonnet-4-6
 description: Create a reusable setup package for a custom ChatGPT GPT/agent from instructions, skills, knowledge files, and desired behavior. Use when the user asks to create, configure, export, package, or document a custom ChatGPT agent/GPT, or asks for files and instructions to build one manually in ChatGPT.
 ---
 

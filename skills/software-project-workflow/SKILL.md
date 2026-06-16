@@ -1,5 +1,6 @@
 ---
 name: software-project-workflow
+model: claude-sonnet-4-6
 description: Initialize and maintain lightweight project-governance files for software projects. Use when creating or updating AGENTS.md role instructions, setting default quality expectations, initializing a project git repository, creating versioned PRDs such as specifications/v1/prd.md, managing task lifecycle files under tasks/pending, tasks/wip, tasks/blocked, tasks/finished, and tasks/archived, and optionally maintaining a local ignored tasks/tasks.md checklist.
 ---
 

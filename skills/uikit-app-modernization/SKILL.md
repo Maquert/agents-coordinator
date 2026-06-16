@@ -1,5 +1,6 @@
 ---
 name: uikit-app-modernization
+model: claude-sonnet-4-6
 description: "Modernizes UIKit apps for multi-window environments by replacing legacy shared-state APIs with context-appropriate modern alternatives. This includes references to mainScreen, interfaceOrientation, application and scene lifecycle, as well as safe area inset updates."
 ---
 # UIKit App Modernization Skill
