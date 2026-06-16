@@ -1,9 +1,10 @@
 Use the `backlog-task-execution` skill as the workflow engine.
 
 Workflow:
-- Read `tasks/project-maintenance.md` and take the first unchecked tech-debt item.
-- If no unchecked item exists, do nothing.
+- Read `tasks/project-maintenance.md` and take the first tech-debt checklist item in the file.
+- If no checklist item exists, do nothing.
 - Before starting, state the exact checklist item you are taking.
+- The maintenance list is a one-item-at-a-time queue. Once the selected item is fully finished, remove that exact checklist item from `tasks/project-maintenance.md`.
 - Create or reuse a matching task detail file under `tasks/` using the repository task rules from `AGENTS.md`, then move it to `tasks/wip/` before implementation starts.
 - Before starting any work, verify the task's assigned branch and confirm the current session is still on that same branch. If the assigned branch changed or the session is on a different branch, stop and report it instead of continuing on the wrong branch.
 - You should not work on the `main` branch: create a new branch when the task has no assigned branch yet.
@@ -12,7 +13,7 @@ Workflow:
 - After validation passes, commit only the task-related files from the current worktree.
 - Push the current branch to `origin`, using escalated `git` or `gh` commands when sandbox or network limits require it. Request escalation for branch/merge/push if sandbox blocks Git metadata.
 - Open a PR using the repository PR template.
-- Mark the task done in both its task file under `tasks/` and `tasks/project-maintenance.md`.
+- Mark the task done in its task file under `tasks/` and remove the finished checklist item from `tasks/project-maintenance.md`.
 - If everything is committed, go back to the `main` branch.
 
 Branch continuity rule:
