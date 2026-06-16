@@ -1,6 +1,6 @@
 ---
 name: xcsift
-model: claude-sonnet-4-6
+models: gpt-5.4-mini, claude-haiku-4-5-20251001
 description: Use xcsift for all Swift and Xcode build commands. Pipe xcodebuild build, xcodebuild test, swift build, swift test through xcsift for structured TOON output with compile errors, warnings, test failures, code coverage, slow tests, and build timing. Essential for parsing Xcode build output, diagnosing compile errors, analyzing test results, and measuring code coverage in any Swift or Xcode project.
 ---
 

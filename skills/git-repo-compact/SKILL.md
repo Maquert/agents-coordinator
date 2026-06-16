@@ -1,6 +1,6 @@
 ---
 name: git-repo-compact
-model: claude-haiku-4-5-20251001
+models: gpt-5.4-mini, claude-sonnet-4-6
 description: Compact and shrink Git repositories by diagnosing object storage, running safe Git maintenance, and planning or executing large-blob history rewrites with git-filter-repo. Use when a user asks to reduce .git size, remove big blobs, clean repository history, garbage collect a repo, purge large committed files, migrate large files to LFS, recover space after a rewrite, prune a git repo, shrink disk usage of a repo, or make the repository take less space on disk.
 metadata:
   short-description: Shrink Git repositories safely

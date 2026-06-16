@@ -1,6 +1,6 @@
 ---
 name: repository-cleanup
-model: claude-haiku-4-5-20251001
+models: gpt-5.4-nano, claude-haiku-4-5-20251001
 description: Clean up software repository branches and worktrees safely and apply lightweight repository hygiene. Use when Codex needs to delete merged branches, prune stale worktrees, protect active task branches from deletion, or run narrow file hygiene such as removing stale localization markers, with optional validation afterwards.
 ---
 
