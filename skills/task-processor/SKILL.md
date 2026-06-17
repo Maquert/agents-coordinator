@@ -1,7 +1,7 @@
 ---
 name: task-processor
 models: gpt-5.4-nano, claude-haiku-4-5-20251001
-description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when processing a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs. Automatically handles task asset images, placing them in task_assets/ with proper naming ({task_id}_{task_slug}_{sequence}.png). Use whenever you need to convert backlog items to tasks, especially with attached screenshots or reference images.
+description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when processing a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs. Every task must be assigned to a project and a tactic. Automatically handles task asset images, placing them in tasks/task_assets/ with proper naming ({task_id}_{task_slug}_{sequence}.png). Use whenever you need to convert backlog items to tasks, especially with attached screenshots or reference images.
 ---
 
 # Backlog Task Intake
@@ -30,38 +30,76 @@ Before executing, verify that the required project structure exists. If it does 
 4. Suggest either creating the baseline structure or updating the automation prompt to map the workflow to the repository's existing paths.
 5. Reference the setup guidance so the user can make the repository compatible.
 
+## Project and Tactic Assignment
+
+Every task **must** be assigned to a project and a tactic. These are required fields, not optional. Do not create a task without them.
+
+### Projects
+
+A project is a top-level grouping stored as a directory at `tasks/{project_id}-{project-name}/`. A project must have a name.
+
+- To use an existing project: read the project directories under `tasks/` and pick the matching one.
+- To create a new project: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the directory `tasks/{project_id}-{project-name}/` with the standard lifecycle subdirectories (`pending/`, `wip/`, `finished/`, `blocked/`, `tactics/`).
+
+### Tactics
+
+A tactic is a mid-level grouping within a project, stored as a file at `tasks/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md`. A tactic must have a name and belongs to exactly one project.
+
+- To use an existing tactic: read the `tactics/` directory inside the project and pick the matching one.
+- To create a new tactic: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the tactic file at `tasks/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md` with a brief description.
+
+### Task Frontmatter
+
+Each task file must include both fields in its front matter:
+
+```yaml
+project: {project_id}
+tactic: {tactic_id}
+```
+
+Tasks live under the lifecycle directories of their project (e.g., `tasks/{project_id}-{project-name}/pending/`).
+
 ## Required Inputs
 
 - A backlog intake source file
-- A task detail destination directory
+- A project (existing or new — must have a name)
+- A tactic within that project (existing or new — must have a name)
 - A backlog index file or another duplicate-check source
-- A task file shape that can store an assigned branch name
+- A task file shape that can store an assigned branch name, project, and tactic
 - Optional: image files to attach as task assets (e.g., screenshots, reference images)
 
 If the required inputs are missing, stop and explain the setup using the references files. Seed missing files from [references/intake-template.md](references/intake-template.md) and [references/tasks-index-template.md](references/tasks-index-template.md) when the user wants the baseline layout.
 
-**Image Asset Handling**: When image files are provided (via the automation prompt or discovered in the conversation), create a `task_assets/` directory if it doesn't exist and automatically place each image with the naming pattern `{task_id}_{task_slug}_{sequence}.png`, where `sequence` is an incrementing number starting from 0 for multiple images per task.
+**Image Asset Handling**: When image files are provided (via the automation prompt or discovered in the conversation), place each image under `tasks/task_assets/` (not under the project root) with the naming pattern `{task_id}_{task_slug}_{sequence}.png`, where `sequence` is an incrementing number starting from 0 for multiple images per task. Create the directory if it does not exist.
 
 ## Execution Pattern
 
 1. Open the source file and collect unordered list items.
 2. Ignore headings, blank lines, and already-processed items.
 3. Stop immediately if there are no eligible items.
-4. Rewrite each item into a concise task title suitable for a task detail file.
-5. Check for duplicates against the existing task detail files and any duplicate-check source named by the caller.
-6. For each non-duplicate item, derive a canonical branch slug from the normalized task title.
-7. The slug must be lowercase, use underscores between words, and omit any agent prefix. Example: `increase_padding`.
-8. Ensure the derived branch slug is unique among existing task records and any duplicate-check source. If needed, append a short deterministic suffix.
-9. For each non-duplicate item, create a new pending task record that follows repository task conventions and stores that assigned branch name.
-10. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
-11. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
-12. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
-13. **Image Assets**: When image files are provided in the automation prompt, create the `task_assets/` directory if needed. For each image file, move or copy it to `task_assets/{task_id}_{task_slug}_{sequence}.png` where `sequence` is 0 for the first image, 1 for the second, etc. Update the task file's `Notes` section to reference the asset, e.g., "See task_assets/{task_id}_{task_slug}_{sequence}.png for reference screenshot."
-14. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
-15. Remove each source item only after the task was created successfully or confirmed as a duplicate.
-16. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
-17. Do not implement the tasks.
-18. When intake changes tracked repository files, commit only the intake-related changes, push the new branch, and create or update a pull request unless the caller explicitly disables remote actions.
+4. **Resolve project**: Before processing any items, determine which project they belong to.
+   - If the caller names a project, find the matching directory under `tasks/` by id or name.
+   - If the caller says "new project", create a new project directory `tasks/{id}-{name}/` with lifecycle subdirectories and a `tactics/` folder.
+   - If no project is provided and one cannot be inferred, stop and ask. Do not proceed without a project.
+5. **Resolve tactic**: For each batch of items (or all items if they share a tactic), determine the tactic.
+   - If the caller names a tactic, find the matching file under `tasks/{project_id}-{name}/tactics/` by id or name.
+   - If the caller says "new tactic", create a new tactic file `tasks/{project_id}-{name}/tactics/{tactic_id}-{tactic-name}.md`.
+   - If no tactic is provided and one cannot be inferred, stop and ask. Do not proceed without a tactic.
+6. Rewrite each item into a concise task title suitable for a task detail file.
+7. Check for duplicates against the existing task detail files and any duplicate-check source named by the caller.
+8. For each non-duplicate item, derive a canonical branch slug from the normalized task title.
+9. The slug must be lowercase, use underscores between words, and omit any agent prefix. Example: `increase_padding`.
+10. Ensure the derived branch slug is unique among existing task records and any duplicate-check source. If needed, append a short deterministic suffix.
+11. For each non-duplicate item, create a new pending task record under `tasks/{project_id}-{name}/pending/` that follows repository task conventions and stores the assigned branch name, `project`, and `tactic` fields.
+12. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
+13. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
+14. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
+15. **Image Assets**: When image files are provided in the automation prompt, create `tasks/task_assets/` if needed. For each image file, move or copy it to `tasks/task_assets/{task_id}_{task_slug}_{sequence}.png` where `sequence` is 0 for the first image, 1 for the second, etc. Update the task file's `Notes` section to reference the asset, e.g., "See tasks/task_assets/{task_id}_{task_slug}_{sequence}.png for reference screenshot."
+16. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
+17. Remove each source item only after the task was created successfully or confirmed as a duplicate.
+18. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
+19. Do not implement the tasks.
+20. When intake changes tracked repository files, commit only the intake-related changes, push the new branch, and create or update a pull request unless the caller explicitly disables remote actions.
 
 ## Default Output
 
@@ -75,7 +113,9 @@ Keep automation prompts short and supply only:
 
 - Repository path or current working directory
 - Any memory file path
-- The backlog source file and task destination paths
+- The backlog source file path
+- Project (name or id of an existing project, or "new: {name}" to create one)
+- Tactic (name or id of an existing tactic, or "new: {name}" to create one)
 - Task id and priority rules that differ from the default
 - Any path overrides when the repository does not use the baseline `tasks/` layout
 - **Optional**: image files to attach as assets (e.g., `images: ["/path/to/screenshot.png"]`)
@@ -83,12 +123,21 @@ Keep automation prompts short and supply only:
 
 Do not restate the full workflow in each automation unless the repository has a real exception to this skill.
 
+**Example:**
+```
+source: tasks/intake.md
+project: 1781617286-lylat-core
+tactic: new: Authentication Flow
+output: Created task IDs with project and tactic assigned.
+```
+
 **Example with images:**
 ```
 source: tasks/intake.md
-destination: tasks/pending/
+project: new: Onboarding
+tactic: new: Initial Setup
 images:
   - /path/to/screenshot1.png
   - /path/to/screenshot2.png
-output: Created task IDs and placed images in task_assets/.
+output: Created task IDs and placed images in tasks/task_assets/.
 ```
