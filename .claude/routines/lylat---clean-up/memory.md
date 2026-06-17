@@ -29,42 +29,63 @@
   /Users/mhjaso/.codex/worktrees/422c/lylat_app. All were clean (no
   uncommitted changes) before removal.
 
-- Protected and left alone (do not re-delete unless status changes):
-  - `claude/rename_saga_to_tactic` — declared `branch: rename_saga_to_tactic`,
-    `status: wip` in tasks/wip/1781296909-rename-saga-to-tactic.md, checked out
-    at /Users/mhjaso/.agents/worktrees/lylat_app/busy-babbage-ac768c. PR #141 is
-    MERGED but the in-repo task is still wip with extra commits, so kept.
-  - `codex/add_search_to_the_get_things_done_and_plan_tabs` — open PR #154,
-    checked out at /Users/mhjaso/.codex/worktrees/c3c3/lylat_app.
-  - `claude/sharp-pare-79990a` — brand-new branch/worktree
-    (/Users/mhjaso/.agents/worktrees/lylat_app/sharp-pare-79990a) created by a
-    concurrent agent run during this cleanup (tip "Add screenshot asset for
-    alignment task", same commit as main). Re-check next run; likely fine to
-    delete once its work lands via PR.
-
 - Localization cleanup: removed the single stale `"Title"` entry
   (`"extractionState": "stale"`, unused in Swift sources) from
-  `Lylat/Localizable.xcstrings`. Done in a fresh isolated worktree
-  (/Users/mhjaso/.agents/worktrees/lylat_app/remove_stale_localization_marker,
-  branch `claude/remove_stale_localization_marker`) because the primary
-  worktree was actively in use by a concurrent agent (mid branch-switch/pull)
-  during this run — do NOT edit files directly in the primary worktree
-  (/Users/mhjaso/Developer/Projects/lylat_app) without first checking it is
-  idle. Opened PR #156 (labeled `claude`). Once #156 merges, remove that
-  worktree and delete `claude/remove_stale_localization_marker` (local +
-  remote-tracking) in a future run.
+  `Lylat/Localizable.xcstrings`. PR #156 (labeled `claude`) opened and merged.
 
 - DerivedData cleanup: removed
   `.xcode-home/Library/Developer/Xcode/DerivedData/Lylat-fgjkpzywxaozjmeqznrcapifvbqe`
-  (gitignored, ~32K of stale `.xcactivitylog` files).
+  (~32K of stale `.xcactivitylog` files).
 
-- Validation: did not run `./scripts/xcode/run_unit_tests_ci.sh`. The only
-  repo change (xcstrings entry removal) doesn't touch Swift code, and the
-  primary worktree shares Xcode derived data with other actively-running
-  worktrees, so a full CI test run risked a "database is locked" collision.
-  Validated only via `python3 -c "import json; json.load(...)"` (valid JSON)
-  and confirming `"Title"` has zero Swift references.
+---
 
-- Remaining local branches after this run: `main`,
-  `claude/rename_saga_to_tactic`, `codex/add_search_to_the_get_things_done_and_plan_tabs`,
-  `claude/sharp-pare-79990a`, plus the new `claude/remove_stale_localization_marker`.
+## Run 2026-06-17
+
+### Deleted local branches (21 total)
+
+**Reachable from origin/main (safe -d):**
+- claude/clever-black-e0b8e9, claude/pedantic-sanderson-795cf1,
+  claude/sharp-babbage-6c9c40, claude/trusting-montalcini-83d256,
+  claude/zen-bhabha-eb9300, claude/great-kilby-c09162,
+  claude/keen-tharp-bae8db, claude/mystifying-bassi-f5cdf1
+
+**Confirmed merged via GitHub PR (force -D):**
+- claude/add_no_icloud_scheme (PR #192), claude/amazing-chatelet-641396 (PR #186),
+  claude/cloudkit_schema_sync (PR #191), claude/fix_selected_tactic_binding_runtime_warning (PR #168),
+  claude/move_modal_dismiss_button_to_top_trailing (PR #170),
+  claude/move_swiftui_previews_to_bottom (PR #184),
+  claude/organize_tests_structure (PR #188),
+  codex/add_feature_view_model_translation_layer (PR #190),
+  codex/fix_macos_design_system_runtime_loading (PR #174),
+  codex/fix_selected_tactic_binding_runtime_warning (PR #172),
+  codex/implement_swiftdata_persistence (PR #179),
+  codex/move_modal_dismiss_button_to_top_trailing (PR #169 closed; work landed in #170),
+  codex/remove_finished_maintenance_item_and_clarify_workflow (PR #173)
+
+### Deleted worktrees (7 total)
+- ~/.agents/worktrees/lylat_app/great-kilby-c09162 (clean)
+- ~/.agents/worktrees/lylat_app/keen-tharp-bae8db (clean)
+- ~/.agents/worktrees/lylat_app/mystifying-bassi-f5cdf1 (dirty: M AGENTS.md — stale, branch merged)
+- ~/.agents/worktrees/lylat_app/pedantic-sanderson-795cf1 (dirty: ?? worktree artifact)
+- ~/.agents/worktrees/lylat_app/sharp-babbage-6c9c40 (dirty: D stale task file — branch merged)
+- ~/.agents/worktrees/lylat_app/trusting-montalcini-83d256 (dirty: ?? worktree artifact)
+- ~/.codex/worktrees/16d4/lylat_app (clean)
+
+### Localization cleanup
+No stale entries found in Lylat/Localizable.xcstrings (0 stale).
+
+### DerivedData cleanup
+Removed `.xcode-home/Library/Developer/Xcode/DerivedData/Lylat-fgjkpzywxaozjmeqznrcapifvbqe` (259MB).
+
+### Remaining branches after this run
+- main
+- claude/update-skill-references (open PR #193 — do NOT delete)
+- claude/add_no_icloud_ios_scheme (active work in primary worktree — do NOT delete)
+- remote-only: codex/cloudkit_schema_and_sync (remote-only tracking ref, no local branch)
+
+### Stale WIP task files (out of scope for repo-cleaner, note for next task executor)
+- tasks/wip/1781617290-cloudkit-schema-and-sync.md → PR #191 MERGED; should move to finished/
+- tasks/wip/1781683368-move-swiftui-previews-to-bottom.md → PR #184 MERGED; should move to finished/
+
+### Validation
+Not run — no Swift source changes; all cleanup was branch/worktree/DerivedData only.
