@@ -77,7 +77,8 @@ When the user asks to open or update a PR:
 4. Use the PR template when creating or updating the PR body.
 5. Absorb repository label definitions and apply the matching existing GitHub labels with `gh pr edit --add-label` when creating or maintaining the PR.
 6. Use `gh pr create` with an explicit base, head, title, and templated body when needed.
-7. Return the PR number and URL.
+7. Always append a `## Agent Thread` section to the PR body with a deep link to the current agent session. Use whichever deep-link scheme matches the agent handling the task — `claude://agents/<session-id>` for Claude, `codex://threads/<thread-id>` for Codex, or the equivalent for any other agent. Retrieve the id from the environment (`$CLAUDE_SESSION_ID`, `$CODEX_THREAD_ID`, or equivalent) if available; otherwise derive it from conversation context. This section is for local convenience and is always included regardless of which agent opened the PR.
+8. Return the PR number and URL.
 
 When the user explicitly says creating the PR is required:
 
