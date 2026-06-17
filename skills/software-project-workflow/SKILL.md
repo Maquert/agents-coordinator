@@ -16,6 +16,8 @@ Do not add language-specific runtime dependencies, package managers, or build to
 
 Always prefer simple reusable scripts over long one-off shell commands. Common build, test, validation, data-preparation, packaging, release, and snapshot workflows should be promoted into stable scripts with the fewest arguments possible, ideally no arguments. When a command needs environment variables, many flags, file-specific paths, redirection, pipes, or formatted output, put those details inside a script instead of asking an agent to execute the raw command. Prefer public no-argument wrapper scripts backed by private helper scripts when several workflows share project, scheme, destination, cache, result bundle, output directory, or formatter settings. Scripts that produce results should write to stable ignored output paths, such as `.build-results/<workflow>/...`, so agents can inspect results without unique filenames or extra approval-specific command text.
 
+Mock implementations and debug-only helpers must never ship in release builds. Record and enforce that they stay behind the `DEBUG` compiler flag, and keep release target membership and release codepaths free of mock/debug-only dependencies.
+
 ## Default Workflow
 
 1. Inspect the project root before editing: look for `.git/`, `AGENTS.md`, `specifications/`, task lifecycle folders, any existing local task checklist such as `tasks/tasks.md`, `scripts/`, `.gitignore`, package files, and existing local conventions.

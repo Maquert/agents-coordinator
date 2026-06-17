@@ -29,10 +29,11 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
 9. If unit tests run, also run the relevant screenshot tests because screenshot tests are part of the validation contract.
 10. Run screenshot tests in record mode so new baseline images are written into the repository for review.
 11. Keep and commit the recorded screenshot image changes with the related code changes so the user can review them in the pull request.
-12. Summarize xcsift output by errors, failing tests, warnings, timing, and next action.
-13. Poll long-running builds sparingly.
+12. Mock implementations and debug-only helpers must never be shipped in release builds; keep them under the `DEBUG` compiler flag and make sure release targets do not depend on them.
+13. Summarize xcsift output by errors, failing tests, warnings, timing, and next action.
+14. Poll long-running builds sparingly.
    - Do not repeatedly poll a running xcodebuild unless you expect a state change, timeout decision, or new actionable output.
-14. Avoid overlapping Xcode validations that share package resolution, derived data, simulators, or snapshot outputs unless the repository explicitly supports that concurrency.
+15. Avoid overlapping Xcode validations that share package resolution, derived data, simulators, or snapshot outputs unless the repository explicitly supports that concurrency.
 
 ## Agent Rules
 

@@ -55,15 +55,16 @@ Apply these rules in both modes unless the automation overrides them:
    - When a broad wrapper fails with many unrelated errors, treat that as a signal to return to focused validation rather than expanding the task.
 9. Do not fix unrelated repository issues.
 10. Respect repository instructions from `AGENTS.md` and any task-lifecycle files.
-11. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
-12. When a task has an assigned branch, always report the PR location in the final output:
+11. Mock implementations and debug-only code must never ship in release builds; keep them behind the `DEBUG` compiler flag and avoid introducing release-path dependencies on them.
+12. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
+13. When a task has an assigned branch, always report the PR location in the final output:
    - include the PR URL when one exists
    - otherwise state explicitly that no PR exists yet and why, such as not pushed, blocked before PR creation, or remote access failure
-13. Always report the task id and concrete branch name in a compact Markdown table in the final output.
+14. Always report the task id and concrete branch name in a compact Markdown table in the final output.
    - use columns `task id` and `branch`
    - include exactly the selected task id and the concrete working branch name such as `codex/increase_padding`
-14. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
-15. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
+15. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
+16. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
 
 Before executing a mode, verify that the required project structure exists. If it does not:
 
