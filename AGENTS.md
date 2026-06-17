@@ -23,10 +23,10 @@
 - Keep this feedback cheap, varied, and specific to the current request.
 
 ## Skill Routing
-- When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `create-chatgpt-agent` skill.
-- When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `gh-cli` skill.
-- When the user asks to plan a new technical project or write stakeholder-facing ADRs, RFDs/RFCs, technical specifications, architecture design documents, or related project planning docs, load and use the `project-planning-docs` skill.
-- When the user asks to build, test, archive, diagnose, or maintain Xcode projects from the terminal, load and use the `xcode-terminal` skill and also use `xcsift` for build/test output.
+- When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
+- When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
+- When the user asks to plan a new technical project or write stakeholder-facing ADRs, RFDs/RFCs, technical specifications, architecture design documents, or related project planning docs, load and use the `project-planner` skill.
+- When the user asks to build, test, archive, diagnose, or maintain Xcode projects from the terminal, load and use the `xcode-terminal-operator` skill and also use `xcode-output-parser` for build/test output.
 
 ## Execution
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
