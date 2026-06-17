@@ -10,6 +10,8 @@ Use this skill to convert raw backlog items into normalized task records. Keep e
 
 Task records must carry an assigned branch name from intake onward. Store the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent later starts the task, it will create or use the concrete git branch `<agent>/<branch>`, such as `claude/increase_padding` or `codex/increase_padding`.
 
+Default remote behavior is to do intake work on a new branch, push that branch, and create or update a pull request when task creation changes tracked repository files. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
+
 If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use [references/project-setup.md](references/project-setup.md) for the baseline layout and [references/path-mapping.md](references/path-mapping.md) for alternate structures and path overrides.
 
 ## Operating Rules
@@ -18,6 +20,7 @@ If the repository does not already expose the paths or files that the automation
 2. Read the automation memory file first when one is provided and reuse it to avoid duplicate work.
 3. Keep edits scoped to intake: do not implement tasks or fix unrelated repository issues.
 4. Respect repository instructions from `AGENTS.md` and any task-lifecycle files.
+5. When the intake work changes tracked repository files, use a new branch for that work and create or update a pull request instead of leaving the changes only locally.
 
 Before executing, verify that the required project structure exists. If it does not:
 
@@ -58,6 +61,7 @@ If the required inputs are missing, stop and explain the setup using the referen
 15. Remove each source item only after the task was created successfully or confirmed as a duplicate.
 16. Leave ambiguous or unprocessable items in the source file and report why they were skipped.
 17. Do not implement the tasks.
+18. When intake changes tracked repository files, commit only the intake-related changes, push the new branch, and create or update a pull request unless the caller explicitly disables remote actions.
 
 ## Default Output
 
