@@ -17,9 +17,8 @@ Repository override:
 - When a task has no assigned branch name, invent one with the prefix `codex/`.
 
 PR labeling:
-- After creating or updating the PR, apply a label that matches the agent identity recorded in the lock file (`agent:` field). For example: if `agent: claude`, apply label `claude`; if `agent: codex`, apply label `codex`.
-- If multiple agents worked on the task (detectable from the git log or co-authorship in commits), apply one label per agent.
-- Use `gh pr edit <number> --add-label "<agent>"` to apply each label.
+- Do not require any automation-specific PR label such as `codex-automation`.
+- If the repository or current task explicitly requires PR labels, follow those local instructions instead of adding automation-default labels.
 
 Pre-work:
 - Pull from the main branch before creating any worktree.
