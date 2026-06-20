@@ -142,6 +142,8 @@ Execution pattern:
 8. Resolve branch ownership from the task file:
    - The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
    - The working git branch for this run must be `<agent>/<branch>`, such as `codex/increase_padding`.
+   - **Before creating the branch, ensure the main integration branch is fully up to date**: run `git checkout main && git pull origin main` (or the equivalent) so the new branch starts from the latest remote state. Never create a task branch off a stale local main.
+   - **Always work in a git worktree**, not the main worktree checkout. Create the worktree with `git worktree add <path> -b <branch>` from an up-to-date main. The main worktree checkout must remain on `main` throughout the task.
    - If the current branch does not match that concrete branch name, create or switch to it from the repository’s base branch before doing work.
    - If the task file does not declare a branch, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
 9. Move the task detail file from `pending/` to `wip/` (and update its status field) before making implementation changes.
@@ -191,7 +193,7 @@ Execution pattern:
 7. Resolve branch ownership from the task file.
 8. The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
 9. The working git branch for this run must be `<agent>/<branch>`, such as `claude/increase_padding`.
-10. If the current branch does not match that concrete branch name, create or switch to it from the current base state.
+10. If the current branch does not match that concrete branch name, create or switch to it from the current base state. If no worktree exists yet for the branch, create one from an up-to-date main: `git checkout main && git pull origin main`, then `git worktree add <path> -b <branch>`. The main worktree checkout must remain on `main`.
 11. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
 12. Read only the code, docs, scripts, and tests needed for that task.
 13. Decide whether the task is already complete, incomplete, or blocked.
