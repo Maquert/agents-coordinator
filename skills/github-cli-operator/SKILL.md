@@ -102,6 +102,8 @@ Search for templates in this order:
 
 If there is one template, use it as the PR body and fill every relevant section. Preserve headings, checklist items, and required fields. If a required field is unknown, write `TBD` or ask the user when the missing value would make the PR misleading.
 
+**`## Summary` must open with 2–3 sentences of narrative prose** describing what the PR achieves and why — enough context for a reviewer to understand the change without reading every file. Only after those sentences may you add a bullet list of specific changes. Never leave the `## Summary` section as a checklist-only or empty placeholder.
+
 If there are multiple templates, choose the clearly matching one from file name and context. If the choice is ambiguous, stop and ask which template to use.
 
 If no repository template exists, create a concise PR body with summary, testing, risks, and related links; mention that no `.github` PR template was found.
