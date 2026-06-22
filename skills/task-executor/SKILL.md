@@ -142,8 +142,9 @@ Execution pattern:
 8. Resolve branch ownership from the task file:
    - The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
    - The working git branch for this run must be `<agent>/<branch>`, such as `codex/increase_padding`.
+   - **Never execute a task on `main` and never execute it in the repository's main checkout/worktree.** If the current checkout is `main`, stop using it for task work immediately and create or switch to a dedicated task worktree first.
    - **Before creating the branch, ensure the main integration branch is fully up to date**: run `git checkout main && git pull origin main` (or the equivalent) so the new branch starts from the latest remote state. Never create a task branch off a stale local main.
-   - **Always work in a git worktree**, not the main worktree checkout. Create the worktree with `git worktree add <path> -b <branch>` from an up-to-date main. The main worktree checkout must remain on `main` throughout the task.
+   - **Always work in a dedicated git worktree**, not the main worktree checkout. Create the task worktree with `git worktree add <path> -b <branch>` from an up-to-date main. The main worktree checkout must remain on `main`, clean, and reserved for branch creation, pulls, and merges only.
    - If the current branch does not match that concrete branch name, create or switch to it from the repository’s base branch before doing work.
    - If the task file does not declare a branch, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
 9. Move the task detail file from `pending/` to `wip/` (and update its status field) before making implementation changes.
@@ -194,16 +195,17 @@ Execution pattern:
 8. The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
 9. The working git branch for this run must be `<agent>/<branch>`, such as `claude/increase_padding`.
 10. If the current branch does not match that concrete branch name, create or switch to it from the current base state. If no worktree exists yet for the branch, create one from an up-to-date main: `git checkout main && git pull origin main`, then `git worktree add <path> -b <branch>`. The main worktree checkout must remain on `main`.
-11. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
-12. Read only the code, docs, scripts, and tests needed for that task.
-13. Decide whether the task is already complete, incomplete, or blocked.
-14. If complete, add concise completion notes, move it to the finished state requested by the repository workflow, and **delete** `~/.agents/tasks/<task-id>.md`.
-15. If incomplete, continue the task end-to-end.
-16. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
-17. Validate only what is necessary to close the task safely.
-18. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
-19. After a validated task commit, push the branch and open or reuse a pull request by default. Set the pull request title to begin with the task id in square brackets such as `[1234] My PR title`. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable. For tracked screenshot files in private repositories, use GitHub blob URLs with `?raw=1` instead of `raw.githubusercontent.com`, add that section to the repository PR template the first time it is needed if the template lacks it, and include a `## Codex Thread` section with `codex://threads/<thread-id>` when the current thread ID is available with confidence. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
-20. Stop after the first WIP task that required action.
+11. Never repurpose the main checkout/worktree for WIP task changes, even temporarily. If the agent starts in the main checkout, it must leave that checkout clean and move the task work into a dedicated non-main worktree before editing files, running task validation, or creating commits.
+12. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
+13. Read only the code, docs, scripts, and tests needed for that task.
+14. Decide whether the task is already complete, incomplete, or blocked.
+15. If complete, add concise completion notes, move it to the finished state requested by the repository workflow, and **delete** `~/.agents/tasks/<task-id>.md`.
+16. If incomplete, continue the task end-to-end.
+17. If blocked, record the blocker in the task file, update the lock file to `status: blocked`, and keep or move the task to the appropriate blocked/WIP state.
+18. Validate only what is necessary to close the task safely.
+19. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
+20. After a validated task commit, push the branch and open or reuse a pull request by default. Set the pull request title to begin with the task id in square brackets such as `[1234] My PR title`. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable. For tracked screenshot files in private repositories, use GitHub blob URLs with `?raw=1` instead of `raw.githubusercontent.com`, add that section to the repository PR template the first time it is needed if the template lacks it, and include a `## Codex Thread` section with `codex://threads/<thread-id>` when the current thread ID is available with confidence. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
+21. Stop after the first WIP task that required action.
 
 Default output:
 
