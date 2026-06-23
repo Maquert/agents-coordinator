@@ -9,15 +9,19 @@ The backlog skills work best when the repository exposes a lightweight task life
 ```text
 tasks/
   intake.md
-  tasks.md
-  task_assets/                        ← shared image assets for all tasks
-  {project_id}-{project-name}/        ← one directory per project
-    tactics/
-      {tactic_id}-{tactic-name}.md   ← one file per tactic
-    pending/
-    wip/
-    blocked/
-    finished/
+  task_assets/                              ← shared image assets for all tasks
+  pending/
+    {task_id}-{task_slug}.md               ← pending task detail files
+  wip/
+    {task_id}-{task_slug}.md               ← work-in-progress task detail files
+  blocked/
+    {task_id}-{task_slug}.md               ← blocked task detail files
+  finished/
+    {task_id}-{task_slug}.md               ← completed task detail files
+  projects/                                ← one directory per project
+    {project_id}-{project-name}/
+      tactics/
+        {tactic_id}-{tactic-name}.md      ← one file per tactic
 ```
 
 Recommended supporting files:
@@ -30,14 +34,13 @@ Recommended supporting files:
 ## File Roles
 
 - `tasks/intake.md`: Raw backlog intake items, usually a checklist or plain bullet list. If the file is missing, create it from `references/intake-template.md`.
-- `tasks/tasks.md`: Human-readable backlog index used for duplicate checks and backlog visibility. If the file is missing, create it from `references/tasks-index-template.md`.
 - `tasks/task_assets/`: Shared image assets for all tasks, named `{task_id}_{task_slug}_{sequence}.png`.
-- `tasks/{project_id}-{project-name}/`: Project directory. Contains lifecycle subdirectories and a `tactics/` folder.
-- `tasks/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md`: Tactic file describing a group of related tasks within a project.
-- `tasks/{project_id}-{project-name}/pending/`: Task detail files that are ready to be started.
-- `tasks/{project_id}-{project-name}/wip/`: Task detail files currently being executed.
-- `tasks/{project_id}-{project-name}/blocked/`: Task detail files waiting on an external dependency or decision.
-- `tasks/{project_id}-{project-name}/finished/`: Completed task detail files with brief notes about what was done.
+- `tasks/pending/`: Task detail files that are ready to be started.
+- `tasks/wip/`: Task detail files currently being executed.
+- `tasks/blocked/`: Task detail files waiting on an external dependency or decision.
+- `tasks/finished/`: Completed task detail files with brief notes about what was done.
+- `tasks/projects/{project_id}-{project-name}/`: Project directory. Contains optional metadata and a `tactics/` folder.
+- `tasks/projects/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md`: Tactic file describing a group of related tasks within a project.
 
 ## Minimal Task File Shape
 

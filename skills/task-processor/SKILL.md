@@ -36,17 +36,17 @@ Every task **must** be assigned to a project and a tactic. These are required fi
 
 ### Projects
 
-A project is a top-level grouping stored as a directory at `tasks/{project_id}-{project-name}/`. A project must have a name.
+A project is a top-level grouping stored as a directory at `tasks/projects/{project_id}-{project-name}/`. A project must have a name and optional metadata.
 
-- To use an existing project: read the project directories under `tasks/` and pick the matching one.
-- To create a new project: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the directory `tasks/{project_id}-{project-name}/` with the standard lifecycle subdirectories (`pending/`, `wip/`, `finished/`, `blocked/`, `tactics/`).
+- To use an existing project: read the project directories under `tasks/projects/` and pick the matching one.
+- To create a new project: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the directory `tasks/projects/{project_id}-{project-name}/` with a `tactics/` subdirectory and optional project metadata file.
 
 ### Tactics
 
-A tactic is a mid-level grouping within a project, stored as a file at `tasks/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md`. A tactic must have a name and belongs to exactly one project.
+A tactic is a mid-level grouping within a project, stored as a file at `tasks/projects/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md`. A tactic must have a name and belongs to exactly one project.
 
 - To use an existing tactic: read the `tactics/` directory inside the project and pick the matching one.
-- To create a new tactic: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the tactic file at `tasks/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md` with a brief description.
+- To create a new tactic: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the tactic file at `tasks/projects/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md` with a brief description.
 
 ### Task Frontmatter
 
@@ -57,7 +57,7 @@ project: {project_id}
 tactic: {tactic_id}
 ```
 
-Tasks live under the lifecycle directories of their project (e.g., `tasks/{project_id}-{project-name}/pending/`).
+Tasks live under the lifecycle directories at the top level (e.g., `tasks/pending/{task_id}-{task_slug}.md`).
 
 ## Required Inputs
 
@@ -78,19 +78,19 @@ If the required inputs are missing, stop and explain the setup using the referen
 2. Ignore headings, blank lines, and already-processed items.
 3. Stop immediately if there are no eligible items.
 4. **Resolve project**: Before processing any items, determine which project they belong to.
-   - If the caller names a project, find the matching directory under `tasks/` by id or name.
-   - If the caller says "new project", create a new project directory `tasks/{id}-{name}/` with lifecycle subdirectories and a `tactics/` folder.
+   - If the caller names a project, find the matching directory under `tasks/projects/` by id or name.
+   - If the caller says "new project", create a new project directory `tasks/projects/{id}-{name}/` with a `tactics/` subdirectory.
    - If no project is provided and one cannot be inferred, stop and ask. Do not proceed without a project.
 5. **Resolve tactic**: For each batch of items (or all items if they share a tactic), determine the tactic.
-   - If the caller names a tactic, find the matching file under `tasks/{project_id}-{name}/tactics/` by id or name.
-   - If the caller says "new tactic", create a new tactic file `tasks/{project_id}-{name}/tactics/{tactic_id}-{tactic-name}.md`.
+   - If the caller names a tactic, find the matching file under `tasks/projects/{project_id}-{name}/tactics/` by id or name.
+   - If the caller says "new tactic", create a new tactic file `tasks/projects/{project_id}-{name}/tactics/{tactic_id}-{tactic-name}.md`.
    - If no tactic is provided and one cannot be inferred, stop and ask. Do not proceed without a tactic.
 6. Rewrite each item into a concise task title suitable for a task detail file.
 7. Check for duplicates against the existing task detail files and any duplicate-check source named by the caller.
 8. For each non-duplicate item, derive a canonical branch slug from the normalized task title.
 9. The slug must be lowercase, use underscores between words, and omit any agent prefix. Example: `increase_padding`.
 10. Ensure the derived branch slug is unique among existing task records and any duplicate-check source. If needed, append a short deterministic suffix.
-11. For each non-duplicate item, create a new pending task record under `tasks/{project_id}-{name}/pending/` that follows repository task conventions and stores the assigned branch name, `project`, and `tactic` fields.
+11. For each non-duplicate item, create a new task record file in the appropriate top-level lifecycle directory (e.g., `tasks/pending/{task_id}-{task_slug}.md`) that follows repository task conventions and stores the assigned branch name, `project`, and `tactic` fields.
 12. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
 13. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
 14. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
