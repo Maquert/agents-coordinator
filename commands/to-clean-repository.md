@@ -1,5 +1,14 @@
 Use the `repository-cleaner` skill.
 
+## Rules
+- Opened PRs branches must be protected. They should never be deleted.
+- Finished tasks branches must be removed if no other task is using the same branch.
+- Stale branches must be deleted: branches opened more than 5 days ago with not recent updates (by recent we mean 2 days).
+
+## Related skills
+Use git-repo-compactor to delete stale information from the repository, such as big orphaned blobs.
+
+## Steps
 - Read the accompanying `memory.md` file first, if present, and avoid repeating already-completed deletions.
 - Refresh refs with `git fetch --prune origin`.
 - Protect `main`, `release/*`, and `hotfix/*` branches.
