@@ -56,15 +56,17 @@ Apply these rules in both modes unless the automation overrides them:
 9. Do not fix unrelated repository issues.
 10. Respect repository instructions from `AGENTS.md` and any task-lifecycle files.
 11. Mock implementations and debug-only code must never ship in release builds; keep them behind the `DEBUG` compiler flag and avoid introducing release-path dependencies on them.
-12. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
-13. When a task has an assigned branch, always report the PR location in the final output:
+12. **Never leave uncommitted changes in any worktree.** Before ending a run — whether the task finishes, is blocked, or the session stops — every file change in the task worktree must be committed. An empty or clean working tree is the only acceptable end state for a worktree.
+13. **Never commit directly to `main`.** All changes, including task lifecycle file moves and status updates, must land on a feature branch and reach `main` through a pull request. Committing to `main` directly is forbidden even for small or administrative changes.
+15. Treat push and PR creation as part of the default finished state unless the automation explicitly disables remote actions.
+16. When a task has an assigned branch, always report the PR location in the final output:
    - include the PR URL when one exists
    - otherwise state explicitly that no PR exists yet and why, such as not pushed, blocked before PR creation, or remote access failure
-14. Always report the task id and concrete branch name in a compact Markdown table in the final output.
+17. Always report the task id and concrete branch name in a compact Markdown table in the final output.
    - use columns `task id` and `branch`
    - include exactly the selected task id and the concrete working branch name such as `codex/increase_padding`
-15. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
-16. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
+18. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
+19. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
 
 Before executing a mode, verify that the required project structure exists. If it does not:
 
@@ -81,7 +83,7 @@ If the run stops or becomes blocked after making relevant file changes:
 1. Do not leave the changes on `main`.
 2. If the current branch is safe and non-main, keep the work there.
 3. Otherwise create or switch to a branch prefixed `wip/`.
-4. Commit the relevant changes locally before stopping when the repository state is coherent enough to preserve.
+4. **Always commit all changes before stopping** — uncommitted changes in a worktree are forbidden. Commit even partial work so the next agent can continue without lost context.
 5. Report the blocker clearly and leave the repository ready for another agent.
 
 If validation fails because of likely concurrent or unrelated changes, retry once after a short wait only when that is cheap and safe.
