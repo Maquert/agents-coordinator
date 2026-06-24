@@ -69,6 +69,22 @@ Apply these rules in both modes unless the automation overrides them:
 18. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
 19. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
 
+## Pull Request Workflow Rule
+
+**1 task = 1 PR**
+
+- Each task execution should result in exactly one pull request for that task.
+- When addressing PR review comments or feedback on an existing PR, **push changes to the original task branch** instead of creating a new PR.
+- Keep all work for a task in a single PR until it is merged.
+- Do not create a new PR for follow-up fixes, refactoring based on review feedback, or addressing reviewer comments. Instead, update the original branch and push to it, which automatically updates the existing PR.
+- This maintains a clean 1:1 relationship between tasks and pull requests, making the project history clear and reviewable.
+
+Example workflow:
+1. Task #1234 → execute → create PR#456 from `claude/fix_thing`
+2. Reviewer comments on PR#456
+3. Next run addresses feedback → push updates to `claude/fix_thing` → PR#456 updates automatically
+4. **Do not create PR#457**; keep all work in PR#456 until merged
+
 Before executing a mode, verify that the required project structure exists. If it does not:
 
 1. Do not invent hidden assumptions.
@@ -157,6 +173,7 @@ Execution pattern:
 11. Validate the task using the repository’s preferred validation scripts and runners (prefer `scripts/` wrappers over raw commands).
    - If the repository wrapper is much broader than the changed surface and a stable focused command is obvious, use the focused command first and keep the wrapper as fallback.
 12. If validation passes, create a focused local commit containing only task-related changes, push the task branch, create or update a pull request against the repository's default integration branch unless the repository says otherwise, set the pull request title to begin with the task id (#123) such as `#1234 My PR title`, ensure the PR description uses `## Visual Changes` with at least one relevant screenshot for UI-relevant work, use GitHub blob URLs with `?raw=1` for tracked screenshot files in private repositories, add that section to the repository PR template if needed, include a `## Codex Thread` section with `codex://threads/<thread-id>` when the current thread ID is available with confidence, move the task file to `finished/`, then **delete** `~/.agents/tasks/<task-id>.md`.
+    - **Follow the Pull Request Workflow Rule:** Keep all task work in a single PR. When addressing review feedback in a future run, push to the original task branch instead of creating a new PR.
 13. If blocked, record the blocker, update the lock file to `status: blocked`, and move the task to `blocked/` (or keep it `wip/` if that is the repository convention), leaving the repository on a safe non-main branch with work preserved.
 14. Stop after the first pending task that required action.
 
@@ -208,6 +225,7 @@ Execution pattern:
 18. Validate only what is necessary to close the task safely.
 19. Create a focused local commit only when the task is validated or the caller explicitly wants preservation of blocked work.
 20. After a validated task commit, push the branch and open or reuse a pull request by default. Set the pull request title to begin with the task id in square brackets such as `[1234] My PR title`. For UI-relevant work, ensure the PR description includes `## Visual Changes` with at least one relevant screenshot when applicable. For tracked screenshot files in private repositories, use GitHub blob URLs with `?raw=1` instead of `raw.githubusercontent.com`, add that section to the repository PR template the first time it is needed if the template lacks it, and include a `## Codex Thread` section with `codex://threads/<thread-id>` when the current thread ID is available with confidence. Skip remote actions only when the automation explicitly disables them or local context proves they are impossible.
+    - **Follow the Pull Request Workflow Rule:** Keep all task work in a single PR. When addressing review feedback, push to the original task branch instead of creating a new PR.
 21. Stop after the first WIP task that required action.
 
 Default output:
