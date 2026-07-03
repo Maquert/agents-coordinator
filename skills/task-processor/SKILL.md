@@ -8,7 +8,9 @@ description: Turn raw backlog intake items into normalized pending task records 
 
 Use this skill to convert raw backlog items into normalized task records. Keep each automation prompt short: specify the backlog source file, the task detail destination, the duplicate-check source, and the exact output shape required by the automation.
 
-Task records must carry an assigned branch name from intake onward. Store the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent later starts the task, it will create or use the concrete git branch `<agent>/<branch>`, such as `claude/increase_padding` or `codex/increase_padding`.
+Task records must carry an assigned branch name from intake onward. Store the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent later starts the task, it will create or use the concrete git branch `<agent>/<branch>` using the **actual agent identity running the task**, such as `claude/increase_padding` for Claude or `codex/increase_padding` for Codex.
+
+Do not encode the agent identity into the stored task slug itself, and do not let examples that mention one agent imply that another agent should reuse that identity in branches, PR labels, PR bodies, locks, or workflow text.
 
 Default remote behavior is to do intake work on a new branch, push that branch, and create or update a pull request when task creation changes tracked repository files. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 

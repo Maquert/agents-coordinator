@@ -1,11 +1,11 @@
 Work on pending tasks from the current project. Pick the highest-priority unblocked task first (Blocker → High → Medium → Trivial).
 
 Rules for each task:
-- Use a dedicated git worktree and branch per task (`claude/<slug>`).
+- Use a dedicated git worktree and branch per task (`<actual-agent>/<slug>`).
 - Each task gets its own pull request. If a PR for that task already exists and is still open, push to that branch instead of opening a new one.
 - Run the full unit test suite (`./scripts/xcode/run_unit_tests_ci.sh`) before pushing. Do not push if tests fail.
 - If screenshot tests fail only because baselines are stale, rerun in record mode and commit updated baselines before pushing.
-- Add the `claude` label to every PR after creation.
+- If the workflow or repository wants an agent label on the PR, it must match the actual agent executing the work (for example `codex` for Codex, `claude` for Claude). Never apply a different agent's label just because an example, template, or older command text used that name.
 - Resolve any merge conflicts with `main` before pushing.
 
 Stopping condition:

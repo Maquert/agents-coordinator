@@ -10,7 +10,9 @@ Use this skill to execute one backlog task per run. Keep each automation prompt 
 
 Default remote behavior is to push the working branch and create or update a pull request after a successful local validation and focused commit. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
-Task records must carry an assigned branch name from intake onward. The task file stores the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent starts the task, it should create or use the concrete git branch `<agent>/<branch>`, such as `claude/increase_padding` or `codex/increase_padding`.
+Task records must carry an assigned branch name from intake onward. The task file stores the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent starts the task, it should create or use the concrete git branch `<agent>/<branch>` using the **actual agent identity running the task**, such as `claude/increase_padding` for Claude or `codex/increase_padding` for Codex.
+
+If pull requests, labels, comments, branch names, worktree locks, or generated workflow text mention an agent identity, that identity must also match the **actual executing agent**. Never stamp `claude` on work performed by Codex, and never stamp `codex` on work performed by Claude, even if an older example, task note, or automation prompt used the wrong agent name.
 
 For UI-relevant work, pull request descriptions should include a `## Visual Changes` section with at least one relevant screenshot when a screenshot is available and useful. SwiftUI UI changes must also add or update screenshot coverage for every impacted platform contract before the task is considered complete. This section is optional for non-UI work and may be omitted when no meaningful screenshot applies. If the repository PR template does not already include `## Visual Changes`, the agent should add that section to the template the first time it prepares a PR description that uses it.
 
@@ -80,9 +82,9 @@ Apply these rules in both modes unless the automation overrides them:
 - This maintains a clean 1:1 relationship between tasks and pull requests, making the project history clear and reviewable.
 
 Example workflow:
-1. Task #1234 → execute → create PR#456 from `claude/fix_thing`
+1. Task #1234 → execute → create PR#456 from `<actual-agent>/fix_thing`
 2. Reviewer comments on PR#456
-3. Next run addresses feedback → push updates to `claude/fix_thing` → PR#456 updates automatically
+3. Next run addresses feedback → push updates to `<actual-agent>/fix_thing` → PR#456 updates automatically
 4. **Do not create PR#457**; keep all work in PR#456 until merged
 
 Before executing a mode, verify that the required project structure exists. If it does not:
@@ -160,7 +162,7 @@ Execution pattern:
    - Missing priority is treated with the repository fallback, which is `Trivial` unless overridden.
 8. Resolve branch ownership from the task file:
    - The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
-   - The working git branch for this run must be `<agent>/<branch>`, such as `codex/increase_padding`.
+   - The working git branch for this run must be `<actual-agent>/<branch>`, such as `codex/increase_padding` when Codex is executing the task or `claude/increase_padding` when Claude is executing it.
    - **Never execute a task on `main` and never execute it in the repository's main checkout/worktree.** If the current checkout is `main`, stop using it for task work immediately and create or switch to a dedicated task worktree first.
    - **Before creating the branch, ensure the main integration branch is fully up to date**: run `git checkout main && git pull origin main` (or the equivalent) so the new branch starts from the latest remote state. Never create a task branch off a stale local main.
    - **Always work in a dedicated git worktree**, not the main worktree checkout. Create the task worktree with `git worktree add <path> -b <branch>` from an up-to-date main. The main worktree checkout must remain on `main`, clean, and reserved for branch creation, pulls, and merges only.
@@ -213,7 +215,7 @@ Execution pattern:
 6. If no lock file exists yet for this task, write one to `~/.agents/tasks/<task-id>.md` with `status: wip` before making changes.
 7. Resolve branch ownership from the task file.
 8. The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
-9. The working git branch for this run must be `<agent>/<branch>`, such as `claude/increase_padding`.
+9. The working git branch for this run must be `<actual-agent>/<branch>`, such as `codex/increase_padding` when Codex is executing the task or `claude/increase_padding` when Claude is executing it.
 10. If the current branch does not match that concrete branch name, create or switch to it from the current base state. If no worktree exists yet for the branch, create one from an up-to-date main: `git checkout main && git pull origin main`, then `git worktree add <path> -b <branch>`. The main worktree checkout must remain on `main`.
 11. Never repurpose the main checkout/worktree for WIP task changes, even temporarily. If the agent starts in the main checkout, it must leave that checkout clean and move the task work into a dedicated non-main worktree before editing files, running task validation, or creating commits.
 12. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
