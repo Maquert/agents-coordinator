@@ -16,12 +16,6 @@
   `| --- | --- |`
   `| Skill | No skill used. |`
 
-## AI Efficiency Coaching
-- Load and use the `ai-efficiency-coach` skill when I reply, give more instructions or adjust a prompt. Do not load it in the initial prompt.
-- Treat references to `ai-efficiency-skill` as references to `ai-efficiency-coach`.
-- Include one brief `AI efficiency feedback:` note when it can help improve the user's prompts, AI agent skills, or AI workflows without distracting from the main task.
-- Keep this feedback cheap, varied, and specific to the current request.
-
 ## Skill Routing
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
 - When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
