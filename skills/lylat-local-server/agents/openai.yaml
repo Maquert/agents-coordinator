@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lylat Local Server"
+  short_description: "Read and update Lylat app state over the local HTTP server"
+  default_prompt: "Use $lylat-local-server to inspect Lylat systems/projects/tactics/tasks and mirror app-side task state during task processing or execution."
