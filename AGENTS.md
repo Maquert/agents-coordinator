@@ -4,6 +4,18 @@
 - The source of truth is under `~/.agents`.
 - Commands, skills, worktrees, and any other agent resources must be checked under `~/.agents` first unless stated otherwise.
 
+## Default Task System
+- The default task system for all agents is the Lylat system, not repository `tasks/` directories.
+- By default, agents must load and use the `lylat-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
+- Treat the Lylat local HTTP server as the primary workflow state for task progress updates.
+- Treat repository `tasks/`, including flows managed by `workflow-manager`, as backup and legacy workflow state unless a stronger local instruction explicitly overrides this.
+- If a repository still uses `tasks/` lifecycle files, keep them aligned only as a backup mirror when feasible; do not treat them as the primary source of active task status by default.
+- If an agent cannot connect to the Lylat local server when task synchronization is expected, it must report that as a clear error. Use explicit error wording so it is obvious that project workflow state may be broken or incomplete.
+- If the Lylat local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
+- When an agent needs to perform a task-related API action that the Lylat server does not support, the agent must add that need as work for the Lylat project at `/Users/mhjaso/Developer/Projects/lylat_app`.
+- File that follow-up under the project issues and the tactic `local server improvements`.
+- If the needed project issue or tactic does not exist, create it.
+
 ## Response Metadata
 - At the end of every response, include a compact Markdown table with columns `Item` and `Value`.
 - The table must include whether a skill was used (which ones).
@@ -17,6 +29,8 @@
   `| Skill | No skill used. |`
 
 ## Skill Routing
+- When task state must be read, updated, synchronized, or created through the Lylat system, load and use the `lylat-local-server` skill.
+- When repository `tasks/` lifecycle files, local governance files, or legacy workflow-manager conventions must be maintained, load and use the `workflow-manager` skill, but treat that path as backup/legacy unless stronger local instructions say otherwise.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
 - When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
 - When the user asks to plan a new technical project or write stakeholder-facing ADRs, RFDs/RFCs, technical specifications, architecture design documents, or related project planning docs, load and use the `project-planner` skill.
@@ -25,6 +39,10 @@
 ## Execution
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
+- For task workflows, verify Lylat local server connectivity early when the run depends on task state or task updates.
+- If Lylat connectivity fails during a task-dependent workflow, surface it as an error, not as a quiet note or optional warning.
+- Make clear that failed Lylat synchronization can collapse the expected project workflow state.
+- When the Lylat API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Lylat project issue under `/Users/mhjaso/Developer/Projects/lylat_app`, using the project issues area and the `local server improvements` tactic.
 - When a task file or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.
 - Mock implementations and debug-only code must never ship in release builds; guard them under the `DEBUG` compiler flag and keep release codepaths free of mock/debug-only dependencies.
