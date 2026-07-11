@@ -1,7 +1,7 @@
 ---
 name: lylat-local-server
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Lylat's macOS-only local HTTP server to list systems, projects, tactics, and tasks, and to update task state during agent workflows. Use together with task-processor and task-executor when app-side task state should be inspected or synchronized.
+description: Connect to Lylat's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Use together with task-processor and task-executor when app-side task state should be inspected or synchronized.
 ---
 
 # Lylat Local Server

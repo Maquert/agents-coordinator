@@ -175,6 +175,11 @@ When creating or updating any PR body:
 - write the deep link as an actual URL in the PR body, either raw or as a normal Markdown link
 - prefer environment-derived ids such as `$CODEX_THREAD_ID` or `$CLAUDE_SESSION_ID` when available; otherwise use the best reliable session identifier from context
 
+When creating or maintaining PR metadata:
+
+- if Codex is the active agent and the repository already defines a `codex` label, ensure the PR has that `codex` label
+- treat a missing `codex` label on a Codex-managed PR as metadata drift and fix it during normal PR maintenance
+
 Resolve review threads only when the caller explicitly decides the code change is complete.
 
 ## Safety
