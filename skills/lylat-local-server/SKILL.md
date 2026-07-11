@@ -10,8 +10,8 @@ Use this skill when Codex needs to communicate with Lylat's local HTTP server ov
 This skill is the app-state bridge for workflows that otherwise use `task-processor`
 and `task-executor` for repository task files, branches, locks, validation, and PRs.
 
-Do **not** use this skill as a replacement for repository task lifecycle management.
-Use it only when the app's in-memory/server-backed state needs to be read or updated.
+Use this skill as the required task-system bridge when Lylat-backed task work is in scope.
+No task may proceed when the Lylat server is unreachable.
 
 ## When To Use
 
@@ -28,13 +28,13 @@ Lylat's local server is **macOS-only**.
 
 - Expect the server at `http://localhost:{port}` on macOS.
 - Do not expect the server to be present on iPhone or iPad.
-- If the server is unreachable, report that clearly and continue with file-based task work when possible.
+- If the server is unreachable, report that clearly as a blocking error and ask the user to start the server.
 
 ## Shared Rules
 
 1. Prefer the narrowest endpoint that answers the question.
 2. Quote URLs in shell commands, especially ones with `?query=params`, to avoid shell globbing issues.
-3. Treat server reads as advisory app state by default. If the user explicitly says Lylat is the source of truth, prefer Lylat task state and selection order over local repository lifecycle files.
+3. Treat Lylat as the source of truth for task state and task selection when this workflow is active.
 4. Treat Lylat as a workflow philosophy, not only a transport. Tactics should stay coherent rather than becoming buckets of unrelated tasks.
 5. Reuse an existing tactic when the new task clearly belongs to the same tactical arc. If it does not, prefer creating a new tactic.
 6. Each tactic should normally include a meaningful starting task and a meaningful final task that makes tactic completion explicit.
@@ -43,8 +43,8 @@ Lylat's local server is **macOS-only**.
    - `wip`
    - `blocked`
    - `finished`
-8. If a task is being executed with `task-executor`, keep the repo task file lifecycle, lock file, and git branch rules from that skill. This skill only mirrors app-side state.
-9. If a task is being created with `task-processor`, keep project/tactic assignment and task-file creation rules from that skill. This skill can optionally create matching app-side entities only when needed.
+8. Do not fall back to repository `tasks/` workflow when the server is down unless the user explicitly changes the policy.
+9. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
 10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
 
 ## Quick Start
@@ -93,7 +93,7 @@ Use this pairing when intake should be informed by the currently open app state.
 - Read `GET /projects` and `GET /tactics` to avoid creating duplicate app-side structures.
 - Decide whether the work belongs in an existing tactic or needs a new tactic to keep tactic boundaries coherent.
 - When creating a new tactic, make sure the tactic has or will have a clear starting task and a clear final task.
-- Run `task-processor` to create repository task files.
+- Run `task-processor` only when the broader workflow still explicitly requires repository task files in addition to Lylat state.
 - Only create app-side entities with `POST /projects`, `POST /projects/{projectId}/tactics`, or `POST /tasks` when the user explicitly wants app-state creation too.
 
 ### With `task-executor`
@@ -103,7 +103,6 @@ Use this pairing when executing an existing task and the app should reflect curr
 - Read `GET /tasks/priority` first to select the next available task from the active queue.
 - Treat `pending` tasks from that queue as available to start and `wip` tasks as already taken by another agent unless the user says otherwise.
 - Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
-- Run `task-executor` for the repository task workflow.
 - When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip"}`.
 - When work completes, mirror app state with `PATCH /tasks/{id} {"state":"finished"}`.
 - If blocked, mirror app state with `PATCH /tasks/{id} {"state":"blocked"}` when appropriate.
@@ -113,7 +112,7 @@ Use this pairing when executing an existing task and the app should reflect curr
 - If `GET /` fails, report the connection error and likely cause: disabled server, wrong port, or non-macOS host.
 - If `404 Not Found` occurs, verify the endpoint against the reference file before retrying.
 - If a `PATCH` returns `404`, confirm the task ID first with `GET /tasks` or `GET /tasks/{id}`.
-- If the app server is unavailable, continue with repository task processing/execution when the main workflow does not strictly depend on app-state synchronization.
+- If the app server is unavailable, stop and ask the user to start the server. Do not continue task work without Lylat connectivity.
 
 ## References
 
