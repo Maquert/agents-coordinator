@@ -168,6 +168,13 @@ When updating PR bodies that include screenshots:
 - for tracked screenshot files in a private repository, prefer GitHub blob URLs with `?raw=1`, for example `https://github.com/owner/repo/blob/branch/path/to/image.png?raw=1`
 - if the image is not tracked in the repository, prefer a GitHub-hosted uploaded attachment instead of a local or inaccessible path
 
+When creating or updating any PR body:
+
+- ensure the last section is exactly `## Talk to the agent`
+- include a direct deep-link URL to the active agent thread, such as `codex://threads/<thread-id>`, `claude://agents/<session-id>`, or the equivalent URL scheme for the agent in use
+- write the deep link as an actual URL in the PR body, either raw or as a normal Markdown link
+- prefer environment-derived ids such as `$CODEX_THREAD_ID` or `$CLAUDE_SESSION_ID` when available; otherwise use the best reliable session identifier from context
+
 Resolve review threads only when the caller explicitly decides the code change is complete.
 
 ## Safety
