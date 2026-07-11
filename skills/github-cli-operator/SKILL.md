@@ -77,8 +77,12 @@ When the user asks to open or update a PR:
 4. Use the PR template when creating or updating the PR body.
 5. Absorb repository label definitions and apply the matching existing GitHub labels with `gh pr edit --add-label` when creating or maintaining the PR.
 6. Use `gh pr create` with an explicit base, head, title, and templated body when needed.
-7. Always append a `## Agent Thread` section to the PR body with a deep link to the current agent session. Use whichever deep-link scheme matches the agent handling the task — `claude://agents/<session-id>` for Claude, `codex://threads/<thread-id>` for Codex, or the equivalent for any other agent. Retrieve the id from the environment (`$CLAUDE_SESSION_ID`, `$CODEX_THREAD_ID`, or equivalent) if available; otherwise derive it from conversation context. This section is for local convenience and is always included regardless of which agent opened the PR.
-8. Return the PR number and URL.
+7. Always append a `## Talk to the agent` section at the very bottom of the PR body.
+8. That section must contain a deep link URL to the current agent session so the thread can be reopened in the matching agent app, such as `claude://agents/<session-id>`, `codex://threads/<thread-id>`, or the equivalent URL scheme for another agent technology.
+9. Be explicit in the PR body: the deep link must be written as a URL, not described indirectly or omitted behind vague wording.
+10. Retrieve the session or thread id from the environment (`$CLAUDE_SESSION_ID`, `$CODEX_THREAD_ID`, or equivalent) if available; otherwise derive it from conversation context.
+11. This section is for local convenience and is always included regardless of which agent opened the PR.
+12. Return the PR number and URL.
 
 When the user explicitly says creating the PR is required:
 
@@ -107,6 +111,8 @@ If there is one template, use it as the PR body and fill every relevant section.
 If there are multiple templates, choose the clearly matching one from file name and context. If the choice is ambiguous, stop and ask which template to use.
 
 If no repository template exists, create a concise PR body with summary, testing, risks, and related links; mention that no `.github` PR template was found.
+
+When finalizing any PR body, ensure `## Talk to the agent` is the last section in the document and that its body includes the direct deep-link URL on its own line or as a normal Markdown link.
 
 ### Project Label Rule
 
