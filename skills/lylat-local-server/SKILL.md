@@ -33,7 +33,7 @@ Lylat's local server is **macOS-only**.
 
 1. Prefer the narrowest endpoint that answers the question.
 2. Quote URLs in shell commands, especially ones with `?query=params`, to avoid shell globbing issues.
-3. Treat server reads as advisory app state. Repository task files remain the workflow source of truth unless the user says otherwise.
+3. Treat server reads as advisory app state by default. If the user explicitly says Lylat is the source of truth, prefer Lylat task state and selection order over local repository lifecycle files.
 4. When updating task state through the server, use the API's canonical values:
    - `pending`
    - `wip`
@@ -48,7 +48,7 @@ Lylat's local server is **macOS-only**.
 1. Check connectivity with `GET /`.
 2. Discover systems with `GET /systems`.
 3. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
-4. Read tasks with `GET /tasks?...`.
+4. Read the active task queue with `GET /tasks/priority` first when selecting work. Use `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does not answer.
 5. Update task state with `PATCH /tasks/{id}` when execution starts or finishes.
 
 ## Preferred Commands
@@ -60,6 +60,7 @@ Use `curl` or the repository's mock client.
 ```bash
 curl -s "http://localhost:8080/"
 curl -s "http://localhost:8080/systems"
+curl -s "http://localhost:8080/tasks/priority"
 curl -s "http://localhost:8080/tasks?state=pending"
 curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
@@ -90,7 +91,9 @@ Use this pairing when intake should be informed by the currently open app state.
 
 Use this pairing when executing an existing task and the app should reflect current progress.
 
-- Read `GET /tasks?state=pending` or a narrower filtered query to identify the relevant app-side task.
+- Read `GET /tasks/priority` first to select the next available task from the active queue.
+- Treat `pending` tasks from that queue as available to start and `wip` tasks as already taken by another agent unless the user says otherwise.
+- Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
 - Run `task-executor` for the repository task workflow.
 - When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip"}`.
 - When work completes, mirror app state with `PATCH /tasks/{id} {"state":"finished"}`.
