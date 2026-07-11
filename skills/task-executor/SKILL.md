@@ -153,6 +153,7 @@ Execution pattern:
 2. Inspect the pending task directory and collect eligible pending task files.
    - Eligible means the task file is under `pending/`, its status is `pending` or the repository equivalent, **and its id is not in the claimed set**.
 3. Read only the pending task files needed to determine priority and choose the highest-priority eligible task.
+   - When a repository-specific companion skill exposes an app-side priority queue such as Lylat's `GET /tasks/priority`, agents may read it first as advisory context, but repository task files and lock files remain the source of truth.
 4. Resolve ties by oldest creation date when available, otherwise by smallest stable id or filename order.
 5. Read the selected pending task file before reading broader code.
 6. Immediately write the lock file to `~/.agents/tasks/<task-id>.md` with `status: wip` before touching any code.

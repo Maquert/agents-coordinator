@@ -178,10 +178,24 @@ curl -s -X POST "http://localhost:8080/tasks" \
     "projectId":"<project-id>",
     "tacticId":"<tactic-id>",
     "description":"",
+    "branch":"",
     "priority":"Medium",
     "state":"pending"
   }'
 ```
+
+`branch` is optional and defaults to `""`. Set it to the task's canonical
+branch slug at creation time instead of a follow-up `PATCH` call — this sets
+the same field `PATCH /tasks/{id}` can update later, and the created task's
+response body echoes it back.
+
+**No repo numeric ID mapping.** `GET /projects` / `GET /tactics` (and the
+`projectId`/`tacticId` nested in task DTOs) only expose app-internal UUIDs.
+There is no field connecting them to the repository's numeric epoch IDs used
+by `tasks/projects/{project_id}-*/tactics/{tactic_id}-*.md` (see `AGENTS.md`).
+Locate the matching repo task-file location by fuzzy-matching on title —
+this is the intended interim approach, not a workaround for a missing
+feature that's about to ship.
 
 ## Mock Agent Shortcuts
 
