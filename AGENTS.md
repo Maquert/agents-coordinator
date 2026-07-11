@@ -12,9 +12,10 @@
 - Tactics must stay coherent. Reuse existing tactics when the work clearly belongs there, but create a new tactic when the work would otherwise turn an existing tactic into a bucket of unrelated tasks.
 - Each tactic should normally have one meaningful starting task, such as foundational work or a task that defines the rest of the tactic, and one meaningful final task that makes completion explicit.
 - When creating or assigning work in Lylat, prefer tactic structures that make the entry point, progression, and completion of the work legible.
-- Treat repository `tasks/`, including flows managed by `workflow-manager`, as backup and legacy workflow state unless a stronger local instruction explicitly overrides this.
-- If a repository still uses `tasks/` lifecycle files, keep them aligned only as a backup mirror when feasible; do not treat them as the primary source of active task status by default.
-- If an agent cannot connect to the Lylat local server when task synchronization is expected, it must report that as a clear error. Use explicit error wording so it is obvious that project workflow state may be broken or incomplete.
+- Stop using repository `tasks/`, including flows managed by `workflow-manager`, for the moment.
+- No task may proceed without a working Lylat server connection.
+- If an agent cannot connect to the Lylat local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
+- Treat missing Lylat connectivity as a blocking error, not as a degraded mode.
 - If the Lylat local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
 - When an agent needs to perform a task-related API action that the Lylat server does not support, the agent must add that need as work for the Lylat project at `/Users/mhjaso/Developer/Projects/lylat_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
@@ -34,7 +35,6 @@
 
 ## Skill Routing
 - When task state must be read, updated, synchronized, or created through the Lylat system, load and use the `lylat-local-server` skill.
-- When repository `tasks/` lifecycle files, local governance files, or legacy workflow-manager conventions must be maintained, load and use the `workflow-manager` skill, but treat that path as backup/legacy unless stronger local instructions say otherwise.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
 - When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
 - When the user asks to plan a new technical project or write stakeholder-facing ADRs, RFDs/RFCs, technical specifications, architecture design documents, or related project planning docs, load and use the `project-planner` skill.
@@ -47,8 +47,9 @@
 - For task creation and reassignment in Lylat, evaluate tactic fit explicitly before adding work.
 - Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.
-- If Lylat connectivity fails during a task-dependent workflow, surface it as an error, not as a quiet note or optional warning.
-- Make clear that failed Lylat synchronization can collapse the expected project workflow state.
+- If Lylat connectivity fails during a task-dependent workflow, stop immediately and ask the user to start the server.
+- Surface failed Lylat synchronization as a blocking error, not as a quiet note or optional warning.
+- Make clear that no task work can proceed until the Lylat server responds.
 - When the Lylat API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Lylat project issue under `/Users/mhjaso/Developer/Projects/lylat_app`, using the project issues area and the `local server improvements` tactic.
 - When a task file or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.
