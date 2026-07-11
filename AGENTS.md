@@ -8,6 +8,10 @@
 - The default task system for all agents is the Lylat system, not repository `tasks/` directories.
 - By default, agents must load and use the `lylat-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Lylat local HTTP server as the primary workflow state for task progress updates.
+- Treat Lylat as a task-system philosophy, not only as an app or HTTP server.
+- Tactics must stay coherent. Reuse existing tactics when the work clearly belongs there, but create a new tactic when the work would otherwise turn an existing tactic into a bucket of unrelated tasks.
+- Each tactic should normally have one meaningful starting task, such as foundational work or a task that defines the rest of the tactic, and one meaningful final task that makes completion explicit.
+- When creating or assigning work in Lylat, prefer tactic structures that make the entry point, progression, and completion of the work legible.
 - Treat repository `tasks/`, including flows managed by `workflow-manager`, as backup and legacy workflow state unless a stronger local instruction explicitly overrides this.
 - If a repository still uses `tasks/` lifecycle files, keep them aligned only as a backup mirror when feasible; do not treat them as the primary source of active task status by default.
 - If an agent cannot connect to the Lylat local server when task synchronization is expected, it must report that as a clear error. Use explicit error wording so it is obvious that project workflow state may be broken or incomplete.
@@ -40,6 +44,9 @@
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
 - For task workflows, verify Lylat local server connectivity early when the run depends on task state or task updates.
+- For task creation and reassignment in Lylat, evaluate tactic fit explicitly before adding work.
+- Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
+- When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.
 - If Lylat connectivity fails during a task-dependent workflow, surface it as an error, not as a quiet note or optional warning.
 - Make clear that failed Lylat synchronization can collapse the expected project workflow state.
 - When the Lylat API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Lylat project issue under `/Users/mhjaso/Developer/Projects/lylat_app`, using the project issues area and the `local server improvements` tactic.
