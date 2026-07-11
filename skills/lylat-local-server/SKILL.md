@@ -35,14 +35,17 @@ Lylat's local server is **macOS-only**.
 1. Prefer the narrowest endpoint that answers the question.
 2. Quote URLs in shell commands, especially ones with `?query=params`, to avoid shell globbing issues.
 3. Treat server reads as advisory app state by default. If the user explicitly says Lylat is the source of truth, prefer Lylat task state and selection order over local repository lifecycle files.
-4. When updating task state through the server, use the API's canonical values:
+4. Treat Lylat as a workflow philosophy, not only a transport. Tactics should stay coherent rather than becoming buckets of unrelated tasks.
+5. Reuse an existing tactic when the new task clearly belongs to the same tactical arc. If it does not, prefer creating a new tactic.
+6. Each tactic should normally include a meaningful starting task and a meaningful final task that makes tactic completion explicit.
+7. When updating task state through the server, use the API's canonical values:
    - `pending`
    - `wip`
    - `blocked`
    - `finished`
-5. If a task is being executed with `task-executor`, keep the repo task file lifecycle, lock file, and git branch rules from that skill. This skill only mirrors app-side state.
-6. If a task is being created with `task-processor`, keep project/tactic assignment and task-file creation rules from that skill. This skill can optionally create matching app-side entities only when needed.
-7. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
+8. If a task is being executed with `task-executor`, keep the repo task file lifecycle, lock file, and git branch rules from that skill. This skill only mirrors app-side state.
+9. If a task is being created with `task-processor`, keep project/tactic assignment and task-file creation rules from that skill. This skill can optionally create matching app-side entities only when needed.
+10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
 
 ## Quick Start
 
@@ -88,6 +91,8 @@ Use this pairing when intake should be informed by the currently open app state.
 
 - Read `GET /systems` to find the active or intended system.
 - Read `GET /projects` and `GET /tactics` to avoid creating duplicate app-side structures.
+- Decide whether the work belongs in an existing tactic or needs a new tactic to keep tactic boundaries coherent.
+- When creating a new tactic, make sure the tactic has or will have a clear starting task and a clear final task.
 - Run `task-processor` to create repository task files.
 - Only create app-side entities with `POST /projects`, `POST /projects/{projectId}/tactics`, or `POST /tasks` when the user explicitly wants app-state creation too.
 
