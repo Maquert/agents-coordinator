@@ -65,11 +65,14 @@ Fields:
 ### Tasks
 
 ```bash
+curl -s "http://localhost:8080/tasks/priority"
 curl -s "http://localhost:8080/tasks"
 curl -s "http://localhost:8080/tasks?state=pending"
 curl -s "http://localhost:8080/tasks?systemId=<system-id>&state=pending"
 curl -s "http://localhost:8080/tasks/<task-id>"
 ```
+
+Use `GET /tasks/priority` first when selecting the next task to execute. It returns the active queue grouped by project, excludes `finished` work, and preserves the server's priority ordering.
 
 Fields:
 - `id`
