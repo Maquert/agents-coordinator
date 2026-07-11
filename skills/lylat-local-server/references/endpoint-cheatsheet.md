@@ -127,6 +127,27 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 
 You may also update `title` or `description` in the same payload.
 
+### Reassign project and/or tactic
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
+```
+
+`projectId` and `tacticId` can be sent together or individually:
+
+- Send both to move a task to a different tactic in a different project (e.g. migrating a task from one project's tactic to another).
+- Send `tacticId` alone to move a task to a different tactic within its current project.
+- Send `projectId` alone only when the task's current tactic already belongs to that project (rare — usually you also need `tacticId`).
+
+The change is atomic: it either fully applies or is fully rejected. The resolved target tactic (payload `tacticId`, or the task's current `tacticId` if omitted) must belong to the resolved target project (payload `projectId`, or the task's current `projectId` if omitted), otherwise the request is rejected. All other task fields (title, description, priority, state, branch, timestamps) are left untouched.
+
+Error responses:
+- `400` — `projectId` or `tacticId` is not a valid UUID
+- `404` — the resolved `projectId` or `tacticId` does not exist
+- `422` — the resolved tactic does not belong to the resolved project, or the task is already assigned to that exact project/tactic
+
 ## Create Endpoints
 
 Only use these when the workflow explicitly needs app-side object creation.
