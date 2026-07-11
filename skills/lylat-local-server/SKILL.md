@@ -18,6 +18,7 @@ Use it only when the app's in-memory/server-backed state needs to be read or upd
 - Read app-side systems before selecting a workspace or confirming the target system.
 - Read app-side projects, tactics, or tasks before intake or execution work.
 - Update app-side task state, such as `pending` → `wip` → `finished`, during execution.
+- Reassign existing tasks to another project or tactic without recreating them.
 - Create app-side projects, tactics, or tasks when the workflow explicitly needs them.
 - Verify that the local server is reachable before an automation depends on it.
 
@@ -49,7 +50,7 @@ Lylat's local server is **macOS-only**.
 2. Discover systems with `GET /systems`.
 3. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
 4. Read the active task queue with `GET /tasks/priority` first when selecting work. Use `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does not answer.
-5. Update task state with `PATCH /tasks/{id}` when execution starts or finishes.
+5. Update task state or assignment with `PATCH /tasks/{id}`.
 
 ## Preferred Commands
 
@@ -65,6 +66,9 @@ curl -s "http://localhost:8080/tasks?state=pending"
 curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip"}'
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
 
 ### mock-agent

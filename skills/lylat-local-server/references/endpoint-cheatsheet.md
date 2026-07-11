@@ -125,7 +125,32 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -d '{"state":"blocked"}'
 ```
 
-You may also update `title` or `description` in the same payload.
+You may also update `title`, `description`, `branch`, `projectId`, or `tacticId`
+in the same payload.
+
+## Reassign A Task
+
+Move a task to another tactic in its current project:
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"tacticId":"<tactic-id>"}'
+```
+
+Move a task to another project and tactic:
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
+```
+
+The server validates that referenced entities exist, belong to the task's
+system, and that the tactic belongs to the resulting project. Send both IDs
+when moving across projects so the combined reassignment is validated and
+applied atomically. Invalid assignments return a 4xx response without a
+partial mutation.
 
 ### Reassign project and/or tactic
 
