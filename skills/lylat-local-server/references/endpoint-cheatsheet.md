@@ -81,6 +81,10 @@ Fields:
 - `state`
 - `priority`
 - `branch`
+- `repositoryTaskId` — optional. Links this server-side task to its repository
+  task-file numeric id (e.g. `1783751236` for
+  `tasks/pending/1783751236-*.md`). `null`/absent when the task has no repo
+  mirror.
 - `projectId`
 - `tacticId`
 - `systemId`
@@ -125,8 +129,20 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -d '{"state":"blocked"}'
 ```
 
-You may also update `title`, `description`, `branch`, `projectId`, or `tacticId`
-in the same payload.
+You may also update `title`, `description`, `branch`, `repositoryTaskId`,
+`projectId`, or `tacticId` in the same payload.
+
+### Attach or correct a repository task-file link
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"repositoryTaskId":"1783751236"}'
+```
+
+Use this to link an existing server task to its repo `tasks/pending/{id}-*.md`
+file retroactively, or to correct drift after a repo task file is renumbered
+or moved.
 
 ## Reassign A Task
 
@@ -204,6 +220,7 @@ curl -s -X POST "http://localhost:8080/tasks" \
     "tacticId":"<tactic-id>",
     "description":"",
     "branch":"",
+    "repositoryTaskId":"1783751236",
     "priority":"Medium",
     "state":"pending"
   }'
@@ -214,13 +231,23 @@ branch slug at creation time instead of a follow-up `PATCH` call — this sets
 the same field `PATCH /tasks/{id}` can update later, and the created task's
 response body echoes it back.
 
-**No repo numeric ID mapping.** `GET /projects` / `GET /tactics` (and the
-`projectId`/`tacticId` nested in task DTOs) only expose app-internal UUIDs.
-There is no field connecting them to the repository's numeric epoch IDs used
-by `tasks/projects/{project_id}-*/tactics/{tactic_id}-*.md` (see `AGENTS.md`).
-Locate the matching repo task-file location by fuzzy-matching on title —
-this is the intended interim approach, not a workaround for a missing
-feature that's about to ship.
+`repositoryTaskId` is optional and defaults to `null`. Set it to the
+repository task file's numeric id (e.g. `1783751236` for
+`tasks/pending/1783751236-*.md`) at creation time so `GET /tasks`,
+`GET /tasks/{id}`, and `GET /tasks/priority` responses link straight back to
+the repo file — no fuzzy title-matching needed. It can also be set or
+corrected later via `PATCH /tasks/{id}`.
+
+**Task-level repo id mapping exists; project/tactic mapping does not.**
+`repositoryTaskId` on the task DTO links a server task to its repo
+`tasks/{lifecycle}/{id}-*.md` file directly — prefer reading/setting this
+field over fuzzy-matching on title. However, `GET /projects` / `GET /tactics`
+(and the `projectId`/`tacticId` nested in task DTOs) still only expose
+app-internal UUIDs; there is no equivalent field connecting them to the
+repository's numeric epoch IDs used by
+`tasks/projects/{project_id}-*/tactics/{tactic_id}-*.md` (see `AGENTS.md`).
+Locate the matching repo project/tactic directory by fuzzy-matching on title
+until that gap is filed and closed the same way.
 
 ## Mock Agent Shortcuts
 
