@@ -6,10 +6,11 @@
 
 ## Default Task System
 - The default task system for all agents is the Lylat system, not repository `tasks/` directories.
+- The default methodology for all agents working for you is `lylat-methodology`.
 - By default, agents must load and use the `lylat-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Lylat local HTTP server as the primary workflow state for task progress updates.
 - Treat Lylat as a task-system philosophy, not only as an app or HTTP server.
-- The `lylat-methodology` skill is the shared philosophy reference for how work should be structured in Lylat, and it should be read alongside `lylat-local-server` when the workflow depends on Lylat.
+- The `lylat-methodology` skill is mandatory and is the shared philosophy reference for how work should be structured in Lylat. Read it alongside `lylat-local-server` when the workflow depends on Lylat.
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
 - Stop using repository `tasks/`, including flows managed by `workflow-manager`, for the moment.
@@ -35,6 +36,7 @@
   `| Skill | No skill used. |`
 
 ## Skill Routing
+- Unless stronger local instructions override it, load and use `lylat-methodology` as the default methodology skill for work done for this user.
 - When the user asks about the Lylat way of work, tactic structure, completion-first planning, WIP discipline, or the general Lylat philosophy, load and use the `lylat-methodology` skill.
 - When task state must be read, updated, synchronized, or created through the Lylat system, load and use the `lylat-local-server` skill.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
