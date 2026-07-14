@@ -105,6 +105,7 @@ Use this pairing when executing an existing task and the app should reflect curr
 - Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
 - When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip"}`.
 - When work completes, mirror app state with `PATCH /tasks/{id} {"state":"finished"}`.
+- When a pull request is merged, ensure the corresponding Lylat task is also updated to `finished` if it is not already there.
 - If blocked, mirror app state with `PATCH /tasks/{id} {"state":"blocked"}` when appropriate.
 
 ## Failure Handling
