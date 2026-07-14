@@ -68,8 +68,13 @@ Apply these rules in both modes unless the automation overrides them:
 17. Always report the task id and concrete branch name in a compact Markdown table in the final output.
    - use columns `task id` and `branch`
    - include exactly the selected task id and the concrete working branch name such as `codex/increase_padding`
-18. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
-19. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
+18. Always finish with a thread task summary table covering every task worked during the current Codex thread. Use exactly these columns: `name of the task`, `id`, `task status`, and `pr status`.
+   - Include the current task and every earlier task execution that is available in the thread context; do not list unrelated backlog tasks.
+   - Derive `task status` from the task record or lifecycle state. Use a clear state such as `pending`, `wip`, `blocked`, or `finished`.
+   - Derive `pr status` from the matching pull request. Use a concrete status such as `PR #123 open`, `PR #123 merged`, `no PR — not pushed`, or `no PR — blocked`; include the PR URL when available.
+   - If no task has been worked in the thread, emit the header and one `None` row rather than omitting the table.
+19. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
+20. When the current Codex thread ID is available with confidence, include a `## Codex Thread` section in the PR description with a `codex://threads/<thread-id>` deep link. Omit the section when the thread ID is unavailable or uncertain.
 
 ## Pull Request Workflow Rule
 
@@ -185,6 +190,7 @@ Default output:
 - Selected task (title + id + priority)
 - Selected task file path
 - Task id / branch table
+- Thread task summary table (`name of the task`, `id`, `task status`, `pr status`)
 - Branch used or created (and whether a `⚠️` warning was emitted)
 - Work completed
 - Validation run
@@ -235,6 +241,7 @@ Default output:
 
 - Selected WIP task
 - Task id / branch table
+- Thread task summary table (`name of the task`, `id`, `task status`, `pr status`)
 - Branch used or created
 - Work completed
 - Validation run
