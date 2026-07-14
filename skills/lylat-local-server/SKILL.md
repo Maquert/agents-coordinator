@@ -1,14 +1,22 @@
 ---
 name: lylat-local-server
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Lylat's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Use together with task-processor and task-executor when app-side task state should be inspected or synchronized.
+description: Connect to Lylat's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Lylat is the sole system of record for task state — repository `tasks/` files are a deprecated legacy workflow (see `task-processor`/`task-executor`) and must not be created as part of normal Lylat-backed task work.
 ---
 
 # Lylat Local Server
 
 Use this skill when Codex needs to communicate with Lylat's local HTTP server over HTTP.
-This skill is the app-state bridge for workflows that otherwise use `task-processor`
-and `task-executor` for repository task files, branches, locks, validation, and PRs.
+
+**Lylat is the sole system of record for task state.** Do not create, move, or edit files under
+a repository `tasks/` directory (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`,
+or any similarly-named lifecycle folder) as part of normal task tracking — not to "mirror" Lylat
+state, not as a progress note, and not because a repository's own `AGENTS.md`/`CLAUDE.md` describes
+a `tasks/` workflow. That file-based workflow is legacy (`task-processor`, `task-executor`) and is
+off by default. If a repository's own instructions still describe `tasks/` as the tracked record,
+treat that as stale documentation, not authorization — flag the conflict to the user instead of
+following it silently. Only touch `tasks/` files when the user explicitly asks for that legacy
+workflow in the current conversation.
 
 Use this skill as the required task-system bridge when Lylat-backed task work is in scope.
 No task may proceed when the Lylat server is unreachable.
@@ -46,7 +54,7 @@ Lylat's local server is **macOS-only**.
    - `wip`
    - `blocked`
    - `finished`
-8. Do not fall back to repository `tasks/` workflow when the server is down unless the user explicitly changes the policy.
+8. Never create, move, or edit repository `tasks/` files as part of normal task tracking, even when the Lylat server is unreachable. If the server is down, stop and ask the user to start it (see Failure Handling) — do not fall back to the deprecated `tasks/` workflow unless the user explicitly asks for it in the current conversation.
 9. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
 10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
 11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
@@ -116,16 +124,23 @@ swift run --package-path tools/mock-agent mock-agent update-task <task-id> --sta
 
 ### With `task-processor`
 
-Use this pairing when intake should be informed by the currently open app state.
+`task-processor` is a legacy, off-by-default skill for repository `tasks/` files. Do not pair with
+it, and do not create `tasks/` files, unless the user has explicitly asked for that legacy workflow
+in the current conversation.
+
+Use this skill when intake should be informed by the currently open app state.
 
 - Read `GET /systems` to find the active or intended system.
 - Read `GET /projects` and `GET /tactics` to avoid creating duplicate app-side structures.
 - Decide whether the work belongs in an existing tactic or needs a new tactic to keep tactic boundaries coherent.
 - When creating a new tactic, make sure the tactic has or will have a clear starting task and a clear final task.
-- Run `task-processor` only when the broader workflow still explicitly requires repository task files in addition to Lylat state.
 - Only create app-side entities with `POST /projects`, `POST /projects/{projectId}/tactics`, or `POST /tasks` when the user explicitly wants app-state creation too.
 
 ### With `task-executor`
+
+`task-executor` is a legacy, off-by-default skill for repository `tasks/` files. This pairing name
+is historical — when Lylat is in scope, use only the Lylat state transitions below and do not create,
+move, or edit `tasks/` files, unless the user has explicitly asked for the legacy file workflow.
 
 Use this pairing when executing an existing task and the app should reflect current progress.
 
