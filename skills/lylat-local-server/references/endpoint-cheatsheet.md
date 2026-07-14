@@ -85,6 +85,8 @@ Fields:
   task-file numeric id (e.g. `1783751236` for
   `tasks/pending/1783751236-*.md`). `null`/absent when the task has no repo
   mirror.
+- `parentIds` — direct parent task UUIDs in the same tactic.
+- `childIds` — direct child task UUIDs in the same tactic.
 - `projectId`
 - `tacticId`
 - `systemId`
@@ -143,6 +145,20 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 Use this to link an existing server task to its repo `tasks/pending/{id}-*.md`
 file retroactively, or to correct drift after a repo task file is renumbered
 or moved.
+
+### Replace task relationships
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"parentIds":["<task-uuid>"],"childIds":["<task-uuid>"]}'
+```
+
+Supply either or both arrays. Omit a side to preserve it, or pass `[]` to
+clear it. The server atomically updates inverse relationships and rejects
+unknown IDs, cross-tactic links, duplicates, self-links, and cycles without
+partially mutating the graph. Do not combine relationship replacement with
+`appendParentId` or tactic reassignment in one request.
 
 ## Reassign A Task
 
@@ -258,6 +274,7 @@ swift run --package-path tools/mock-agent mock-agent list-projects
 swift run --package-path tools/mock-agent mock-agent list-tactics --project <project-id>
 swift run --package-path tools/mock-agent mock-agent list-tasks --state pending
 swift run --package-path tools/mock-agent mock-agent update-task <task-id> --state wip
+swift run --package-path tools/mock-agent mock-agent update-task <task-id> --parent-ids <id-1>,<id-2> --child-ids <id-3>
 ```
 
 ## Important Limits
