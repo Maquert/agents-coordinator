@@ -43,6 +43,7 @@
 - When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
 - When the user asks to plan a new technical project or write stakeholder-facing ADRs, RFDs/RFCs, technical specifications, architecture design documents, or related project planning docs, load and use the `project-planner` skill.
 - When the user asks to build, test, archive, diagnose, or maintain Xcode projects from the terminal, load and use the `xcode-terminal-operator` skill and also use `xcode-output-parser` for build/test output.
+- When any screenshot, snapshot, visual-regression, or image-baseline test fails, renders malformed output, flakes, or may have stale references, immediately load and use `screenshot-test-troubleshooter` before changing code or recording baselines.
 
 ## Execution
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.

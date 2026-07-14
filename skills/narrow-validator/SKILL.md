@@ -29,6 +29,7 @@ Read [references/validation-ladder.md](references/validation-ladder.md) when the
    - snapshot output directories
    - git index or staged state
 4. Run the focused path first.
+   - If a screenshot or snapshot assertion fails, immediately load `screenshot-test-troubleshooter` and classify the failure before widening or recording baselines.
 5. Widen only when one of these is true:
    - no focused contract exists
    - the changed surface is shared chrome or shared infrastructure

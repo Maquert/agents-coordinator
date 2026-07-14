@@ -114,6 +114,8 @@ Avoid parallel validation commands that share derived data, package resolution, 
 
 ## Screenshot Validation
 
+Immediately load and use `screenshot-test-troubleshooter` when a screenshot or snapshot assertion fails. Follow its classification workflow before changing product code, snapshot hosts, precision, or reference images.
+
 When screenshot validation or baseline refresh work is involved, use this checklist before recording or updating snapshots:
 
 1. Inspect the current baseline image.
