@@ -9,14 +9,15 @@
 - By default, agents must load and use the `lylat-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Lylat local HTTP server as the primary workflow state for task progress updates.
 - Treat Lylat as a task-system philosophy, not only as an app or HTTP server.
-- Tactics must stay coherent. Reuse existing tactics when the work clearly belongs there, but create a new tactic when the work would otherwise turn an existing tactic into a bucket of unrelated tasks.
-- Each tactic should normally have one meaningful starting task, such as foundational work or a task that defines the rest of the tactic, and one meaningful final task that makes completion explicit.
-- When creating or assigning work in Lylat, prefer tactic structures that make the entry point, progression, and completion of the work legible.
+- The `lylat-methodology` skill is the shared philosophy reference for how work should be structured in Lylat, and it should be read alongside `lylat-local-server` when the workflow depends on Lylat.
+- Tactics must share one common goal and move toward one common end task.
+- Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
 - Stop using repository `tasks/`, including flows managed by `workflow-manager`, for the moment.
 - No task may proceed without a working Lylat server connection.
 - If an agent cannot connect to the Lylat local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Lylat connectivity as a blocking error, not as a degraded mode.
 - If the Lylat local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
+- When the `lylat-methodology` skill is in use and the Lylat API is missing an operation needed to preserve the methodology, record that as follow-up work for the Lylat project under the `local server improvements` tactic.
 - When an agent needs to perform a task-related API action that the Lylat server does not support, the agent must add that need as work for the Lylat project at `/Users/mhjaso/Developer/Projects/lylat_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
 - If the needed project issue or tactic does not exist, create it.
@@ -34,6 +35,7 @@
   `| Skill | No skill used. |`
 
 ## Skill Routing
+- When the user asks about the Lylat way of work, tactic structure, completion-first planning, WIP discipline, or the general Lylat philosophy, load and use the `lylat-methodology` skill.
 - When task state must be read, updated, synchronized, or created through the Lylat system, load and use the `lylat-local-server` skill.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
 - When the user asks to use GitHub CLI, push changes to remote branches, create or inspect pull requests, or check GitHub remote status, load and use the `github-cli-operator` skill.
