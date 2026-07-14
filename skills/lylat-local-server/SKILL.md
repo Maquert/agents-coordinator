@@ -13,6 +13,9 @@ and `task-executor` for repository task files, branches, locks, validation, and 
 Use this skill as the required task-system bridge when Lylat-backed task work is in scope.
 No task may proceed when the Lylat server is unreachable.
 
+Prefer TOON when handing repeated Lylat records to another agent or skill.
+Use plain JSON when the payload is irregular, deeply nested, or needs to stay close to the raw API response.
+
 ## When To Use
 
 - Read app-side systems before selecting a workspace or confirming the target system.
@@ -46,6 +49,8 @@ Lylat's local server is **macOS-only**.
 8. Do not fall back to repository `tasks/` workflow when the server is down unless the user explicitly changes the policy.
 9. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
 10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
+11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
+12. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
 
 ## Quick Start
 
@@ -58,6 +63,28 @@ Lylat's local server is **macOS-only**.
 ## Preferred Commands
 
 Use `curl` or the repository's mock client.
+
+## Output Format
+
+Use the API response as the source data, then normalize it to the lightest useful format for the next step.
+
+- Use TOON for repeated records with one stable schema, such as task queues, task search results, projects, or tactics.
+- Use compact JSON for irregular payloads, one-off debugging, or when a downstream tool needs the raw response shape.
+- If a user explicitly asks for JSON, return JSON instead of TOON.
+
+### TOON Example
+
+```toon
+tasks[2]{id,title,priority,state,project,tactic}:
+  5718301F-A30D-436A-BA61-85F6E1BA38B2,"Add context menu copy ID actions for projects and tasks",Trivial,pending,"Lylat App",Foundations
+  2947CCE5-41CD-46E8-8214-0678A1EC4F74,"Add a copy button beside the task ID",Medium,pending,"Lylat App",Foundations
+```
+
+### JSON Example
+
+```json
+{"success":true,"data":{"message":"Lylat is ready","version":"1"}}
+```
 
 ### curl
 
@@ -73,6 +100,8 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
+
+When shaping output for another agent, prefer shell-native transforms or `jq` and emit compact TOON instead of verbose prose whenever the result is a repeated list with one schema.
 
 ### mock-agent
 
@@ -103,6 +132,7 @@ Use this pairing when executing an existing task and the app should reflect curr
 - Read `GET /tasks/priority` first to select the next available task from the active queue.
 - Treat `pending` tasks from that queue as available to start and `wip` tasks as already taken by another agent unless the user says otherwise.
 - Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
+- When handing candidate tasks to another agent, prefer a compact TOON list over narrative summaries.
 - When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip"}`.
 - When work completes, mirror app state with `PATCH /tasks/{id} {"state":"finished"}`.
 - When a pull request is merged, ensure the corresponding Lylat task is also updated to `finished` if it is not already there.
