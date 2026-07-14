@@ -1,10 +1,14 @@
 ---
 name: task-processor
 models: gpt-5.4-nano, claude-haiku-4-5-20251001
-description: Turn raw backlog intake items into normalized pending task records for a software repository, without implementing them. Use when processing a backlog source file such as tasks/intake.md into task detail files with titles, acceptance criteria, priorities, and assigned branch slugs. Every task must be assigned to a project and a tactic. Automatically handles task asset images, placing them in tasks/task_assets/ with proper naming ({task_id}_{task_slug}_{sequence}.png). Use whenever you need to convert backlog items to tasks, especially with attached screenshots or reference images.
+description: Legacy skill for repositories that still explicitly use task markdown files. Do not use by default. Repository `tasks/` directories are examples only unless the user explicitly asks for the old task-file workflow.
 ---
 
 # Backlog Task Intake
+
+This is a legacy skill.
+Do not use it unless the user explicitly asks to use repository task markdown files.
+When Lylat is available, create and manage tasks in Lylat instead of under `tasks/`.
 
 Use this skill to convert raw backlog items into normalized task records. Keep each automation prompt short: specify the backlog source file, the task detail destination, the duplicate-check source, and the exact output shape required by the automation.
 

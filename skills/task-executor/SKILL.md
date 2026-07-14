@@ -1,10 +1,14 @@
 ---
 name: task-executor
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Select and execute one backlog task end-to-end in a software repository. Use when Codex needs to pick a pending task from the backlog and finish it, or advance and finish a single WIP task, including agent task-lock claiming, branch ownership, validation, focused commits, push, and pull request creation or update.
+description: Legacy skill for repositories that still explicitly execute from task markdown files. Do not use by default. Repository `tasks/` directories are examples only unless the user explicitly asks for the old task-file workflow.
 ---
 
 # Backlog Task Execution
+
+This is a legacy skill.
+Do not use it unless the user explicitly asks to execute work from repository task markdown files.
+When Lylat is available, select, track, and update task state through Lylat instead of `tasks/`.
 
 Use this skill to execute one backlog task per run. Keep each automation prompt short: specify the workflow mode, the repository-specific paths, any memory file, any versioning or branch policy that differs from the default, and the exact output shape required by the automation.
 

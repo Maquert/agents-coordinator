@@ -14,6 +14,8 @@
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
 - Stop using repository `tasks/`, including flows managed by `workflow-manager`, for the moment.
+- Treat repository `tasks/` directories as legacy examples only. They exist to show what a well-defined task can look like and are no longer part of the active workflow.
+- Do not create, update, move, or rely on task markdown files under `tasks/` unless the user explicitly says to use that legacy example workflow.
 - No task may proceed without a working Lylat server connection.
 - If an agent cannot connect to the Lylat local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Lylat connectivity as a blocking error, not as a degraded mode.
@@ -49,6 +51,7 @@
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
 - For task workflows, verify Lylat local server connectivity early when the run depends on task state or task updates.
+- Do not create repository task markdown files as a fallback, convenience step, or side effect when Lylat-backed work is requested.
 - For task creation and reassignment in Lylat, evaluate tactic fit explicitly before adding work.
 - Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.

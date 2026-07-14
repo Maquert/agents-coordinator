@@ -1,14 +1,16 @@
 ---
 name: workflow-manager
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Initialize and maintain lightweight project-governance files for software projects. Use when creating or updating AGENTS.md role instructions, setting default quality expectations, initializing a project git repository, creating versioned PRDs such as specifications/v1/prd.md, managing task lifecycle files under tasks/pending, tasks/wip, tasks/blocked, tasks/finished, and tasks/archived, and optionally maintaining a local ignored tasks/tasks.md checklist.
+description: Initialize and maintain lightweight project-governance files for software projects. Use when creating or updating AGENTS.md role instructions, setting default quality expectations, initializing a project git repository, creating versioned PRDs such as specifications/v1/prd.md, and maintaining governance files. Repository `tasks/` directories are legacy examples only unless the user explicitly asks for that workflow.
 ---
 
 # Software Project Workflow
 
 ## Overview
 
-Use this skill to give software projects a consistent product/specification workflow. It owns project governance files, task lifecycle files, and default role expectations; framework-specific skills remain the source of stack-specific scaffolding, build, platform, simulator, deployment, and validation preferences.
+Use this skill to give software projects a consistent product/specification workflow. It owns project governance files and default role expectations; framework-specific skills remain the source of stack-specific scaffolding, build, platform, simulator, deployment, and validation preferences.
+
+Repository `tasks/` directories are legacy examples only by default. Do not create, update, or rely on task markdown files under `tasks/` unless the user explicitly asks for that legacy workflow.
 
 For Xcode projects, use this skill alongside `xcode-project-creator`; that skill remains authoritative for Xcode project scaffolding and Apple platform preferences. When `xcode-project-creator` applies, also use `xcode-terminal` plus `xcsift` for build and test diagnostics, use Point-Free `swift-snapshot-testing` for screenshot tests, keep each SwiftUI view in its own file with a counterpart test file, and name Swift extension files as `<BaseEntity>+<ExtensionName>.swift`, for example `UIDevice+Custom.swift`.
 
@@ -23,7 +25,7 @@ Mock implementations and debug-only helpers must never ship in release builds. R
 1. Inspect the project root before editing: look for `.git/`, `AGENTS.md`, `specifications/`, task lifecycle folders, any existing local task checklist such as `tasks/tasks.md`, `scripts/`, `.gitignore`, package files, and existing local conventions.
 2. Preserve existing project instructions and task content. Merge missing workflow requirements instead of replacing files.
 3. Create only missing workflow files and directories.
-4. Keep `specifications/` for versioned project requirements and root `tasks/` for lifecycle tracking. Task detail files under `tasks/` are the tracked project record. Any `tasks.md` checklist is optional local state and must stay ignored by Git.
+4. Keep `specifications/` for versioned project requirements. Treat root `tasks/` as a legacy examples area only unless the user explicitly asks for the old task-file workflow.
 5. Validate the resulting structure with shell commands and a quick content check.
 
 ## Initialize A Project
@@ -39,8 +41,7 @@ This creates:
 - A design system specification, initially under `specifications/v1/design-system/`, when the project has no existing design-system location.
 - `scripts/` for frequently used project scripts, grouped by category.
 - `scripts/used_scripts.md` as reusable documentation for commands and script patterns used during development.
-- `tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`, and `tasks/archived/`.
-- `tasks/aux_assets/` for temporary task-specific attached images, sounds, and audiovisual references.
+- no repository task lifecycle directories by default
 
 Use the bundled template at `assets/AGENTS.md.template` as the source for a new `AGENTS.md`. If `AGENTS.md` already exists, merge the template manually instead of overwriting unless the user explicitly asks to replace it.
 
@@ -102,11 +103,7 @@ Keep every `tasks.md` file out of git history. Add this exact entry to `.gitigno
 tasks.md
 ```
 
-Create `tasks/aux_assets/` when it is missing and add this exact entry to `.gitignore` when it is not already ignored:
-
-```gitignore
-tasks/aux_assets/
-```
+Do not create `tasks/aux_assets/` unless the user explicitly enables the legacy `tasks/` workflow.
 
 ## Git Repository
 
@@ -119,7 +116,7 @@ Every initialized project must be a git repository.
 
 ## Task Rules
 
-Use task detail files under `tasks/` as the project source of truth. Any local checklist such as `tasks/tasks.md` is optional convenience state only; do not require it for task selection, and do not create, restore, or commit any `tasks.md` file unless the user explicitly asks for that workflow.
+Do not use task detail files under `tasks/` as the default source of truth. Treat them as legacy examples only, and only create, restore, or update them when the user explicitly asks for that workflow.
 
 - Every item must use Markdown checkbox syntax.
 - Every item must include its task id in square brackets immediately before the title.
