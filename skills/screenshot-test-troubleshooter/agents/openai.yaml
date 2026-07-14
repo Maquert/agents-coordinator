@@ -1,0 +1,4 @@
+interface:
+  display_name: "Screenshot Test Troubleshooter"
+  short_description: "Diagnose and fix screenshot failures fast"
+  default_prompt: "Use $screenshot-test-troubleshooter to diagnose this screenshot test failure and apply the smallest evidence-based fix."
