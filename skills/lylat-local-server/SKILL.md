@@ -32,6 +32,7 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 - Reassign existing tasks to another project or tactic without recreating them.
 - Create app-side projects, tactics, or tasks when the workflow explicitly needs them.
 - Verify that the local server is reachable before an automation depends on it.
+- Ensure every created Lylat task has an explicit `agentRole`.
 
 ## macOS Constraint
 
@@ -60,6 +61,7 @@ Lylat's local server is **macOS-only**.
 11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
 12. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
 13. **Whenever you move a task to `wip`, set `deeplinkUrl` in the same `PATCH` call** to a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. This is required, not optional: it is how a human or another agent can reopen the exact session that took the task. It is distinct from the app's own `lylat://open/...` navigation links, which are computed internally and must never be used as the value here.
+14. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
 
 ## Quick Start
 
@@ -108,6 +110,9 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
+curl -s -X POST "http://localhost:8080/tasks" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Refine onboarding copy","projectId":"<project-id>","tacticId":"<tactic-id>","priority":"Medium","state":"pending","agentRole":"Localization Team"}'
 ```
 
 When shaping output for another agent, prefer shell-native transforms or `jq` and emit compact TOON instead of verbose prose whenever the result is a repeated list with one schema.
@@ -135,6 +140,7 @@ Use this skill when intake should be informed by the currently open app state.
 - Read `GET /projects` and `GET /tactics` to avoid creating duplicate app-side structures.
 - Decide whether the work belongs in an existing tactic or needs a new tactic to keep tactic boundaries coherent.
 - When creating a new tactic, make sure the tactic has or will have a clear starting task and a clear final task.
+- When creating a new task, choose an explicit `agentRole` that matches the intended kind of work.
 - Only create app-side entities with `POST /projects`, `POST /projects/{projectId}/tactics`, or `POST /tasks` when the user explicitly wants app-state creation too.
 
 ### With `task-executor`

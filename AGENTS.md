@@ -21,6 +21,14 @@
 - Treat missing Lylat connectivity as a blocking error, not as a degraded mode.
 - If the Lylat local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
 - Write Lylat task, tactic, and related descriptions in Markdown by default so they stay readable for both agents and humans.
+- Lylat tasks must always have an `agentRole`.
+- Preferred default Lylat agent roles:
+  - `Product Manager`: creates or refines tasks.
+  - `Developer`: executes code changes.
+  - `QA`: validates work; does not execute unless fixing is needed.
+  - `Localization Team`: updates wording, semantics, and internationalization-related behavior; can make code changes when needed.
+  - `Product Designer`: focuses on visual descriptions, images, assets, icons, and aesthetic refinement; may make minimal code changes when needed.
+- Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
 - When the `lylat-methodology` skill is in use and the Lylat API is missing an operation needed to preserve the methodology, record that as follow-up work for the Lylat project under the `local server improvements` tactic.
 - When an agent needs to perform a task-related API action that the Lylat server does not support, the agent must add that need as work for the Lylat project at `/Users/mhjaso/Developer/Projects/lylat_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
@@ -54,6 +62,7 @@
 - For task workflows, verify Lylat local server connectivity early when the run depends on task state or task updates.
 - Do not create repository task markdown files as a fallback, convenience step, or side effect when Lylat-backed work is requested.
 - For task creation and reassignment in Lylat, evaluate tactic fit explicitly before adding work.
+- Whenever creating a Lylat task, assign an explicit `agentRole` at creation time.
 - When creating or updating descriptions in Lylat, prefer clean Markdown structure over plain prose blobs.
 - Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.

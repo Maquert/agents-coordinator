@@ -32,6 +32,7 @@ The point is to keep tactics coherent, move work visibly, and finish things.
 8. If an agent already has more than one task in progress, its main priority is to find the simplest and quickest one to finish, finish it, and only then continue with another one.
 9. When choosing between several valid next steps, prefer the one that reduces WIP and increases clarity.
 10. Task state must be updated promptly when reality changes so the system stays trustworthy.
+11. Every Lylat task must have an explicit `agentRole`; do not leave task ownership semantics implicit.
 
 ## Work Selection
 
@@ -46,6 +47,17 @@ When selecting work:
 - check whether the agent already owns a `wip` task before starting a new one
 - if more than one task is already `wip` for the same agent, stop selecting new work and finish the quickest one first
 - do not start a second task merely because it looks interesting or important if another task can be finished now
+- when creating tasks, choose an `agentRole` that reflects the kind of work the task is for, not just who happened to create it
+
+Preferred role defaults:
+
+- `Product Manager`: create or refine tasks
+- `Developer`: code execution
+- `QA`: validation and verification, with fixes only when needed
+- `Localization Team`: wording, semantics, and internationalization-related work
+- `Product Designer`: visual descriptions, assets, icons, and aesthetic refinement
+
+Create a custom role when these do not fit, but never leave `agentRole` empty.
 
 ## Tactic Design
 
@@ -114,3 +126,4 @@ Use this draft as the starting point for refining the Lylat methodology with the
 7. Every tactic should share one end task and one goal.
 8. Task state must be updated immediately when reality changes.
 9. Scoped tactics are better than massive tactics.
+10. Every task needs an explicit `agentRole`.
