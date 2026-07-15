@@ -9,12 +9,13 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 
 ## Selecting tasks
 
-3. Load `GET {baseUrl}/tasks/priority` from the current project. Treat `pending` entries as available; `wip` entries are already claimed by another agent unless the user says otherwise.
-4. Take the top N pending tasks in the order returned by the priority queue (already Blocker → High → Medium → Trivial).
-5. Before claiming a server-selected task, confirm the repository mirror exists or can be derived confidently:
+3. At the start of each iteration, load `GET {baseUrl}/tasks/priority` from the current project. Treat `pending` entries as available; `wip` entries are already claimed by another agent unless the user says otherwise.
+4. Take only the current top pending task in the order returned by the priority queue (already Blocker → High → Medium → Trivial). Do not preselect or prelock the rest of the batch.
+5. Before claiming that server-selected task, confirm the repository mirror exists or can be derived confidently:
    - If the server task description includes a repository task id and source path, use that repo task file.
    - If the server task has no repository mirror file yet, create or update the matching repo task detail file before execution when the task is clearly intended for the current repository.
    - If the task cannot be mirrored confidently into the repository workflow, report the mismatch clearly, skip it, and continue to the next pending server task.
+6. After finishing, blocking, or skipping the current task, query `GET {baseUrl}/tasks/priority` again and repeat until the batch size is reached. Never hold locks for more than one task at a time.
 
 ## Rules for each task
 
@@ -27,12 +28,12 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 
 ## Stopping condition
 
-- Stop automatically after the batch size (default **5**) tasks are pushed to their branches with passing tests and no conflicts with `main`. Do not continue until the user reviews and approves more work.
+- Stop automatically after the batch size (default **5**) tasks are each processed one-by-one and pushed to their branches with passing tests and no conflicts with `main`. Do not continue until the user reviews and approves more work.
 - If a task is blocked (missing dependency, design decision needed, ambiguous spec), mirror `blocked` state on the server, skip it, and take the next one.
 
 ## For each task, follow the task-executor lifecycle, mirroring state to the Lylat server at each step
 
-1. Claim the task lock under `~/.agents/tasks/<id>.md`.
+1. Claim only the current task lock under `~/.agents/tasks/<id>.md`. Do not lock any later candidate task in advance.
 2. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>"}` — always set `deeplinkUrl` in this same call, a link back to the live conversation/thread doing this task (`codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent scheme for another agent technology). Never leave `deeplinkUrl` unset or reuse the app's own `lylat://open/...` navigation URL for it. Also move the repository task file from `tasks/pending/` to `tasks/wip/` if one exists (backup mirror). If the server task had to be materialized into a missing repo task file first, do that before the move.
 3. Create or reuse the worktree and branch.
 4. Implement the changes.
@@ -40,7 +41,7 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 6. Commit, push, and open or update the PR.
 7. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"finished"}`. Also move the repository task file to `tasks/finished/` if one exists.
 8. Remove the lock file.
-9. Report the PR URL, then immediately start the next task.
+9. Report the PR URL, then re-query the priority endpoint and start the next task.
 
 ## When the Lylat API can't do something the workflow needs
 
