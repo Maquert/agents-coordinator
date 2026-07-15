@@ -76,7 +76,7 @@ When the user asks to open or update a PR:
 3. Inspect the repository's `.github` directory for a PR template and project label definitions before drafting or editing the PR.
 4. Use the PR template when creating or updating the PR body.
 5. Absorb repository label definitions and apply the matching existing GitHub labels with `gh pr edit --add-label` when creating or maintaining the PR.
-6. When Codex is the agent creating or maintaining the PR, add the `codex` label if that label exists in the repository.
+6. When an AI agent (e.g., Codex, Claude, Gemini, Antigravity) is creating or maintaining the PR, add the corresponding agent label (e.g. `codex`, `claude`, `gemini`) if that label exists in the repository.
 7. Use `gh pr create` with an explicit base, head, title, and templated body when needed.
 7. Always append a `## Talk to the agent` section at the very bottom of the PR body.
 8. That section must contain a deep link URL to the current agent session so the thread can be reopened in the matching agent app, such as `claude://agents/<session-id>`, `codex://threads/<thread-id>`, or the equivalent URL scheme for another agent technology.
@@ -143,7 +143,7 @@ When a candidate file is found:
 When applying labels to a PR:
 
 - Use the absorbed label definitions to choose labels that reflect scope, risk, platform, release train, ownership, and workflow state when those concepts are defined by the repository.
-- When Codex is the active agent and the repository already has a `codex` label, always add that label to the PR during creation or maintenance.
+- When an AI agent is the active agent and the repository already has a corresponding agent label (e.g. `codex`, `claude`, `gemini`), always add that label to the PR during creation or maintenance.
 - When maintaining an existing PR, add missing matching labels with `gh pr edit --add-label`.
 - Remove labels only when the repository convention or the user request makes the mismatch clear.
 - Mention in the response which label-definition file was used, or that no project label file was found under `.github`.

@@ -60,7 +60,7 @@ Lylat's local server is **macOS-only**.
 10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
 11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
 12. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
-13. **Whenever you move a task to `wip`, set `deeplinkUrl` in the same `PATCH` call** to a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. This is required, not optional: it is how a human or another agent can reopen the exact session that took the task. It is distinct from the app's own `lylat://open/...` navigation links, which are computed internally and must never be used as the value here.
+13. **Whenever you move a task to `wip`, set `deeplinkUrl` and `agentTechnology` in the same `PATCH` call**. `deeplinkUrl` must be a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. `agentTechnology` must be the name of the active AI agent (e.g., "Codex", "Claude", "Antigravity"). These fields are required, not optional. The deeplink is distinct from the app's own `lylat://open/...` navigation links, which must never be used as the value here.
 14. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
 
 ## Quick Start
@@ -155,7 +155,7 @@ Use this pairing when executing an existing task and the app should reflect curr
 - Treat `pending` tasks from that queue as available to start and `wip` tasks as already taken by another agent unless the user says otherwise.
 - Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
 - When handing candidate tasks to another agent, prefer a compact TOON list over narrative summaries.
-- When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>"}` — set both fields in the same call. Do not move a task to `wip` without also setting `deeplinkUrl` to your own live conversation/thread link.
+- When work starts, mirror app state with `PATCH /tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>","agentTechnology":"<your-agent-name>"}` — set all fields in the same call. Do not move a task to `wip` without also setting `deeplinkUrl` and `agentTechnology`.
 - When work completes, mirror app state with `PATCH /tasks/{id} {"state":"finished"}`.
 - When a pull request is merged, ensure the corresponding Lylat task is also updated to `finished` if it is not already there.
 - If blocked, mirror app state with `PATCH /tasks/{id} {"state":"blocked"}` when appropriate.
