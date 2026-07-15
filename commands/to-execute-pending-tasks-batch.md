@@ -33,7 +33,7 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 ## For each task, follow the task-executor lifecycle, mirroring state to the Lylat server at each step
 
 1. Claim the task lock under `~/.agents/tasks/<id>.md`.
-2. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"wip"}`. Also move the repository task file from `tasks/pending/` to `tasks/wip/` if one exists (backup mirror). If the server task had to be materialized into a missing repo task file first, do that before the move.
+2. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>"}` — always set `deeplinkUrl` in this same call, a link back to the live conversation/thread doing this task (`codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent scheme for another agent technology). Never leave `deeplinkUrl` unset or reuse the app's own `lylat://open/...` navigation URL for it. Also move the repository task file from `tasks/pending/` to `tasks/wip/` if one exists (backup mirror). If the server task had to be materialized into a missing repo task file first, do that before the move.
 3. Create or reuse the worktree and branch.
 4. Implement the changes.
 5. Run unit tests; record screenshots if needed.

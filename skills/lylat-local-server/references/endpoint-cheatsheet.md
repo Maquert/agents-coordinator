@@ -85,6 +85,11 @@ Fields:
   task-file numeric id (e.g. `1783751236` for
   `tasks/pending/1783751236-*.md`). `null`/absent when the task has no repo
   mirror.
+- `deeplinkUrl` — **required before moving a task to `wip`.** The URL that
+  reopens the live agent conversation/thread doing the work, e.g.
+  `codex://threads/<thread-id>` or `claude://agents/<session-id>`. This is
+  the agent's own conversation link, not an app-navigation URL. Empty string
+  when unset. See "Set The Agent Conversation Deeplink" below.
 - `parentIds` — direct parent task UUIDs in the same tactic.
 - `childIds` — direct child task UUIDs in the same tactic.
 - `projectId`
@@ -109,11 +114,22 @@ Priority values:
 
 ### Start work
 
+When taking a task, set `state` and `deeplinkUrl` together in the same
+`PATCH` call:
+
 ```bash
 curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
-  -d '{"state":"wip"}'
+  -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
 ```
+
+`deeplinkUrl` must point back to the exact conversation/thread holding this
+task, not a generic app URL. Example: opening the Codex app, starting a new
+thread, and asking it to implement Feature A means that thread's own
+`codex://threads/<thread-id>` link is the value to set — the same idea
+applies to `claude://agents/<session-id>` in Claude. See "Set The Agent
+Conversation Deeplink" below if you only need to attach or correct it
+without changing state.
 
 ### Finish work
 
@@ -145,6 +161,24 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 Use this to link an existing server task to its repo `tasks/pending/{id}-*.md`
 file retroactively, or to correct drift after a repo task file is renumbered
 or moved.
+
+### Set the agent conversation deeplink
+
+```bash
+curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"deeplinkUrl":"claude://agents/<session-id>"}'
+```
+
+Every agent taking a task must set this — it is what lets a human (or
+another agent) reopen the exact live conversation doing the work. Set it in
+the same request as `{"state":"wip"}` when starting a task; use this
+standalone form to attach or correct it afterward (for example, if the
+conversation was resumed under a new session id). The app's task-editor UI
+displays this as a read-only "Task Deeplink URL" field — it is API-set only,
+not directly editable in the UI. It is unrelated to the app's own internal
+`lylat://open/...` navigation links, which are computed separately and never
+need to be set manually.
 
 ### Replace task relationships
 
