@@ -1,4 +1,10 @@
 {
+  "sidecars": {
+    "batch-tasks": {
+      "enabled": true,
+      "projectId": "b2b2b353-a9b6-42c5-ac4d-32ae72da79f8"
+    }
+  },
   "userSettings": {
     "artifactReviewMode": "always-proceed",
     "autoExecutionPolicy": "CASCADE_COMMANDS_AUTO_EXECUTION_EAGER",

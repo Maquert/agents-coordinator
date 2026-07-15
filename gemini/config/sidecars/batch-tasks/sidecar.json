@@ -1,0 +1,1 @@
+{"builtin":"schedule", "args":["0 10 * * *", "agentapi", "new-conversation", "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to implement the next 3 tasks."], "displayName":"Batch tasks"}
