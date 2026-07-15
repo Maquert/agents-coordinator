@@ -20,6 +20,7 @@
 - If an agent cannot connect to the Lylat local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Lylat connectivity as a blocking error, not as a degraded mode.
 - If the Lylat local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
+- Write Lylat task, tactic, and related descriptions in Markdown by default so they stay readable for both agents and humans.
 - When the `lylat-methodology` skill is in use and the Lylat API is missing an operation needed to preserve the methodology, record that as follow-up work for the Lylat project under the `local server improvements` tactic.
 - When an agent needs to perform a task-related API action that the Lylat server does not support, the agent must add that need as work for the Lylat project at `/Users/mhjaso/Developer/Projects/lylat_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
@@ -53,6 +54,7 @@
 - For task workflows, verify Lylat local server connectivity early when the run depends on task state or task updates.
 - Do not create repository task markdown files as a fallback, convenience step, or side effect when Lylat-backed work is requested.
 - For task creation and reassignment in Lylat, evaluate tactic fit explicitly before adding work.
+- When creating or updating descriptions in Lylat, prefer clean Markdown structure over plain prose blobs.
 - Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.
 - If Lylat connectivity fails during a task-dependent workflow, stop immediately and ask the user to start the server.
@@ -62,7 +64,8 @@
 - When a task file or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.
 - Mock implementations and debug-only code must never ship in release builds; guard them under the `DEBUG` compiler flag and keep release codepaths free of mock/debug-only dependencies.
-- When the user says `Commit the changes` or `Comit the changes`, interpret it as: group related changes, choose one commit message per group, stage each group, and create local git commits. It never means to push changes.
+- By default, petitions for this `~/.agents` project must be committed on `main` and pushed to `origin` unless the user explicitly says otherwise.
+- When the user says `Commit the changes` or `Comit the changes`, interpret it as: group related changes, choose one commit message per group, stage each group, create local git commits, and push them to `origin/main` for this project unless the user explicitly says otherwise.
 - If there have been changes to code in a repository, propose a brief git commit message at the end. Otherwise ignore this instruction. Commit messages must start with a verb and stay under 100 characters. Use this pattern: `<verb><object complement><optional extra content>`. Example: `Add configuration for a deploy pipeline`.
 
 ## Review
