@@ -1,6 +1,8 @@
 {
   "userSettings": {
     "artifactReviewMode": "always-proceed",
+    "autoExecutionPolicy": "CASCADE_COMMANDS_AUTO_EXECUTION_EAGER",
+    "enableTerminalSandbox": false,
     "globalPermissionGrants": {
       "allow": [
         "read_file(/Users/mhjaso/.gemini)",
@@ -32,11 +34,17 @@
         "unsandboxed(git -C ~/.agents add gemini/)",
         "write_file(/Users/mhjaso/.agents/.gitignore)",
         "unsandboxed(git -C ~/.agents reset)",
-        "unsandboxed(git -C ~/.agents add .)"
+        "unsandboxed(git -C ~/.agents add .)",
+        "unsandboxed(git -C ~/.agents commit -m \"Add global Antigravity/Gemini configuration under gemini/ and symlink skills\")",
+        "unsandboxed(git -C ~/.agents push)",
+        "unsandboxed(agy)",
+        "unsandboxed(curl -x http://127.0.0.1:50978 -s \"http://localhost:8080/tasks/7EB2AC5E-2F4B-4AE1-A350-35A47AD16D70\")",
+        "unsandboxed(curl -s \"http://macbook-pro-16-de-miguel-local-deep-nova.local:8080/tasks/priority\")"
       ]
     },
     "internetAccessPolicy": "allow",
     "nonWorkspaceFileAccess": "allow",
+    "nonWorkspaceFileAccessPolicy": "AGENT_SETTING_POLICY_ALLOW",
     "remoteControlHostname": "macbook-pro-16-de-miguel-local-deep-nova",
     "toolExecutionPolicy": "always-proceed"
   }
