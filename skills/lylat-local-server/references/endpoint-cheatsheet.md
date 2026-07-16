@@ -101,8 +101,10 @@ Fields:
 State values:
 - `pending`
 - `wip`
+- `in_review`
 - `blocked`
 - `finished`
+- `archived`
 
 Priority values:
 - `Trivial`
