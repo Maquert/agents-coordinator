@@ -1,0 +1,4 @@
+interface:
+  display_name: "Xcode Release Publisher"
+  short_description: "Build, version, document, and publish Xcode releases"
+  default_prompt: "Use $xcode-release-publisher to prepare and publish the next Xcode app release."
