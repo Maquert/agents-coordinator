@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ecelyo Local Server"
+  short_description: "Read and update Ecelyo app state over the local HTTP server"
+  default_prompt: "Use $ecelyo-local-server to inspect Ecelyo systems/projects/tactics/tasks and mirror app-side task state during task processing or execution."
