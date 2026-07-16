@@ -66,12 +66,6 @@ open worktrees/README.md
 | Skill | No skill used. |
 ```
 
-### AI efficiency coaching
-
-- Load and use the `ai-efficiency-coach` skill when responding to follow-up instructions or prompt adjustments.
-- Treat references to `ai-efficiency-skill` as `ai-efficiency-coach`.
-- Include one brief `AI efficiency feedback:` note when it improves prompt, skill, or workflow efficiency without distracting from the main task.
-
 ### Skill routing
 
 - Use `create-chatgpt-agent` for requests to create, configure, export, package, or document a custom ChatGPT GPT or agent.
