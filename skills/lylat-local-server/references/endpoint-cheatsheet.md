@@ -10,6 +10,22 @@ http://localhost:{port}
 
 Default port is `8080`.
 
+## Response Format
+
+Responses use JSON by default. Clients may opt into Token-Oriented Object Notation (TOON) with `?format=toon` or the HTTP header `Accept: text/toon`. `?format=json` explicitly selects JSON, and the query parameter takes precedence over the header.
+
+**TOON query example:**
+```bash
+curl -s "http://localhost:8080/tasks?format=toon"
+```
+
+**TOON header example:**
+```bash
+curl -s "http://localhost:8080/tasks" -H "Accept: text/toon"
+```
+
+---
+
 ## Connectivity
 
 ```bash
