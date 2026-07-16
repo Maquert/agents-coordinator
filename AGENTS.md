@@ -75,6 +75,7 @@
 - Mock implementations and debug-only code must never ship in release builds; guard them under the `DEBUG` compiler flag and keep release codepaths free of mock/debug-only dependencies.
 - By default, petitions for this `~/.agents` project must be committed on `main` and pushed to `origin` unless the user explicitly says otherwise.
 - When the user says `Commit the changes` or `Comit the changes`, interpret it as: group related changes, choose one commit message per group, stage each group, create local git commits, and push them to `origin/main` for this project unless the user explicitly says otherwise.
+- If a pull request is updated after its related task was already marked finished, the agent must move that task back to `in progress`.
 - Pull request merge policy by task priority:
   - `Trivial`: agents should open and merge the PR by default.
   - `Medium`: agents should open and merge the PR by default unless the PR is large or complex enough that human review is warranted; the agent decides.
