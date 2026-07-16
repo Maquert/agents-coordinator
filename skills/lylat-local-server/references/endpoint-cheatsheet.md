@@ -309,7 +309,51 @@ swift run --package-path tools/mock-agent mock-agent list-tactics --project <pro
 swift run --package-path tools/mock-agent mock-agent list-tasks --state pending
 swift run --package-path tools/mock-agent mock-agent update-task <task-id> --state wip
 swift run --package-path tools/mock-agent mock-agent update-task <task-id> --parent-ids <id-1>,<id-2> --child-ids <id-3>
+swift run --package-path tools/mock-agent mock-agent delete-task <task-id>
 ```
+
+## Delete Endpoints
+
+### Delete a task
+
+```bash
+curl -s -X DELETE "http://localhost:8080/tasks/<task-id>"
+```
+
+Permanently removes the task and returns the deleted task in the response body.
+Use this to revert mistaken task creation without leaving stale entries in the
+active queue. The deletion is immediate and cannot be undone through the API.
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": { /* deleted task DTO */ }
+}
+```
+
+**Error responses:**
+- `400` — task ID is not a valid UUID
+- `404` — no task with that ID exists
+- `405` — no task ID provided (bare `DELETE /tasks`)
+
+### Delete an acceptance criterion
+
+```bash
+curl -s -X DELETE "http://localhost:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
+```
+
+Removes a single acceptance criterion from the task.
+
+**Response (200 OK):**
+```json
+{
+  "success": true
+}
+```
+
+**Error responses:**
+- `404` — task or criterion not found
 
 ## Important Limits
 
