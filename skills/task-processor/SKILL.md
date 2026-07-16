@@ -54,6 +54,15 @@ A tactic is a mid-level grouping within a project, stored as a file at `tasks/pr
 - To use an existing tactic: read the `tactics/` directory inside the project and pick the matching one.
 - To create a new tactic: generate a timestamp-based id, prompt for a name (or derive it from the intake context), and create the tactic file at `tasks/projects/{project_id}-{project-name}/tactics/{tactic_id}-{tactic-name}.md` with a brief description.
 
+### Task Relationships and Parallelism
+
+Prefer a connected, sequential task graph within each tactic. When several tasks contribute to one tactic, link each task to its real predecessor and successor so work has a legible path from the starting task to the final validation or completion task.
+
+- A tactic's first task may have no parent and its final task may have no child; these are the only normal endpoint exceptions.
+- Do not fabricate dependencies solely to satisfy graph shape. A link must reflect a genuine ordering, prerequisite, integration, or validation relationship.
+- Prefer sequential delivery over wide fan-out. At any branch, create no more than three parallel tasks unless the user explicitly asks for more or the work cannot reasonably be sequenced.
+- When intake creates a new tactic with more than one task, include a clear final validation or completion task and connect it to the preceding work.
+
 ### Task Frontmatter
 
 Each task file must include both fields in its front matter:
@@ -99,7 +108,7 @@ If the required inputs are missing, stop and explain the setup using the referen
 11. For each non-duplicate item, create a new task record file in the appropriate top-level lifecycle directory (e.g., `tasks/pending/{task_id}-{task_slug}.md`) that follows repository task conventions and stores the assigned branch name, `project`, and `tactic` fields.
 12. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
 13. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
-14. When the repository uses front matter for task headers, the task template may also include an optional `depends on:` field to record another task id or reference that must be completed first.
+14. Build the tactic's task relationships while creating the records: prefer a sequence, use a `depends on:` field (or the active task system's equivalent) for each real prerequisite, keep at most three parallel branches, and leave only the first and final tasks as normal graph endpoints.
 15. **Image Assets**: When image files are provided in the automation prompt, create `tasks/task_assets/` if needed. For each image file, move or copy it to `tasks/task_assets/{task_id}_{task_slug}_{sequence}.png` where `sequence` is 0 for the first image, 1 for the second, etc. Update the task file's `Notes` section to reference the asset, e.g., "See tasks/task_assets/{task_id}_{task_slug}_{sequence}.png for reference screenshot."
 16. Update the backlog index only when the repository still uses one for local convenience; do not require a backlog index when task files are the source of truth.
 17. Remove each source item only after the task was created successfully or confirmed as a duplicate.

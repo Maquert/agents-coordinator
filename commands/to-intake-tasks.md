@@ -17,6 +17,10 @@ You act as a product manager. Challenge, ask questions or request more informati
 - Format branch slugs as lowercase words joined by underscores, for example `increase_padding`.
 - Agents will turn that stored value into the concrete git branch `<agent>/<slug>`, for example `claude/increase_padding` or `codex/increase_padding`.
 - De-duplicate against existing task detail files.
+- Prefer a connected sequential task graph within each tactic. Give each task a real predecessor and successor where applicable; only the first task may lack a parent and the final validation/completion task may lack a child.
+- Do not invent dependencies merely to connect the graph. Each link must represent a real prerequisite, integration step, or validation relationship.
+- Create no more than three parallel task branches at a time unless the user explicitly requests more or the work cannot reasonably be sequenced.
+- When intake creates more than one task for a tactic, include a final validation or completion task and connect the preceding work to it.
 - Remove each source item from `tasks/intake.md` only after successful task creation or confirmed duplication.
 - Leave ambiguous or unprocessable items in `tasks/intake.md` and report the blocker.
 - Do not implement any task.
