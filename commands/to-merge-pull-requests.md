@@ -1,17 +1,17 @@
 Use the `github-cli-operator` skill.
-Use the `lylat-methodology` skill.
-Use the `lylat-local-server` skill.
+Use the `ecelyo-methodology` skill.
+Use the `ecelyo-local-server` skill.
 
-Merge eligible open pull requests that I created by starting from Lylat task priority, then moving from each selected task to its pull request.
+Merge eligible open pull requests that I created by starting from Ecelyo task priority, then moving from each selected task to its pull request.
 
 ## Rules
 
 - Inspect every open pull request in the GitHub repository before starting.
-- Inspect the relevant Lylat tasks first and use Lylat as the source of truth for merge order.
+- Inspect the relevant Ecelyo tasks first and use Ecelyo as the source of truth for merge order.
 - Determine which pull requests were created by the currently authenticated GitHub user.
 - Never merge a pull request created by another author.
 - Do not process pull requests by lowest PR number.
-- Instead, process work in Lylat priority order using the methodology rules:
+- Instead, process work in Ecelyo priority order using the methodology rules:
   1. critical-priority tasks
   2. blocked-task resolution tasks
   3. in-progress tasks not currently claimed by anyone
@@ -22,16 +22,16 @@ Merge eligible open pull requests that I created by starting from Lylat task pri
 - Request escalation for branch/merge/push if sandbox blocks Git metadata.
 - Screenshot tests are assumed to be correct. If screenshot or snapshot references change or conflict, record and keep the new references, then include them in the branch update.
 - Do not merge stale, invalid, blocked, draft, dependency-blocked, or otherwise unsafe pull requests. Record the specific reason in the final report.
-- No task may proceed without a working Lylat server connection. If the server does not respond, stop and ask the user to start it.
+- No task may proceed without a working Ecelyo server connection. If the server does not respond, stop and ask the user to start it.
 
 ## Workflow
 
 1. Verify the GitHub CLI setup and authenticated account.
-2. Verify Lylat server connectivity.
-3. Read the relevant Lylat task queue and identify the highest-priority tasks using the Lylat methodology ordering.
+2. Verify Ecelyo server connectivity.
+3. Read the relevant Ecelyo task queue and identify the highest-priority tasks using the Ecelyo methodology ordering.
 4. Fetch and prune `origin`, then list all open pull requests with at least their number, author, head branch, draft status, mergeability, review state, checks, and URL.
-5. Map the prioritized Lylat tasks to their corresponding pull requests.
-6. Classify every mapped pull request as mine or not mine, and keep the processing order driven by the mapped Lylat task order rather than PR number.
+5. Map the prioritized Ecelyo tasks to their corresponding pull requests.
+6. Classify every mapped pull request as mine or not mine, and keep the processing order driven by the mapped Ecelyo task order rather than PR number.
 7. For each eligible mapped pull request of mine, in that order:
    1. Check out its head branch and ensure the worktree is clean before modifying it.
    2. Merge `origin/main` into the current branch.
@@ -42,7 +42,7 @@ Merge eligible open pull requests that I created by starting from Lylat task pri
    7. Push the updated branch.
    8. Recheck required reviews, checks, mergeability, and dependencies on GitHub.
    9. Merge the pull request only when it is valid, unblocked, and passing. Confirm that GitHub reports it as merged before continuing.
-   10. If the pull request is merged, ensure the corresponding Lylat task is updated to `finished`.
+   10. If the pull request is merged, ensure the corresponding Ecelyo task is updated to `finished`.
    11. Fetch `origin/main` again before processing the next pull request.
 8. Query GitHub again for all open pull requests so the final report reflects the repository's current state.
 

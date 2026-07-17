@@ -1,11 +1,11 @@
-Use the `lylat-local-server` skill and the `task-executor` skill together for this workflow.
+Use the `ecelyo-local-server` skill and the `task-executor` skill together for this workflow.
 
 Batch size: **5 tasks** by default. If the user gives a different number, use that instead.
 
 ## Server connectivity
 
-1. Read `~/.claude/lylat-server-config.json` for the `baseUrl` to use. If that file is missing, prefer the repository's documented Lylat server address when one exists; fall back to `http://localhost:8080` only when neither source is available.
-2. Check connectivity with `GET {baseUrl}/`. If it fails, report a clear error (likely cause: server disabled, wrong port/host, or the config file is stale) and stop — do not silently fall back to repository `tasks/` files for task *selection*, since the user has designated the Lylat server as the primary workflow state. Repository `tasks/` files stay a backup mirror only, per project instructions.
+1. Read `~/.claude/ecelyo-server-config.json` for the `baseUrl` to use. If that file is missing, prefer the repository's documented Ecelyo server address when one exists; fall back to `http://localhost:8080` only when neither source is available.
+2. Check connectivity with `GET {baseUrl}/`. If it fails, report a clear error (likely cause: server disabled, wrong port/host, or the config file is stale) and stop — do not silently fall back to repository `tasks/` files for task *selection*, since the user has designated the Ecelyo server as the primary workflow state. Repository `tasks/` files stay a backup mirror only, per project instructions.
 
 ## Selecting tasks
 
@@ -31,10 +31,10 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 - Stop automatically after the batch size (default **5**) tasks are each processed one-by-one and pushed to their branches with passing tests and no conflicts with `main`. Do not continue until the user reviews and approves more work.
 - If a task is blocked (missing dependency, design decision needed, ambiguous spec), mirror `blocked` state on the server, skip it, and take the next one.
 
-## For each task, follow the task-executor lifecycle, mirroring state to the Lylat server at each step
+## For each task, follow the task-executor lifecycle, mirroring state to the Ecelyo server at each step
 
 1. Claim only the current task lock under `~/.agents/tasks/<id>.md`. Do not lock any later candidate task in advance.
-2. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>"}` — always set `deeplinkUrl` in this same call, a link back to the live conversation/thread doing this task (`codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent scheme for another agent technology). Never leave `deeplinkUrl` unset or reuse the app's own `lylat://open/...` navigation URL for it. Also move the repository task file from `tasks/pending/` to `tasks/wip/` if one exists (backup mirror). If the server task had to be materialized into a missing repo task file first, do that before the move.
+2. Mirror app state with `PATCH {baseUrl}/tasks/{id} {"state":"wip","deeplinkUrl":"<your-conversation-url>"}` — always set `deeplinkUrl` in this same call, a link back to the live conversation/thread doing this task (`codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent scheme for another agent technology). Never leave `deeplinkUrl` unset or reuse the app's own `ecelyo://open/...` navigation URL for it. Also move the repository task file from `tasks/pending/` to `tasks/wip/` if one exists (backup mirror). If the server task had to be materialized into a missing repo task file first, do that before the move.
 3. Create or reuse the worktree and branch.
 4. Implement the changes.
 5. Run unit tests; record screenshots if needed.
@@ -43,6 +43,6 @@ Batch size: **5 tasks** by default. If the user gives a different number, use th
 8. Remove the lock file.
 9. Report the PR URL, then re-query the priority endpoint and start the next task.
 
-## When the Lylat API can't do something the workflow needs
+## When the Ecelyo API can't do something the workflow needs
 
-Do not silently work around it. Create or update a task under project `1781617286` (`lylat-app`), tactic `local server improvements`, describing the missing capability, and mention it in your report to the user.
+Do not silently work around it. Create or update a task under project `1781617286` (`ecelyo-app`), tactic `local server improvements`, describing the missing capability, and mention it in your report to the user.

@@ -8,7 +8,7 @@ description: Legacy skill for repositories that still explicitly use task markdo
 
 This is a legacy skill.
 Do not use it unless the user explicitly asks to use repository task markdown files.
-When Lylat is available, create and manage tasks in Lylat instead of under `tasks/`.
+When Ecelyo is available, create and manage tasks in Ecelyo instead of under `tasks/`.
 
 Use this skill to convert raw backlog items into normalized task records. Keep each automation prompt short: specify the backlog source file, the task detail destination, the duplicate-check source, and the exact output shape required by the automation.
 

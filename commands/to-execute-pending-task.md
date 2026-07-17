@@ -23,8 +23,8 @@ PR labeling:
 Pre-work:
 - Pull from the main branch before creating any worktree.
 
-Lylat deeplink requirement:
-- When taking a task and moving it to `wip` through the Lylat local server (see the `lylat-local-server` skill), set the task's `deeplinkUrl` field in the same `PATCH /tasks/{id}` call — do not send `{"state":"wip"}` alone.
-- `deeplinkUrl` must be the URL that reopens the live agent conversation/thread doing the work, e.g. `codex://threads/<thread-id>` for Codex or `claude://agents/<session-id>` for Claude — never the app's own `lylat://open/...` navigation URL.
+Ecelyo deeplink requirement:
+- When taking a task and moving it to `wip` through the Ecelyo local server (see the `ecelyo-local-server` skill), set the task's `deeplinkUrl` field in the same `PATCH /tasks/{id}` call — do not send `{"state":"wip"}` alone.
+- `deeplinkUrl` must be the URL that reopens the live agent conversation/thread doing the work, e.g. `codex://threads/<thread-id>` for Codex or `claude://agents/<session-id>` for Claude — never the app's own `ecelyo://open/...` navigation URL.
 - Example: `curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" -H 'Content-Type: application/json' -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'`.
 - If the session/thread id is not yet known when the task is taken, set `deeplinkUrl` as soon as it is available with a follow-up `PATCH /tasks/{id} {"deeplinkUrl":"..."}` before continuing further work on the task.
