@@ -1,6 +1,6 @@
 ---
 name: xcode-release-publisher
-description: Prepare and publish releases for Xcode projects by deriving customer-facing notes, selecting a semantic version, incrementing the App Store build number, updating release metadata and localization catalogs, building the requested Apple platform, committing and tagging the release, pushing the reusable release-candidate branch, and opening the release pull request. Use when Codex needs to generate, cut, prepare, or publish a release for an Xcode app or Apple-platform project.
+description: Prepare and publish releases for Xcode projects by deriving customer-facing notes, selecting a semantic version, incrementing the committed release build baseline, updating release metadata and localization catalogs, building the requested Apple platform, pushing the reusable release-candidate branch, orchestrating a repository-defined Xcode Cloud release when requested, tagging the validated candidate, and opening the release pull request. Use when Codex needs to generate, cut, prepare, validate, or publish a release for an Xcode app or Apple-platform project.
 ---
 
 # Xcode Release Publisher
@@ -11,12 +11,12 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 - Default the target platform to macOS. Honor an explicitly requested Apple platform.
 - Use semantic versioning. Choose a minor bump when the range contains any user-visible feature. Choose a patch bump only when it contains subtle improvements and fixes. Never choose a major bump unless the developer explicitly requests it. Keep a `0.x` app on `0.x` unless a major release is explicitly requested.
-- Increment the Xcode build number sequentially. In the absence of a stronger repository convention, use the highest numeric build number among the released app targets plus one.
+- Increment the committed Xcode build number sequentially. In the absence of a stronger repository convention, use the highest numeric build number among the released app targets plus one. When a repository-defined Xcode Cloud hook derives the final artifact build number from this baseline and `CI_BUILD_NUMBER`, preserve that ownership boundary and report both values.
 - Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Avoid excessive technical detail; compress internal cleanup into a light line such as “and all of those nice improvements without which I would not be making this release in the first place.” Do not claim changes unsupported by the release range.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - Put every release change, including the build number and `RELEASE_NOTES.md`, in one pull request from the branch named exactly `release-candidate`.
 - Title the pull request with the bare version, such as `1.4.0`.
-- Create one release commit and tag that commit with the bare version, such as `1.4.0`.
+- Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the branch and tags and open the pull request. Do not merely return a comparison URL.
 
 ## 1. Establish a Safe Release Range
@@ -38,33 +38,45 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 1. Group user-visible changes and rewrite them in customer language.
 2. Select the next marketing version using the release contract and the current Xcode marketing version. Cross-check semantic-version tags and stop on unexplained version drift.
 3. Find the effective Xcode build number (`CURRENT_PROJECT_VERSION` or its repository-defined equivalent) for every released app target. Require numeric values, choose the highest value plus one, and update all relevant configurations consistently. Prefer the project's configured Apple Generic Versioning mechanism; otherwise update the authoritative build setting rather than a generated plist.
+   - Before editing, inspect documented Xcode Cloud hooks and release specifications. If the hosted workflow derives its artifact build number from the committed baseline, increment only the baseline here; do not replace, disable, or duplicate the hosted calculation.
 4. Update the marketing version in the authoritative Xcode setting or repository version file.
 5. Create or replace root-level `RELEASE_NOTES.md` with concise App Store notes for this release. Include the version as a heading unless the repository's established store format requires otherwise.
 6. Update any configured internal release-note destination. If release-note entries live in a `Localizable.xcstrings` or similar strings catalog, remove stale release-note entries and add the current list without disturbing unrelated localization data.
 7. Confirm that marketing version, build number, internal notes, and App Store notes describe the same release.
 
-## 3. Build the Release Candidate
+## 3. Build and Validate the Release Candidate
 
 1. Use the repository's documented build entry point when available; otherwise discover the workspace or project and shared app scheme narrowly.
 2. Build the app in Release configuration for the requested platform, defaulting to macOS. Use a deterministic destination appropriate to that platform and pipe every `xcodebuild`, `swift build`, or test invocation through `xcsift` as required by `xcode-output-parser`.
-3. Do not archive or submit to App Store Connect unless explicitly requested. Do not bypass signing or project settings merely to manufacture a passing result.
+3. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. Do not bypass signing or project settings merely to manufacture a passing result.
 4. If the build fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
+5. When publication uses Xcode Cloud:
+   - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
+   - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication.
+   - Defer hosted execution until the candidate branch is pushed in the next section, and do not create release tags yet.
 
-## 4. Commit, Tag, Push, and Open the PR
+## 4. Commit, Publish the Candidate, Tag, and Open the PR
 
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the build-number update and `RELEASE_NOTES.md` are present.
-2. Create one commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style.
-3. Create an annotated tag named exactly `<version>` on that release commit. Refuse to move an existing semantic-version tag.
-4. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the new release commit.
-5. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag to the new commit; never force-update a semantic-version tag.
-6. Before creating the pull request, inspect and follow the repository PR template and label definitions. Add the matching existing labels, including the active agent label when available.
-7. Open a pull request to the default branch with:
+2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
+3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. Do not push release tags yet when hosted validation remains.
+4. Before creating the pull request, inspect and follow the repository PR template and label definitions. Add the matching existing labels, including the active agent label when available.
+5. Open a pull request to the default branch with:
    - title: exactly `<version>`
    - head: exactly `release-candidate`
    - body: the repository template when present, otherwise concise Summary, Validation, Risks, and Related Links sections
    - final section: `## Talk to the agent` with the current Codex task deep link
-8. Do not merge the new release pull request unless the developer separately requests it. The eventual merge method should preserve the tagged release commit. If repository policy requires squash merging, recreate the semantic-version and `release_notes` tags on the merged default-branch commit after merge.
-9. Return to the default branch only after all release work is safely committed, pushed, tagged, and represented by the pull request.
+6. When publication uses Xcode Cloud, keep the pull request in draft while hosted stabilization is active, then:
+   - Run the documented workflow from `release-candidate`.
+   - Record the run URL, committed build baseline, final artifact build number, destinations, and distribution result.
+   - Fix hosted-only failures on the same candidate branch, push with `--force-with-lease` when the reusable branch must be replaced, and rerun without publishing immutable version tags.
+   - Require the final hosted archive and intended distribution to succeed before continuing.
+7. Use a draft pull request only while release development or hosted stabilization is incomplete. Mark it ready when all required release gates pass and human review is the remaining step.
+8. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head. Refuse to move an existing semantic-version tag.
+9. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
+10. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
+11. Do not merge the new release pull request unless the developer separately requests it. The eventual merge method should preserve the tagged release commit. If repository policy requires squash merging, recreate the semantic-version and `release_notes` tags on the merged default-branch commit after merge.
+12. Return to the default branch only after all release work is safely committed, pushed, tagged, and represented by the pull request.
 
 ## Failure Handling
 
@@ -80,11 +92,12 @@ Report:
 
 - target platform and build result
 - release comparison range
-- marketing version and build-number changes
+- marketing version, committed build baseline, and hosted artifact build-number changes
 - App Store and internal release-note destinations
 - release commit hash
 - semantic-version and `release_notes` tag actions
 - pushed branch and tags
 - pull request URL, or the exact no-PR blocker
+- Xcode Cloud run URL and distribution result when hosted publication was requested
 
 End with `RELEASE NOTES CREATED AT <CURRENT DATE>`, including day, month, year, hour, and minute.
