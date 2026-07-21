@@ -52,7 +52,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 4. If the build fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
 5. When publication uses Xcode Cloud:
    - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
-   - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication.
+   - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication. When multiple archive actions share one release, require the hosted build-number hook to be idempotent and confirm every artifact receives the same final build number.
    - Defer hosted execution until the candidate branch is pushed in the next section, and do not create release tags yet.
 
 ## 4. Commit, Publish the Candidate, Tag, and Open the PR
