@@ -16,6 +16,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Require version-controlled store metadata on `release-candidate`: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - Put every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, in one pull request from the branch named exactly `release-candidate`.
+- Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `/Users/mhjaso/Developer/Projects/ecelyo_app-release`.
 - Title the pull request with the bare version, such as `1.4.0`.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the branch and tags and open the pull request. Do not merely return a comparison URL.
@@ -31,7 +32,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
    - If its previous pull request is open, do not overwrite it. Continue that same release only when the developer asked to update it; otherwise stop and ask for the previous release to be merged.
    - If its previous pull request was closed without merging, stop and ask whether it should be recovered or discarded.
    - If it was merged, update the default branch and verify that the prior release is present before reuse.
-6. Recreate local `release-candidate` from the updated `origin` default branch. Reusing this one branch is intentional; replace the remote branch later with `--force-with-lease`, never an unchecked force push.
+6. Create the persistent sibling release worktree only when it does not already exist, then reuse it for every release. In that worktree, recreate local `release-candidate` from the updated `origin` default branch. If `release-candidate` is checked out in an obsolete release worktree, require it to be clean, remove that worktree, and attach the branch at the persistent path without losing its commit. Reusing this one worktree and branch is intentional; replace the remote branch later with `--force-with-lease`, never an unchecked force push.
 7. Determine the comparison start from the sole `release_notes` tag. If it does not exist, use the latest semantic-version tag; if neither exists, use the initial commit and report that fallback.
 8. Read only the commits and changed files needed to understand the range. Exclude technical-only maintenance from customer notes unless the developer requests it.
 
@@ -83,7 +84,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 9. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
 10. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
 11. Do not merge the new release pull request unless the developer separately requests it. The eventual merge method should preserve the tagged release commit. If repository policy requires squash merging, recreate the semantic-version and `release_notes` tags on the merged default-branch commit after merge.
-12. Return to the default branch only after all release work is safely committed, pushed, tagged, and represented by the pull request.
+12. Leave the persistent release worktree on `release-candidate` after completion so the next release reuses it. Keep the primary worktree on the default branch.
 
 ## Failure Handling
 
