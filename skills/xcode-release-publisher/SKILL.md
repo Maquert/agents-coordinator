@@ -13,6 +13,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Use semantic versioning. Choose a minor bump when the range contains any user-visible feature. Choose a patch bump only when it contains subtle improvements and fixes. Never choose a major bump unless the developer explicitly requests it. Keep a `0.x` app on `0.x` unless a major release is explicitly requested.
 - Follow the repository's build-number convention. In the absence of one, increment the highest numeric build number among the released app targets by one. When the repository commits a fake sentinel and generates timestamp-based build numbers during compilation, preserve the sentinel, never commit a generated build number, and validate the embedded artifact value instead. If a Unix epoch-minute value exceeds Apple's `CFBundleVersion` component limits, preserve the exact minute in an ordered 4.2.2-digit encoding such as `NNNN.NN.NN` rather than embedding an invalid oversized integer.
 - Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Avoid excessive technical detail; compress internal cleanup into a light line such as “and all of those nice improvements without which I would not be making this release in the first place.” Do not claim changes unsupported by the release range.
+- Require version-controlled store metadata on `release-candidate`: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - Put every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, in one pull request from the branch named exactly `release-candidate`.
 - Title the pull request with the bare version, such as `1.4.0`.
@@ -44,17 +45,19 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
    - Inspect documented Xcode Cloud hooks and release specifications. Do not replace, disable, or duplicate their build-number ownership.
 4. Update the marketing version in the authoritative Xcode setting or repository version file.
 5. Create or replace root-level `RELEASE_NOTES.md` with concise App Store notes for this release. Include the version as a heading unless the repository's established store format requires otherwise.
-6. Update any configured internal release-note destination. If release-note entries live in a `Localizable.xcstrings` or similar strings catalog, remove stale release-note entries and add the current list without disturbing unrelated localization data.
-7. Confirm that the marketing version, effective build-number plan, internal notes, and App Store notes describe the same release.
+6. Create or update the localized app description, App Store release notes, and beta tester build notes in the repository metadata directory. Keep beta notes practical and test-oriented; include the platform, version, build-number check, and the most important changed flows.
+7. Update any configured internal release-note destination. If release-note entries live in a `Localizable.xcstrings` or similar strings catalog, remove stale release-note entries and add the current list without disturbing unrelated localization data.
+8. Confirm that the marketing version, effective build-number plan, internal notes, App Store notes, app description, and beta tester notes describe the same release.
 
 ## 3. Build and Validate the Release Candidate
 
 1. Use the repository's documented build entry point when available; otherwise discover the workspace or project and shared app scheme narrowly.
 2. Build the app in Release configuration for the requested platform, defaulting to macOS. Use a deterministic destination appropriate to that platform and pipe every `xcodebuild`, `swift build`, or test invocation through `xcsift` as required by `xcode-output-parser`.
-3. Before any signed build, archive, export, upload, notarization, or other operation that can access a private key or trigger Keychain/SecurityAgent, obtain the developer's explicit approval immediately before execution. Release intent or an earlier request to publish is not sufficient private-key authorization. State which operation and identity will use the key and what prompt may appear; never launch it speculatively or in the background. If a prompt appears unexpectedly, stop the initiating process and wait for approval before retrying.
-4. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. Do not bypass signing or project settings merely to manufacture a passing result.
-5. If the build fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
-6. When publication uses Xcode Cloud:
+3. Run the repository's release-metadata validator when present. Refuse to publish a candidate missing its app description, App Store release notes, beta tester notes, required localizations, or version parity.
+4. Before any signed build, archive, export, upload, notarization, or other operation that can access a private key or trigger Keychain/SecurityAgent, obtain the developer's explicit approval immediately before execution. Release intent or an earlier request to publish is not sufficient private-key authorization. State which operation and identity will use the key and what prompt may appear; never launch it speculatively or in the background. If a prompt appears unexpectedly, stop the initiating process and wait for approval before retrying.
+5. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. Do not bypass signing or project settings merely to manufacture a passing result.
+6. If the build fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
+7. When publication uses Xcode Cloud:
    - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
    - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication. For timestamp-based numbering, confirm every artifact contains a valid timestamp for its own compilation and never the committed fake sentinel; require identical artifact numbers only when the repository contract explicitly requires them.
    - Defer hosted execution until the candidate branch is pushed in the next section, and do not create release tags yet.
@@ -63,7 +66,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the build-number update and `RELEASE_NOTES.md` are present.
 2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
-3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. Do not push release tags yet when hosted validation remains.
+3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. Do not push release tags yet when hosted validation remains. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build.
 4. Before creating the pull request, inspect and follow the repository PR template and label definitions. Add the matching existing labels, including the active agent label when available.
 5. Open a pull request to the default branch with:
    - title: exactly `<version>`
@@ -71,7 +74,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
    - body: the repository template when present, otherwise concise Summary, Validation, Risks, and Related Links sections
    - final section: `## Talk to the agent` with the current Codex task deep link
 6. When publication uses Xcode Cloud, keep the pull request in draft while hosted stabilization is active, then:
-   - Run the documented workflow from `release-candidate`.
+   - Observe the run automatically triggered by the `release-candidate` push when that is the repository contract; never trigger it separately.
    - Record the run URL, committed build-number convention, final artifact build number or numbers, destinations, and distribution result.
    - Fix hosted-only failures on the same candidate branch, push follow-up commits normally, and rerun without publishing immutable version tags. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
    - Require the final hosted archive and intended distribution to succeed before continuing.
