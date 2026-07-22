@@ -1,14 +1,16 @@
 ---
 name: task-processor
-models: gpt-5.4-nano, claude-haiku-4-5-20251001
-description: Legacy skill for repositories that still explicitly use task markdown files. Do not use by default. Repository `tasks/` directories are examples only unless the user explicitly asks for the old task-file workflow.
+description: Capture raw requests as normalized backlog tasks without implementing them. Always use when the first non-whitespace text in a user prompt is `New task:` (case-insensitive), treating the remainder as task-intake content. Also use when the user explicitly requests backlog intake or the legacy repository task-file workflow. Use Ecelyo as the default task store; only create repository `tasks/` files when the user separately opts into that legacy workflow.
 ---
 
 # Backlog Task Intake
 
-This is a legacy skill.
-Do not use it unless the user explicitly asks to use repository task markdown files.
-When Ecelyo is available, create and manage tasks in Ecelyo instead of under `tasks/`.
+Use this skill for task intake only. Do not implement the captured task in the same turn unless the
+user explicitly asks for both intake and implementation.
+
+The repository task-file workflow in this skill is legacy. When Ecelyo is available, create and
+manage the task in Ecelyo instead of under `tasks/` unless the user separately asks for repository
+task markdown files.
 
 Use this skill to convert raw backlog items into normalized task records. Keep each automation prompt short: specify the backlog source file, the task detail destination, the duplicate-check source, and the exact output shape required by the automation.
 
@@ -16,9 +18,42 @@ Task records must carry an assigned branch name from intake onward. Store the ca
 
 Do not encode the agent identity into the stored task slug itself, and do not let examples that mention one agent imply that another agent should reuse that identity in branches, PR labels, PR bodies, locks, or workflow text.
 
-Default remote behavior is to do intake work on a new branch, push that branch, and create or update a pull request when task creation changes tracked repository files. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
+Default remote behavior for explicit repository task-file intake is to do intake work on a new branch, push that branch, and create or update a pull request when task creation changes tracked repository files. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
 If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use [references/project-setup.md](references/project-setup.md) for the baseline layout and [references/path-mapping.md](references/path-mapping.md) for alternate structures and path overrides.
+
+## `New task:` Prompt Contract
+
+When the first non-whitespace text in a prompt is `New task:` (case-insensitive):
+
+1. Load and use this skill.
+2. Remove only the prefix and treat all remaining prompt content and attachments as the raw task.
+3. Create or update a normalized task record; do not execute the requested work.
+4. Use Ecelyo as the task store by default. Load `ecelyo-methodology` and
+   `ecelyo-local-server`, verify connectivity, and preserve tactic coherence.
+5. Treat the prefix as task-intake authorization, not as authorization to create repository
+   `tasks/` files. Use the legacy file workflow only when the prompt also requests it explicitly.
+6. Infer project and tactic only when the context makes the assignment reliable; otherwise ask for
+   the missing assignment before creating the task.
+7. Assign an explicit `agentRole` that reflects the work the captured task requires.
+
+The prefix is a routing command even when the remainder resembles a direct implementation request.
+For example, `New task: Fix the login crash` means capture a task named from that request; it does
+not mean fix the crash now.
+
+## Direct Prompt Intake
+
+For a `New task:` prompt or another direct intake request:
+
+1. Normalize the request into a concise title.
+2. Check Ecelyo for an existing equivalent task before creating a duplicate.
+3. Resolve a coherent existing project and tactic, or ask when either cannot be inferred safely.
+4. Create a Markdown description containing the available goal, constraints, acceptance criteria,
+   dependencies, and attachment context without inventing missing requirements.
+5. Set an explicit priority, using the active system's fallback when the user does not provide one.
+6. Set an explicit `agentRole` appropriate to the task.
+7. Create the task in `pending` state and report its id, project, tactic, priority, and role.
+8. Stop after intake; do not begin execution.
 
 ## Operating Rules
 
@@ -76,18 +111,19 @@ Tasks live under the lifecycle directories at the top level (e.g., `tasks/pendin
 
 ## Required Inputs
 
-- A backlog intake source file
+- Direct mode: prompt content after `New task:` or another raw task request
+- Legacy batch mode: a backlog intake source file
 - A project (existing or new — must have a name)
 - A tactic within that project (existing or new — must have a name)
-- A backlog index file or another duplicate-check source
-- A task file shape that can store an assigned branch name, project, and tactic
+- A duplicate-check source: Ecelyo by default, or the repository records in legacy mode
+- Legacy mode only: a task file shape that can store an assigned branch name, project, and tactic
 - Optional: image files to attach as task assets (e.g., screenshots, reference images)
 
 If the required inputs are missing, stop and explain the setup using the references files. Seed missing files from [references/intake-template.md](references/intake-template.md) and [references/tasks-index-template.md](references/tasks-index-template.md) when the user wants the baseline layout.
 
 **Image Asset Handling**: When image files are provided (via the automation prompt or discovered in the conversation), place each image under `tasks/task_assets/` (not under the project root) with the naming pattern `{task_id}_{task_slug}_{sequence}.png`, where `sequence` is an incrementing number starting from 0 for multiple images per task. Create the directory if it does not exist.
 
-## Execution Pattern
+## Legacy File Intake Execution Pattern
 
 1. Open the source file and collect unordered list items.
 2. Ignore headings, blank lines, and already-processed items.

@@ -1,4 +1,4 @@
 interface:
   display_name: "Backlog Task Intake"
-  short_description: "Turn raw backlog items into normalized pending task records"
-  default_prompt: "Use $backlog-task-intake to convert backlog intake items into task records safely."
+  short_description: "Capture prompts as normalized pending tasks"
+  default_prompt: "Use $task-processor to capture this New task: request without implementing it."

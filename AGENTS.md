@@ -6,6 +6,9 @@
 
 ## Default Task System
 - The default task system for all agents is the Ecelyo system, not repository `tasks/` directories.
+- A prompt whose first non-whitespace text is `New task:` (case-insensitive) must load and use the `task-processor` skill for task intake.
+- For a `New task:` prompt, capture the remainder as a task and do not implement it in the same turn unless the user explicitly asks for both intake and implementation.
+- The `New task:` prefix authorizes task intake but does not by itself opt into legacy repository task markdown files. Keep Ecelyo as the task store unless the prompt separately requests the legacy file workflow.
 - The default methodology for all agents working for you is `ecelyo-methodology`.
 - By default, agents must load and use the `ecelyo-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Ecelyo local HTTP server as the primary workflow state for task progress updates.
@@ -48,6 +51,7 @@
 
 ## Skill Routing
 - Unless stronger local instructions override it, load and use `ecelyo-methodology` as the default methodology skill for work done for this user.
+- When the first non-whitespace text in a user prompt is `New task:` (case-insensitive), always load and use `task-processor`, capture the remainder as task-intake content, and do not execute the captured work unless explicitly asked to do both.
 - When the user asks about the Ecelyo way of work, tactic structure, completion-first planning, WIP discipline, or the general Ecelyo philosophy, load and use the `ecelyo-methodology` skill.
 - When task state must be read, updated, synchronized, or created through the Ecelyo system, load and use the `ecelyo-local-server` skill.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
