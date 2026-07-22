@@ -1,7 +1,6 @@
 ---
 name: ecelyo-methodology
-models: gpt-5.4-mini, claude-sonnet-4-6
-description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, and coordinate execution through Ecelyo. Ecelyo is the sole system of record — repository `tasks/` files are a deprecated legacy workflow. Use together with `ecelyo-local-server` when actual task state must be read or updated.
+description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record — repository `tasks/` files are a deprecated legacy workflow. Use together with `ecelyo-local-server` when actual task state must be read or updated.
 ---
 
 # Ecelyo Methodology
@@ -33,6 +32,7 @@ The point is to keep tactics coherent, move work visibly, and finish things.
 9. When choosing between several valid next steps, prefer the one that reduces WIP and increases clarity.
 10. Task state must be updated promptly when reality changes so the system stays trustworthy.
 11. Every Ecelyo task must have an explicit `agentRole`; do not leave task ownership semantics implicit.
+12. Archived projects and archived tactics must never receive new tasks. Before creating or reassigning a task, verify that both destination containers are not archived. Do not silently reactivate an archived project or tactic to make an assignment fit.
 
 ## Work Selection
 
@@ -48,6 +48,7 @@ When selecting work:
 - if more than one task is already `wip` for the same agent, stop selecting new work and finish the quickest one first
 - do not start a second task merely because it looks interesting or important if another task can be finished now
 - when creating tasks, choose an `agentRole` that reflects the kind of work the task is for, not just who happened to create it
+- before creating or reassigning a task, read the destination project and tactic status; reject the assignment if either one is archived
 
 Preferred role defaults:
 
@@ -80,6 +81,17 @@ Create a new tactic when:
 - the only reason to keep it in the current tactic would be convenience
 - the current tactic would become bloated or harder to finish coherently
 
+### Archived Project And Tactic Guard
+
+Treat archived projects and tactics as closed historical records.
+
+- Never create a task in an archived project or archived tactic.
+- Never reassign an existing task into an archived project or archived tactic.
+- Verify both destination statuses immediately before task creation or reassignment; do not rely on stale context.
+- If the intended destination is archived, select another active destination only when it shares the same goal and tactical arc.
+- Otherwise create a new appropriately scoped active project or tactic when authorized, or ask the user where the task belongs.
+- Do not unarchive a project or tactic unless the user explicitly requests reactivation as a separate action.
+
 ## Agent Behavior
 
 Agents following Ecelyo should:
@@ -105,6 +117,7 @@ Use `ecelyo-methodology` to decide:
 - whether to reuse or create a tactic
 - whether WIP should be reduced before anything else
 - how to prioritize completion
+- whether the destination project and tactic are active and eligible to receive work
 
 Use `ecelyo-local-server` to:
 
@@ -113,7 +126,7 @@ Use `ecelyo-local-server` to:
 - inspect the active priority queue
 - update task state and assignment
 
-## Initial Ten-Rule Draft
+## Initial Rule Draft
 
 Use this draft as the starting point for refining the Ecelyo methodology with the user:
 
@@ -127,3 +140,4 @@ Use this draft as the starting point for refining the Ecelyo methodology with th
 8. Task state must be updated immediately when reality changes.
 9. Scoped tactics are better than massive tactics.
 10. Every task needs an explicit `agentRole`.
+11. Archived projects and tactics are closed records: never create or reassign tasks into them, and never reactivate them implicitly.
