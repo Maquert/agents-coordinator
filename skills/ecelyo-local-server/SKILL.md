@@ -36,11 +36,12 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 
 ## macOS Constraint
 
-Ecelyo's local server is **macOS-only**.
+Ecelyo's local server is **macOS-only** and lives on the LAN, not `localhost`. The host is set once
+in the `ECELYO_SERVER_IP` environment variable (in `~/.zshenv`, so every shell and agent picks it up).
+Base URL: `http://$ECELYO_SERVER_IP:8080`.
 
-- Expect the server at `http://localhost:{port}` on macOS.
 - Do not expect the server to be present on iPhone or iPad.
-- If the server is unreachable, report that clearly as a blocking error and ask the user to start the server.
+- If `ECELYO_SERVER_IP` is unset, or the server is unreachable, stop and ask the user rather than guessing `localhost`.
 
 ## Shared Rules
 
@@ -100,17 +101,17 @@ tasks[2]{id,title,priority,state,project,tactic}:
 ### curl
 
 ```bash
-curl -s "http://localhost:8080/"
-curl -s "http://localhost:8080/systems"
-curl -s "http://localhost:8080/tasks/priority"
-curl -s "http://localhost:8080/tasks?state=pending"
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s "http://$ECELYO_SERVER_IP:8080/"
+curl -s "http://$ECELYO_SERVER_IP:8080/systems"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks/priority"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
-curl -s -X POST "http://localhost:8080/tasks" \
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Refine onboarding copy","projectId":"<project-id>","tacticId":"<tactic-id>","priority":"Medium","state":"pending","agentRole":"Localization Team"}'
 ```
@@ -162,10 +163,10 @@ Use this pairing when executing an existing task and the app should reflect curr
 
 ## Failure Handling
 
-- If `GET /` fails, report the connection error and likely cause: disabled server, wrong port, or non-macOS host.
+- If `GET /` fails, report the connection error and likely cause: server not running, `ECELYO_SERVER_IP` unset or stale, or non-macOS host.
 - If `404 Not Found` occurs, verify the endpoint against the reference file before retrying.
 - If a `PATCH` returns `404`, confirm the task ID first with `GET /tasks` or `GET /tasks/{id}`.
-- If the app server is unavailable, stop and ask the user to start the server. Do not continue task work without Ecelyo connectivity.
+- If the app server is unavailable, stop and ask the user to start it or confirm the IP. Do not continue task work without Ecelyo connectivity.
 
 ## References
 

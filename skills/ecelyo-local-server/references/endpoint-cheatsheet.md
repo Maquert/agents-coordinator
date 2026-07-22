@@ -5,10 +5,11 @@ Use this reference only when you need the exact endpoint or payload shape.
 ## Base URL
 
 ```text
-http://localhost:{port}
+http://$ECELYO_SERVER_IP:8080
 ```
 
-Default port is `8080`.
+The server's LAN IP is set once in the `ECELYO_SERVER_IP` environment variable (`~/.zshenv`). If it's
+unset, ask the user for the IP instead of guessing `localhost`.
 
 ## Response Format
 
@@ -16,12 +17,12 @@ Responses use JSON by default. Clients may opt into Token-Oriented Object Notati
 
 **TOON query example:**
 ```bash
-curl -s "http://localhost:8080/tasks?format=toon"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks?format=toon"
 ```
 
 **TOON header example:**
 ```bash
-curl -s "http://localhost:8080/tasks" -H "Accept: text/toon"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
 ```
 
 ---
@@ -29,7 +30,7 @@ curl -s "http://localhost:8080/tasks" -H "Accept: text/toon"
 ## Connectivity
 
 ```bash
-curl -s "http://localhost:8080/"
+curl -s "http://$ECELYO_SERVER_IP:8080/"
 ```
 
 Expected success body:
@@ -43,7 +44,7 @@ Expected success body:
 ### Systems
 
 ```bash
-curl -s "http://localhost:8080/systems"
+curl -s "http://$ECELYO_SERVER_IP:8080/systems"
 ```
 
 Fields:
@@ -55,8 +56,8 @@ Fields:
 ### Projects
 
 ```bash
-curl -s "http://localhost:8080/projects"
-curl -s "http://localhost:8080/projects?systemId=<system-id>"
+curl -s "http://$ECELYO_SERVER_IP:8080/projects"
+curl -s "http://$ECELYO_SERVER_IP:8080/projects?systemId=<system-id>"
 ```
 
 Fields:
@@ -67,9 +68,9 @@ Fields:
 ### Tactics
 
 ```bash
-curl -s "http://localhost:8080/tactics"
-curl -s "http://localhost:8080/tactics?systemId=<system-id>"
-curl -s "http://localhost:8080/tactics?projectId=<project-id>"
+curl -s "http://$ECELYO_SERVER_IP:8080/tactics"
+curl -s "http://$ECELYO_SERVER_IP:8080/tactics?systemId=<system-id>"
+curl -s "http://$ECELYO_SERVER_IP:8080/tactics?projectId=<project-id>"
 ```
 
 Fields:
@@ -81,11 +82,11 @@ Fields:
 ### Tasks
 
 ```bash
-curl -s "http://localhost:8080/tasks/priority"
-curl -s "http://localhost:8080/tasks"
-curl -s "http://localhost:8080/tasks?state=pending"
-curl -s "http://localhost:8080/tasks?systemId=<system-id>&state=pending"
-curl -s "http://localhost:8080/tasks/<task-id>"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks/priority"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks?systemId=<system-id>&state=pending"
+curl -s "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
 ```
 
 Use `GET /tasks/priority` first when selecting the next task to execute. It returns the active queue grouped by project, excludes `finished` work, and preserves the server's priority ordering.
@@ -136,7 +137,7 @@ When taking a task, set `state` and `deeplinkUrl` together in the same
 `PATCH` call:
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
 ```
@@ -152,7 +153,7 @@ without changing state.
 ### Finish work
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"finished"}'
 ```
@@ -160,7 +161,7 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 ### Block work
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"blocked"}'
 ```
@@ -171,7 +172,7 @@ You may also update `title`, `description`, `branch`, `repositoryTaskId`,
 ### Attach or correct a repository task-file link
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"repositoryTaskId":"1783751236"}'
 ```
@@ -183,7 +184,7 @@ or moved.
 ### Set the agent conversation deeplink
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"deeplinkUrl":"claude://agents/<session-id>"}'
 ```
@@ -201,7 +202,7 @@ need to be set manually.
 ### Replace task relationships
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"parentIds":["<task-uuid>"],"childIds":["<task-uuid>"]}'
 ```
@@ -217,7 +218,7 @@ partially mutating the graph. Do not combine relationship replacement with
 Move a task to another tactic in its current project:
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"tacticId":"<tactic-id>"}'
 ```
@@ -225,7 +226,7 @@ curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
 Move a task to another project and tactic:
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -239,7 +240,7 @@ partial mutation.
 ### Reassign project and/or tactic
 
 ```bash
-curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" \
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -264,7 +265,7 @@ Only use these when the workflow explicitly needs app-side object creation.
 ### Project
 
 ```bash
-curl -s -X POST "http://localhost:8080/projects" \
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
   -H 'Content-Type: application/json' \
   -d '{"title":"New Project","systemId":"<system-id>"}'
 ```
@@ -272,7 +273,7 @@ curl -s -X POST "http://localhost:8080/projects" \
 ### Tactic
 
 ```bash
-curl -s -X POST "http://localhost:8080/projects/<project-id>/tactics" \
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects/<project-id>/tactics" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Core Development","objective":"Ship the v1 features"}'
 ```
@@ -280,7 +281,7 @@ curl -s -X POST "http://localhost:8080/projects/<project-id>/tactics" \
 ### Task
 
 ```bash
-curl -s -X POST "http://localhost:8080/tasks" \
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
   -H 'Content-Type: application/json' \
   -d '{
     "title":"Fix login button",
@@ -305,6 +306,8 @@ repository task file's numeric id (e.g. `1783751236` for
 `GET /tasks/{id}`, and `GET /tasks/priority` responses link straight back to
 the repo file — no fuzzy title-matching needed. It can also be set or
 corrected later via `PATCH /tasks/{id}`.
+
+`agentRole`, `agentTechnology`, `deeplinkUrl`, and `gitWorktree` are optional at creation time. Passing `agentTechnology` and `deeplinkUrl` during `POST /tasks` (e.g., when creating a task directly into `wip` state) persists both fields atomically in the creation call without requiring a follow-up `PATCH /tasks/{id}` request.
 
 **Task-level repo id mapping exists; project/tactic mapping does not.**
 `repositoryTaskId` on the task DTO links a server task to its repo
@@ -335,7 +338,7 @@ swift run --package-path tools/mock-agent mock-agent delete-task <task-id>
 ### Delete a task
 
 ```bash
-curl -s -X DELETE "http://localhost:8080/tasks/<task-id>"
+curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
 ```
 
 Permanently removes the task and returns the deleted task in the response body.
@@ -358,7 +361,7 @@ active queue. The deletion is immediate and cannot be undone through the API.
 ### Delete an acceptance criterion
 
 ```bash
-curl -s -X DELETE "http://localhost:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
+curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
 ```
 
 Removes a single acceptance criterion from the task.
