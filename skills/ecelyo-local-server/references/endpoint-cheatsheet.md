@@ -255,7 +255,7 @@ The change is atomic: it either fully applies or is fully rejected. The resolved
 Error responses:
 - `400` — `projectId` or `tacticId` is not a valid UUID
 - `404` — the resolved `projectId` or `tacticId` does not exist
-- `422` — the resolved tactic does not belong to the resolved project, or the task is already assigned to that exact project/tactic
+- `422` — the resolved tactic does not belong to the resolved project, the task is already assigned to that exact project/tactic, or the target project/tactic is archived (closed container)
 
 ## Create Endpoints
 
