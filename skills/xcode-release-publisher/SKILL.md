@@ -21,6 +21,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the branch and tags and open the pull request. Do not merely return a comparison URL.
 - Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
+- Keep Xcode Cloud release preparation fast. When `release-candidate` is based on the current trusted default branch, do not rerun local unit, screenshot, build, or archive suites; assume the default branch is stable and let Xcode Cloud perform release validation. Run only fast repository and metadata contract checks before pushing.
 
 ## 1. Establish a Safe Release Range
 
@@ -52,12 +53,12 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 ## 3. Build and Validate the Release Candidate
 
-1. Use the repository's documented build entry point when available; otherwise discover the workspace or project and shared app scheme narrowly.
-2. Build the app in Release configuration for the requested platform, defaulting to macOS. Use a deterministic destination appropriate to that platform and pipe every `xcodebuild`, `swift build`, or test invocation through `xcsift` as required by `xcode-output-parser`.
-3. Run the repository's release-metadata validator when present. Refuse to publish a candidate missing its app description, App Store release notes, beta tester notes, required localizations, or version parity.
+1. Use the repository's documented fast release-contract entry points when available; otherwise discover the workspace or project and shared app scheme narrowly.
+2. For an Xcode Cloud release based on the current trusted default branch, do not run local unit tests, screenshot tests, builds, archives, or the repository's full validation wrapper. Xcode Cloud owns those release gates after the candidate push.
+3. Run only fast structural checks and the repository's release-metadata validator when present. Refuse to publish a candidate missing its shared schemes, app description, App Store release notes, beta tester notes, required localizations, or version parity.
 4. Before any signed build, archive, export, upload, notarization, or other operation that can access a private key or trigger Keychain/SecurityAgent, obtain the developer's explicit approval immediately before execution. Release intent or an earlier request to publish is not sufficient private-key authorization. State which operation and identity will use the key and what prompt may appear; never launch it speculatively or in the background. If a prompt appears unexpectedly, stop the initiating process and wait for approval before retrying.
 5. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. Do not bypass signing or project settings merely to manufacture a passing result.
-6. If the build fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
+6. If a fast release-contract check fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag, push release tags, or open a ready release pull request as though validation passed.
 7. When publication uses Xcode Cloud:
    - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
    - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication. For timestamp-based numbering, confirm every artifact contains a valid timestamp for its own compilation and never the committed fake sentinel; require identical artifact numbers only when the repository contract explicitly requires them.
