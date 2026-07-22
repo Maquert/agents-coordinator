@@ -20,6 +20,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Title the pull request with the bare version, such as `1.4.0`.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the branch and tags and open the pull request. Do not merely return a comparison URL.
+- After hosted release gates pass, integrate `release-candidate` with local Git rather than GitHub's merge operation. Merge the validated branch into the local default branch, push that merged default branch, and keep `origin/release-candidate` intact so Xcode Cloud retains its branch binding. Never use `gh pr merge`, the GitHub merge API, or the GitHub merge button for this branch.
 - Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
 - Keep Xcode Cloud release preparation fast. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. By default, assume the current default branch is stable and let Xcode Cloud perform release validation. Run only fast repository and metadata contract checks before pushing; do not run local builds or archives unless explicitly requested or required to diagnose a concrete release failure.
 
@@ -84,8 +85,13 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 8. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head. Refuse to move an existing semantic-version tag.
 9. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
 10. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
-11. Do not merge the new release pull request unless the developer separately requests it. The eventual merge method should preserve the tagged release commit. If repository policy requires squash merging, recreate the semantic-version and `release_notes` tags on the merged default-branch commit after merge.
-12. Leave the persistent release worktree on `release-candidate` after completion so the next release reuses it. Keep the primary worktree on the default branch.
+11. After the hosted gates and tags succeed, integrate the release without GitHub's merge operation:
+   - Require clean persistent release and primary worktrees, then fetch `origin`.
+   - Verify `origin/release-candidate` still points to the validated and tagged candidate.
+   - Fast-forward the local default branch from `origin`, then merge `release-candidate` into it with local Git using a non-squash merge that preserves the tagged candidate commit.
+   - Push the merged default branch normally. Do not use `gh pr merge`, the GitHub merge API, or the GitHub merge button. If branch protection rejects the push, report that exact blocker and do not silently fall back to a GitHub merge.
+   - Leave `origin/release-candidate` present. Do not delete it locally or remotely. GitHub may close the release pull request automatically when it sees the merged ancestry, but GitHub must not perform or squash the merge.
+12. Leave the persistent release worktree on `release-candidate` after completion so the next release reuses it. Keep the primary worktree on the merged default branch.
 
 ## Failure Handling
 
