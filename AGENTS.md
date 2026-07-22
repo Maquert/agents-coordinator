@@ -33,7 +33,7 @@
   - `Product Designer`: focuses on visual descriptions, images, assets, icons, and aesthetic refinement; may make minimal code changes when needed.
 - Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
 - When the `ecelyo-methodology` skill is in use and the Ecelyo API is missing an operation needed to preserve the methodology, record that as follow-up work for the Ecelyo project under the `local server improvements` tactic.
-- When an agent needs to perform a task-related API action that the Ecelyo server does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/lylat_app`.
+- When an agent needs to perform a task-related API action that the Ecelyo server does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/ecelyo_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
 - If the needed project issue or tactic does not exist, create it.
 
@@ -73,7 +73,7 @@
 - If Ecelyo connectivity fails during a task-dependent workflow, stop immediately and ask the user to start the server.
 - Surface failed Ecelyo synchronization as a blocking error, not as a quiet note or optional warning.
 - Make clear that no task work can proceed until the Ecelyo server responds.
-- When the Ecelyo API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Ecelyo project issue under `/Users/mhjaso/Developer/Projects/lylat_app`, using the project issues area and the `local server improvements` tactic.
+- When the Ecelyo API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Ecelyo project issue under `/Users/mhjaso/Developer/Projects/ecelyo_app`, using the project issues area and the `local server improvements` tactic.
 - When a task file or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.
 - Mock implementations and debug-only code must never ship in release builds; guard them under the `DEBUG` compiler flag and keep release codepaths free of mock/debug-only dependencies.
