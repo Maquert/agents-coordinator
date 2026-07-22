@@ -18,6 +18,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Title the pull request with the bare version, such as `1.4.0`.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the branch and tags and open the pull request. Do not merely return a comparison URL.
+- Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
 
 ## 1. Establish a Safe Release Range
 
