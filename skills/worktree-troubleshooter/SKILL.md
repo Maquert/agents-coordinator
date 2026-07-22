@@ -27,7 +27,7 @@ Check the exact failing command and error first.
 - `git apply --index` fails on `index.lock`:
   The patch itself is fine; the git index for that worktree is blocked. Escalate `git apply --index`.
 - `gpg: cannot open '/dev/tty'` during commit:
-  The commit is blocked by interactive signing, not by the diff. Re-run only that commit with `git -c commit.gpgsign=false commit ...` if a local unsigned automation commit is acceptable.
+  The commit is blocked by interactive private-key signing, not by the diff. Explain that the retry may trigger a GPG, pinentry, or Keychain prompt and obtain the user's explicit approval immediately before retrying. Do not bypass signing with `commit.gpgsign=false` unless the user separately and explicitly approves an unsigned commit.
 - `Could not resolve package dependencies` mixed with sandbox cache errors:
   Distinguish dependency resolution from filesystem restrictions. If the failing path is under global caches or requires network/package resolution, use a reusable elevated wrapper script.
 - `gh auth status` says the token is invalid, but the user reports a valid login:
@@ -80,7 +80,8 @@ The goal is to get a narrow reusable approval surface that matches one workflow.
 
 - If the failure is about repo metadata writes, escalate the specific git command.
 - If the failure repeats across several git mutation commands, move to the clean-worktree patch-transfer flow.
-- If the failure is only GPG/TTY, do not redesign the workflow; override signing for that one local commit.
+- If the failure is only GPG/TTY, do not redesign the workflow. Obtain explicit immediate approval before retrying any private-key operation, and do not silently disable signing.
+- Never launch GPG, SSH, `codesign`, or another private-key operation speculatively or in the background. If an authorization prompt appears unexpectedly, stop the initiating process, disclose what triggered it, and wait for approval before retrying.
 - If GitHub CLI auth looks invalid only inside the sandbox, verify it outside the sandbox before asking the user to rotate credentials.
 - If a push succeeds but PR creation fails, separate branch publication from GitHub CLI auth and retry the `gh` step with escalation.
 - If a repo has a PR template, prepare the completed body before the elevated `gh pr create` call so the privileged step is a single concrete action.

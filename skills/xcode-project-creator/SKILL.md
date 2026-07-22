@@ -50,6 +50,8 @@ Ask only for missing decisions that affect generated files:
 
 If the user has already supplied a decision, do not ask again.
 
+Before running a signed build or any command that can access a private key or trigger Keychain/SecurityAgent, obtain the user's explicit approval immediately before execution. A signing preference or earlier request to create or build the project is not private-key authorization. Prefer simulator or unsigned validation when sufficient; never start a private-key operation speculatively or in the background, and stop to disclose any unexpected authorization prompt before retrying.
+
 ## Project Shape
 
 Use the existing repository style if creating inside a repo. For a new standalone app, prefer this layout:

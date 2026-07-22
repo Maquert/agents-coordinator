@@ -61,6 +61,12 @@
 - When any screenshot, snapshot, visual-regression, or image-baseline test fails, renders malformed output, flakes, or may have stale references, immediately load and use `screenshot-test-troubleshooter` before changing code or recording baselines.
 
 ## Execution
+- Before running any command that can access a private key or trigger a macOS Keychain or SecurityAgent prompt, obtain the user's explicit approval immediately before execution. A general request to build, archive, publish, commit, or continue is not sufficient approval for private-key access.
+- Treat signed builds, `codesign`, signed Xcode archives/exports/uploads, notarization, certificate or private-key import/export, Keychain access-control changes, and interactive commit signing as private-key operations requiring this immediate approval.
+- Before requesting approval, state which operation will use the key, its purpose, and which system prompt may appear. Do not launch the operation speculatively, in the background, or while waiting for approval.
+- Never ask the user to provide a Keychain or private-key password in chat; the user must enter it only in the trusted system dialog.
+- If a private-key authorization prompt appears unexpectedly, stop the initiating process immediately, disclose what triggered it, and wait for explicit approval before retrying.
+- Read-only certificate or provisioning-profile inspection and unsigned or ad-hoc validation that cannot access a private key may proceed without this approval.
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
 - For task workflows, verify Ecelyo local server connectivity early when the run depends on task state or task updates.

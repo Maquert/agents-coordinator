@@ -38,6 +38,8 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
 ## Agent Rules
 
 - Prefer discovery commands before build commands: `xcodebuild -list -json`, `-showdestinations`, `-showTestPlans`, `-showBuildSettings -json`, `xcodebuild -showsdks -json`, and `xcrun simctl list --json`.
+- Immediately before any signed build, archive, export, upload, notarization, `codesign`, or other command that can access a private key or trigger Keychain/SecurityAgent, obtain the user's explicit approval. Earlier approval to build, archive, publish, or continue does not satisfy this private-key consent gate.
+- State which operation and signing identity will use the key and what system prompt may appear. Do not start the command speculatively or in the background. If a private-key prompt appears unexpectedly, stop the initiating process, disclose the trigger, and wait for approval before retrying.
 - Request permission early for commands that build, test, boot simulators, download platforms/components, resolve packages from network, sign, archive, export, or contact Apple services.
 - Never run `clean`, delete DerivedData, reset simulators, or change signing/provisioning without user intent.
 - Do not use `-allowProvisioningUpdates`, `-allowProvisioningDeviceRegistration`, `-skipPackagePluginValidation`, `-skipMacroValidation`, or `-skipPackageSignatureValidation` unless the user explicitly accepts the risk.
