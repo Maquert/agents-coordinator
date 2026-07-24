@@ -1,9 +1,9 @@
 ---
-name: backlog-task-batch-execution
+name: task-batch-executor
 description: Execute several backlog tasks end-to-end in strict sequence, with one worktree, branch, validation cycle, pull request, merge, and task-state update per task. Use when the user asks an agent to take a batch, ordered list, or specified number of backlog tasks and requires each task to be completed and merged before the next task starts.
 ---
 
-# Backlog Task Batch Execution
+# Task Batch Executor
 
 Execute a bounded batch without parallelizing or pre-claiming tasks. Treat every task as a full
 `task-executor` run and treat a successful merge as the gate for starting the next task.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Batch Executor"
+  short_description: "Execute and merge backlog tasks sequentially"
+  default_prompt: "Use $task-batch-executor to execute, validate, and merge several backlog tasks one at a time."

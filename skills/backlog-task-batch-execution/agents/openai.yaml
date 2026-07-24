@@ -1,4 +1,0 @@
-interface:
-  display_name: "Backlog Task Batch Execution"
-  short_description: "Execute and merge backlog tasks sequentially"
-  default_prompt: "Use $backlog-task-batch-execution to execute, validate, and merge several backlog tasks one at a time."
