@@ -1,0 +1,4 @@
+interface:
+  display_name: "Task Model Selector"
+  short_description: "Match tasks to suitable AI models"
+  default_prompt: "Use $task-model-selector to recommend priority-ordered AI models for this task."
