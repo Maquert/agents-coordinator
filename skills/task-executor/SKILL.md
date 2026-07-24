@@ -240,6 +240,7 @@ Execution pattern:
 Default output:
 
 - Selected task (title + id + priority)
+- Ecelyo project and tactic (name + id)
 - Selected task file path
 - Task id / branch table
 - Branch used or created (and whether a `⚠️` warning was emitted)
@@ -249,7 +250,13 @@ Default output:
 - Push status
 - PR URL or reuse status, including whether the PR is still open or already merged
 - Task lifecycle moves performed
+- Final task status: `**FINISHED**` only after merge, cleanup, and Ecelyo synchronization, or
+  `**BLOCKED**` with the exact unresolved gate
 - Memory update summary if a memory file was provided
+
+The final response must explicitly declare Project, Tactic, Pull request (URL and merged/open/not
+created), Branch, Worktree cleanup, and Task status. Use `N/A — <reason>` when a field does not
+apply. Never end with an ambiguous “done,” “implemented,” or “PR pending” status.
 
 ## Mode: wip-task-execution
 

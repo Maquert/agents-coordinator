@@ -140,12 +140,17 @@ and its worktree and associated branches are deleted.
 Report tasks in execution order with:
 
 - task id and title;
+- project and tactic names and ids;
 - concrete branch;
+- worktree cleanup result;
 - validation result;
 - acceptance-criteria result for every criterion;
 - commit and push status;
 - PR URL and merge status; and
 - final Ecelyo state.
 
-End with `merged/target`, the stopping reason when incomplete, and confirmation that no later task
-was claimed early.
+End with an unambiguous status for every task and for the batch. Use `Task Status: **FINISHED**`
+only after the task's PR is merged, its worktree and associated branches are deleted, and Ecelyo
+is synchronized. If any gate remains unresolved, use `Task Status: **BLOCKED**`, state the exact
+blocker in bold, and do not describe the task as finished. Include `N/A — <reason>` rather than
+omitting project, tactic, PR, branch, or worktree fields. Confirm no later task was claimed early.

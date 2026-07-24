@@ -49,6 +49,35 @@
   `| --- | --- |`
   `| Skill | No skill used. |`
 
+## Mandatory Task Execution Closeout
+
+When an agent selects, executes, advances, or batch-processes a task, it must close the task
+explicitly before ending the response. “Implemented” or “PR opened” is not a finished task. The
+agent must continue through validation, pull-request creation, merge, worktree and branch cleanup,
+and Ecelyo state synchronization as required by the active task skill.
+
+If the task cannot be completed safely, the agent must update Ecelyo to `blocked` (or preserve the
+accurate active state when the blocker is outside the API's control), explain the exact blocking
+gate, and stop without claiming success. A blocked task must never be described as finished.
+
+Every task-execution final response must include this clearly labeled closeout, even when a field is
+not applicable. Use `N/A — <reason>` instead of omitting a field:
+
+| Task closeout field | Required value |
+| --- | --- |
+| Project | Ecelyo project name and id |
+| Tactic | Ecelyo tactic name and id |
+| Task | Task title and id |
+| Pull request | URL plus `merged`, `open`, or `not created` |
+| Branch | Concrete task branch, or `N/A` with reason |
+| Worktree | Removed/clean, or the exact cleanup blocker |
+| Task status | `**FINISHED**` only after all completion gates; `**BLOCKED**` when blocked |
+
+For a batch, include one closeout row per task and a final batch status. The final status must be
+unambiguous: use `Task Status: **FINISHED**` only when the task is fully resolved, or
+`Task Status: **BLOCKED**` when any required gate remains unresolved. Do not end a task execution
+with a vague status such as “done,” “implemented,” “ready,” or “PR pending.”
+
 ## Skill Routing
 - Unless stronger local instructions override it, load and use `ecelyo-methodology` as the default methodology skill for work done for this user.
 - When the first non-whitespace text in a user prompt is `New task:` (case-insensitive), always load and use `task-processor`, capture the remainder as task-intake content, and do not execute the captured work unless explicitly asked to do both.
