@@ -1,6 +1,7 @@
 # Minimal Project Setup
 
-Use this reference when a repository wants to adopt the backlog skills (`backlog-task-intake` and `backlog-task-execution`) with the default file layout.
+Use this reference when a repository wants to adopt the task skills (`task-processor` and
+`task-executor`) with the default file layout.
 
 ## Baseline Layout
 

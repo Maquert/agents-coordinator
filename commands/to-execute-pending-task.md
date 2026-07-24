@@ -1,9 +1,11 @@
-Use the `task-executor` skill.
+Use the `task-executor` skill in `batch-task-execution` mode with a batch size of **1**. The
+single-task request is one atomic batch: apply the complete selection, execution, validation, PR,
+merge, cleanup, and Ecelyo closeout workflow before ending.
 If screenshot verification fails only because affected baselines are stale, rerun the relevant screenshot record workflow, update the references, rerun verification, and continue the task instead of marking it blocked.
 Prefer the narrowest dedicated snapshot or screenshot test that covers the changed surface before broader suites.
 If the repository exposes one canonical script to refresh all definitive screenshot baselines, use that script when the task needs a full multi-platform baseline refresh.
 
-Mode: `pending-task-execution`.
+Mode: `batch-task-execution` with batch size `1`.
 
 Repository paths:
 - Pending tasks: `tasks/pending/`
@@ -14,7 +16,8 @@ Repository paths:
 Mention the chosen task at the beginning of the session and mark it with this emoji "💻".
 
 Repository override:
-- When a task has no assigned branch name, invent one with the prefix `codex/`.
+- Never invent a missing branch. Stop with the exact missing assignment and report the task as
+  blocked according to the task-executor closeout contract.
 
 PR labeling:
 - Do not require any automation-specific PR label such as `codex-automation`.

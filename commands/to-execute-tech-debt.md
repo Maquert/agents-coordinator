@@ -1,4 +1,6 @@
-Use the `task-executor` skill as the workflow engine.
+Use the `task-executor` skill in `batch-task-execution` mode with a batch size of **1** as the
+workflow engine. Treat the selected tech-debt item as one atomic task and apply the complete PR,
+merge, cleanup, and Ecelyo closeout lifecycle.
 
 Workflow:
 - Read `tasks/project-maintenance.md` and take the first tech-debt checklist item in the file.

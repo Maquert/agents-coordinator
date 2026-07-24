@@ -48,7 +48,7 @@ If the repository stores all tasks in one directory:
 
 If the repository only has issue text, TODO comments, or project board references:
 
-- Explain that `backlog-task-intake` and `backlog-task-execution` need either task detail files or an agreed target format
+- Explain that `task-processor` and `task-executor` need either task detail files or an agreed target format
 - Recommend creating the baseline `tasks/` structure first
 - If `tasks/intake.md` is missing, recommend seeding it from `references/intake-template.md`
 

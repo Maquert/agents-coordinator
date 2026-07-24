@@ -1,7 +1,8 @@
-Use the `task-executor` skill as the workflow engine.
+Use the `task-executor` skill in `batch-task-execution` mode with a batch size of **1** as the
+workflow engine for the nightly task.
 Use the most appropriate model for this run.
 
-Mode: `wip-task-execution`.
+Mode: `batch-task-execution` with batch size `1`.
 
 Repository:
 - Checkout and work on the target project repository.

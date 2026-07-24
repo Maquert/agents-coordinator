@@ -40,7 +40,7 @@ Do not add extra agent-branding prose or footer text to pull requests, such as `
 
 When linking screenshots from files already committed in the repository, do not use `raw.githubusercontent.com` URLs for private repositories because GitHub renders those as anonymous fetches and they return `404`. Prefer authenticated GitHub blob URLs with `?raw=1`, or GitHub-uploaded attachments when the image is not tracked in the repo.
 
-If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use the `backlog-task-intake` skill references (`references/project-setup.md` for the baseline layout and `references/path-mapping.md` for alternate structures and path overrides) as the setup guidance.
+If the repository does not already expose the paths or files that the automation expects, stop before making workflow changes and explain how to configure the repository. Use the `task-processor` references (`references/project-setup.md` for the baseline layout and `references/path-mapping.md` for alternate structures and path overrides) as the setup guidance.
 
 ## Workflow Selection
 
@@ -297,7 +297,7 @@ Required inputs:
 - A defined task-file shape that can hold branch ownership and status notes
 - A destination for finished or blocked tasks when the repository uses lifecycle folders
 
-If the repository has WIP work tracked elsewhere, explain how to map that structure using the `backlog-task-intake` references instead of guessing.
+If the repository has WIP work tracked elsewhere, explain how to map that structure using the `task-processor` references instead of guessing.
 
 Execution pattern:
 
