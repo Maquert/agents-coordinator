@@ -1,0 +1,4 @@
+interface:
+  display_name: "Replicate UI References"
+  short_description: "Rebuild interfaces from golden visual references"
+  default_prompt: "Use $ui-reference-replication to analyze the supplied UI reference, rebuild the interface in measured groups, render each pass, compare visually, and hold publication until the result is close."
