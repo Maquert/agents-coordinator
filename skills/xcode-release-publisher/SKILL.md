@@ -1,11 +1,20 @@
 ---
 name: xcode-release-publisher
-description: Prepare and publish releases for Xcode projects by deriving customer-facing notes, selecting a semantic version, honoring the repository-defined build-number system, updating release metadata and localization catalogs, building the requested Apple platform, pushing the persistent release-candidate branch, orchestrating a repository-defined Xcode Cloud release when requested, tagging the validated candidate, and integrating it locally without a GitHub pull request for that branch. Use when Codex needs to generate, cut, prepare, validate, or publish a release for an Xcode app or Apple-platform project.
+description: Prepare and publish releases for Xcode projects by deriving customer-facing notes, selecting a semantic version, honoring the repository-defined build-number system, updating release metadata and localization catalogs, preparing either an Xcode manual or explicitly requested Xcode Cloud release, pushing the persistent release-candidate branch, tagging the validated candidate, and integrating it locally without a GitHub pull request for that branch. Use when Codex needs to generate, cut, prepare, validate, or publish a release for an Xcode app or Apple-platform project.
 ---
 
 # Xcode Release Publisher
 
 Prepare the complete release candidate, not only its notes. Load and follow `xcode-terminal-operator` and `xcode-output-parser` for Xcode discovery and builds, and `github-cli-operator` for GitHub authentication, branch pushes, and tags.
+
+## Release Modes
+
+There are two supported release modes. Select one explicitly at the start of every release and state it in the handoff:
+
+- **Xcode manual** — the current default. The developer opens the pushed `release-candidate` branch in Xcode and owns the signed archive, App Store Connect upload, and final release action. Use the repository's local build phase or other documented local build-number generator, validate the embedded artifact locally when Xcode is available, and stop at the developer handoff. Do not assume Xcode Cloud, trigger hosted workflows, create release tags, or merge the candidate unless the developer asks to continue after upload.
+- **Xcode Cloud** — opt in only when the developer explicitly requests it or the repository release request names it. Follow the repository's Xcode Cloud workflow, hooks, hosted build-number ownership, and distribution gates. Pushes to `release-candidate` may trigger hosted validation; do not tag or integrate until the hosted run succeeds.
+
+If the developer does not name a mode, use **Xcode manual**.
 
 ## Release Contract
 
@@ -17,12 +26,12 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - Keep every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, on the branch named exactly `release-candidate`.
 - Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `/Users/mhjaso/Developer/Projects/ecelyo_app-release`.
-- Never create, open, update, or merge a GitHub pull request whose head is `release-candidate`. GitHub's post-merge branch cleanup can delete this persistent branch and break Xcode Cloud's branch binding.
+- Never create, open, update, or merge a GitHub pull request whose head is `release-candidate`. In Xcode Cloud mode, GitHub's post-merge branch cleanup can delete this persistent branch and break Xcode Cloud's branch binding; in Xcode manual mode, the persistent branch remains the developer's upload handoff.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the candidate branch and validated tags directly. Review the candidate through its local diff and hosted artifacts; do not use a pull request for this persistent branch.
-- After hosted release gates pass, integrate `release-candidate` with local Git rather than GitHub's merge operation. Merge the validated branch into the local default branch, push that merged default branch, and keep `origin/release-candidate` intact so Xcode Cloud retains its branch binding. Never use `gh pr merge`, the GitHub merge API, or the GitHub merge button for this branch.
+- After the required release gates pass, integrate `release-candidate` with local Git rather than GitHub's merge operation only when the developer requests integration. In Xcode Cloud mode, keep `origin/release-candidate` intact so Xcode Cloud retains its branch binding. Never use `gh pr merge`, the GitHub merge API, or the GitHub merge button for this branch.
 - Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
-- Keep Xcode Cloud release preparation fast. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. By default, assume the current default branch is stable and let Xcode Cloud perform release validation. Run only fast repository and metadata contract checks before pushing; do not run local builds or archives unless explicitly requested or required to diagnose a concrete release failure.
+- Keep release preparation proportional to the selected mode. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. In Xcode manual mode, run the narrowest requested local build/archive validation when Xcode is available; do not upload or access App Store Connect. In Xcode Cloud mode, run only fast repository and metadata contract checks before pushing and let Xcode Cloud perform the normal release validation.
 
 ## 1. Establish a Safe Release Range
 
@@ -42,7 +51,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 3. Inspect the effective Xcode build-number convention (`CURRENT_PROJECT_VERSION` or its repository-defined equivalent) for every released app target.
    - For a conventional committed number, require numeric values, choose the highest value plus one, and update all relevant configurations consistently. Prefer Apple Generic Versioning; otherwise update the authoritative build setting rather than a generated plist.
    - For a repository-defined fake sentinel plus build-time timestamp, require the sentinel to remain unchanged, verify every released app target uses the version-controlled generator, and do not write the generated value into source files.
-   - Inspect documented Xcode Cloud hooks and release specifications. Do not replace, disable, or duplicate their build-number ownership.
+   - Inspect documented build hooks and release specifications for the selected mode. In Xcode manual mode, preserve and validate the local date/timestamp generator. In Xcode Cloud mode, do not replace, disable, or duplicate Xcode Cloud's build-number ownership.
 4. Update the marketing version in the authoritative Xcode setting or repository version file.
 5. Create or replace root-level `RELEASE_NOTES.md` with concise App Store notes for this release. Include the version as a heading unless the repository's established store format requires otherwise.
 6. Create or update the localized app description, App Store release notes, and beta tester build notes in the repository metadata directory. Keep beta notes practical and test-oriented; include the platform, version, build-number check, and the most important changed flows.
@@ -52,12 +61,12 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 ## 3. Build and Validate the Release Candidate
 
 1. Use the repository's documented fast release-contract entry points when available; otherwise discover the workspace or project and shared app scheme narrowly.
-2. Do not run local unit tests, screenshot tests, other test suites, builds, archives, or the repository's full validation wrapper by default. Run them only when the developer explicitly requests them for the release or when a specific hosted failure requires a narrow diagnostic reproduction. Xcode Cloud owns the normal release gates after the candidate push.
+2. Do not run local unit tests, screenshot tests, other test suites, builds, archives, or the repository's full validation wrapper by default. Run them only when the developer explicitly requests them for the release or when a specific failure requires a narrow diagnostic reproduction. In Xcode manual mode, the developer owns the final signed build and upload; in Xcode Cloud mode, Xcode Cloud owns the normal hosted release gates after the candidate push.
 3. Run only fast structural checks and the repository's release-metadata validator when present. Refuse to publish a candidate missing its shared schemes, app description, App Store release notes, beta tester notes, required localizations, or version parity.
 4. Before any signed build, archive, export, upload, notarization, or other operation that can access a private key or trigger Keychain/SecurityAgent, obtain the developer's explicit approval immediately before execution. Release intent or an earlier request to publish is not sufficient private-key authorization. State which operation and identity will use the key and what prompt may appear; never launch it speculatively or in the background. If a prompt appears unexpectedly, stop the initiating process and wait for approval before retrying.
 5. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. Do not bypass signing or project settings merely to manufacture a passing result.
 6. If a fast release-contract check fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag or push release tags as though validation passed.
-7. When publication uses Xcode Cloud:
+7. When publication uses Xcode Cloud mode:
    - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
    - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication. For timestamp-based numbering, confirm every artifact contains a valid timestamp for its own compilation and never the committed fake sentinel; require identical artifact numbers only when the repository contract explicitly requires them.
    - Defer hosted execution until the candidate branch is pushed in the next section, and do not create release tags yet.
@@ -66,9 +75,9 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the build-number update and `RELEASE_NOTES.md` are present.
 2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
-3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. Do not push release tags yet when hosted validation remains. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build.
+3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. In Xcode manual mode, this push is the developer's Xcode handoff; do not push release tags yet. In Xcode Cloud mode, do not push release tags while hosted validation remains. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build.
 4. Do not call `gh pr create`, `gh pr edit`, `gh pr ready`, `gh pr merge`, or an equivalent API with `release-candidate` as the head branch. The absence of a pull request is an intentional branch-lifecycle requirement, not a blocker.
-5. When publication uses Xcode Cloud:
+5. When publication uses Xcode Cloud mode:
    - Observe the run automatically triggered by the `release-candidate` push when that is the repository contract; never trigger it separately.
    - Record the run URL, committed build-number convention, final artifact build number or numbers, destinations, and distribution result.
    - Fix hosted-only failures on the same candidate branch, push follow-up commits normally, and rerun without publishing immutable version tags. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
@@ -76,7 +85,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 6. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head. Refuse to move an existing semantic-version tag.
 7. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
 8. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
-9. After the hosted gates and tags succeed, integrate the release without GitHub's merge operation:
+9. After the required gates and tags succeed, integrate the release without GitHub's merge operation when integration is requested:
    - Require clean persistent release and primary worktrees, then fetch `origin`.
    - Verify `origin/release-candidate` still points to the validated and tagged candidate.
    - Fast-forward the local default branch from `origin`, then merge `release-candidate` into it with local Git using a non-squash merge that preserves the tagged candidate commit.
@@ -106,6 +115,6 @@ Report:
 - pushed branch and tags
 - confirmation that no pull request was created for `release-candidate`
 - verified remote `release-candidate` commit after default-branch integration
-- Xcode Cloud run URL and distribution result when hosted publication was requested
+- selected release mode; Xcode Cloud run URL and distribution result only when hosted publication was requested
 
 End with `RELEASE NOTES CREATED AT <CURRENT DATE>`, including day, month, year, hour, and minute.
