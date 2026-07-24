@@ -1,13 +1,13 @@
 ---
 name: task-executor
-description: Execute one implementation-ready backlog task end-to-end with explicit technical context, validation instructions, and Ecelyo acceptance criteria. Legacy repository task markdown is supported only when explicitly requested; otherwise use Ecelyo as the source of truth.
+description: Execute one or several implementation-ready backlog tasks end-to-end with explicit technical context, validation instructions, strict sequencing, PR merge gates, cleanup, and Ecelyo acceptance criteria. Use when an agent must finish a single task or an ordered batch; Ecelyo is the default source of truth.
 ---
 
 # Task Executor
 
-This is a legacy skill.
-Do not use it unless the user explicitly asks to execute work from repository task markdown files.
-When Ecelyo is available, select, track, and update task state through Ecelyo instead of `tasks/`.
+This is the canonical task execution skill for both single-task and ordered-batch work. When
+Ecelyo is available, select, track, and update task state through Ecelyo instead of `tasks/`.
+Use repository task markdown only when the user explicitly requests that legacy workflow.
 
 Use this skill to execute one backlog task per run. Keep each automation prompt short: specify the workflow mode, the repository-specific paths, any memory file, any versioning or branch policy that differs from the default, and the exact output shape required by the automation.
 
@@ -50,6 +50,35 @@ Choose one mode first:
 - `wip-task-execution`: Advance or finish a single WIP task with minimal repo scanning.
 
 If the automation does not name the mode explicitly, infer it from the prompt and state the chosen mode in the response.
+
+### `batch-task-execution`
+
+Use this mode when the caller requests several tasks, an ordered list, or a batch size. Treat each
+task as a complete execution and do not pre-claim or parallelize the batch.
+
+1. Require a repository path and either an ordered task-id list or a batch size (default `5`).
+2. Verify Ecelyo connectivity, repository instructions, remote/PR capability, task ownership, and
+   that every candidate belongs to the target repository before claiming anything.
+3. Select only the next task. For priority selection, refresh `GET /tasks/priority` after each
+   completed task; never snapshot or reserve the whole batch.
+4. Apply the pending or WIP execution mode below to the selected task, including its lock,
+   technical readiness contract, validation, PR, merge, cleanup, and Ecelyo synchronization.
+5. Start the next task only after the current task's PR is merged, its worktree and associated
+   branches are deleted, and Ecelyo reports `finished`.
+6. Stop at the current task if it is unavailable, ambiguous, blocked, fails validation, cannot be
+   pushed, cannot open/update its PR, cannot merge, or cannot complete cleanup.
+
+Batch invariants:
+
+- Hold at most one task in progress.
+- Do not count an open PR as completed.
+- Do not skip an explicitly ordered task.
+- Report one complete closeout for every task and a final batch status.
+
+Batch final output must report, for every task, its project and tactic (name + id), task id/title,
+branch, worktree cleanup, validation and acceptance-criteria results, commit/push status, PR URL and
+merge state, Ecelyo state, and an unambiguous `Task Status: **FINISHED**` or
+`Task Status: **BLOCKED**` with the exact blocker in bold.
 
 ## Agent Task-Lock Protocol
 
@@ -302,6 +331,7 @@ Execution pattern:
 Default output:
 
 - Selected WIP task
+- Ecelyo project and tactic (name + id)
 - Task id / branch table
 - Branch used or created
 - Work completed
@@ -309,7 +339,14 @@ Default output:
 - Local commit status
 - Push status
 - PR URL or reuse status, including whether the PR is still open or already merged
+- Worktree cleanup result
+- Final task status: `**FINISHED**` only after merge, cleanup, and Ecelyo synchronization, or
+  `**BLOCKED**` with the exact unresolved gate
 - Memory update summary if a memory file was provided
+
+The final response must explicitly declare Project, Tactic, Pull request (URL and merged/open/not
+created), Branch, Worktree cleanup, and Task status. Use `N/A — <reason>` when a field does not
+apply. Never end with an ambiguous “done,” “implemented,” or “PR pending” status.
 
 ## Automation Prompt Contract
 

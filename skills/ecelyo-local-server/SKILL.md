@@ -1,7 +1,7 @@
 ---
 name: ecelyo-local-server
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Ecelyo's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state — repository `tasks/` files are a deprecated legacy workflow (see `task-processor`/`task-executor`) and must not be created as part of normal Ecelyo-backed task work.
+description: Connect to Ecelyo's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state — repository `tasks/` files are a deprecated legacy workflow (see `task-processor` and the optional legacy mode of `task-executor`) and must not be created as part of normal Ecelyo-backed task work.
 ---
 
 # Ecelyo Local Server
@@ -12,8 +12,8 @@ Use this skill when Codex needs to communicate with Ecelyo's local HTTP server o
 a repository `tasks/` directory (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`,
 or any similarly-named lifecycle folder) as part of normal task tracking — not to "mirror" Ecelyo
 state, not as a progress note, and not because a repository's own `AGENTS.md`/`CLAUDE.md` describes
-a `tasks/` workflow. That file-based workflow is legacy (`task-processor`, `task-executor`) and is
-off by default. If a repository's own instructions still describe `tasks/` as the tracked record,
+a `tasks/` workflow. That file-based workflow is legacy (`task-processor` and the optional legacy
+mode of `task-executor`) and is off by default. If a repository's own instructions still describe `tasks/` as the tracked record,
 treat that as stale documentation, not authorization — flag the conflict to the user instead of
 following it silently. Only touch `tasks/` files when the user explicitly asks for that legacy
 workflow in the current conversation.
@@ -146,9 +146,9 @@ Use this skill when intake should be informed by the currently open app state.
 
 ### With `task-executor`
 
-`task-executor` is a legacy, off-by-default skill for repository `tasks/` files. This pairing name
-is historical — when Ecelyo is in scope, use only the Ecelyo state transitions below and do not create,
-move, or edit `tasks/` files, unless the user has explicitly asked for the legacy file workflow.
+`task-executor` is the canonical single-task and ordered-batch execution skill. When Ecelyo is in
+scope, use its live task state and do not create, move, or edit `tasks/` files unless the user has
+explicitly asked for the legacy file workflow.
 
 Use this pairing when executing an existing task and the app should reflect current progress.
 
