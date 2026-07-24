@@ -33,6 +33,17 @@ If the developer does not name a mode, use **Xcode manual**.
 - Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
 - Keep release preparation proportional to the selected mode. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. In Xcode manual mode, run the narrowest requested local build/archive validation when Xcode is available; do not upload or access App Store Connect. In Xcode Cloud mode, run only fast repository and metadata contract checks before pushing and let Xcode Cloud perform the normal release validation.
 
+## 0. Commit Release Notes on Main Before Starting the Release
+
+Perform this phase on the primary default-branch checkout before creating or refreshing the persistent release worktree or `release-candidate` branch.
+
+1. Require a clean, up-to-date default branch and fetch tags. Save the current `release_notes` tag (or the documented first-release fallback) as the comparison start before changing it.
+2. Read only the commits in that range that describe user-visible work. Filter out technical-only changes, group the remaining changes, and rewrite them as clear customer-facing release notes.
+3. Remove stale release-note entries from the repository's existing release-note destination and `Localizable.xcstrings` or equivalent catalog when present. Create the new internal release-note list in the repository-defined destination. If the destination cannot be inferred safely, stop before editing.
+4. Select the semantic version for this release using the release contract and carry it into the candidate phase. Do not update the Xcode marketing version, build number, App Store metadata, or beta metadata on main.
+5. Commit only the release-note changes on the default branch, using `Prepare <version> release notes` unless repository instructions require another style. Move the single `release_notes` tag to this commit and push both the default branch and that marker tag.
+6. Treat this note commit as the committed release baseline. Create or refresh the persistent release worktree and `release-candidate` from the updated default branch. Do not regenerate the same notes from the moved marker; only append candidate-specific user-visible changes later on `release-candidate`.
+
 ## 1. Establish a Safe Release Range
 
 1. Read the repository instructions and any supplied automation memory before editing.
@@ -41,13 +52,13 @@ If the developer does not name a mode, use **Xcode manual**.
 4. Fetch `origin` and tags.
 5. Inspect the remote history for `release-candidate`. If a pull request currently uses it as the head branch, do not merge that pull request; close it before continuing so repository automation cannot delete the persistent branch.
 6. Create the persistent sibling release worktree only when it does not already exist, then reuse it for every release. In that worktree, recreate local `release-candidate` from the updated `origin` default branch. If `release-candidate` is checked out in an obsolete release worktree, require it to be clean, remove that worktree, and attach the branch at the persistent path without losing its commit. Reusing this one worktree and branch is intentional; replace the remote branch later with `--force-with-lease`, never an unchecked force push.
-7. Determine the comparison start from the sole `release_notes` tag. If it does not exist, use the latest semantic-version tag; if neither exists, use the initial commit and report that fallback.
-8. Read only the commits and changed files needed to understand the range. Exclude technical-only maintenance from customer notes unless the developer requests it.
+7. Use the release-note comparison range and version captured in Phase 0. The moved `release_notes` tag now marks the committed note baseline; do not treat it as an empty release and do not discard the pre-generated notes.
+8. Read only candidate-specific commits and changed files needed to identify additions after the Phase 0 note commit. Exclude technical-only maintenance from any note additions unless the developer requests it.
 
 ## 2. Select Versions and Write Notes
 
-1. Group user-visible changes and rewrite them in customer language.
-2. Select the next marketing version using the release contract and the current Xcode marketing version. Cross-check semantic-version tags and stop on unexplained version drift.
+1. Preserve the Phase 0 release-note list and selected version. If candidate-specific commits add user-visible work, append only those changes in customer language.
+2. Apply the carried version to the current Xcode marketing version. Recalculate only when candidate-specific changes materially change the release scope; cross-check semantic-version tags and stop on unexplained version drift.
 3. Inspect the effective Xcode build-number convention (`CURRENT_PROJECT_VERSION` or its repository-defined equivalent) for every released app target.
    - For a conventional committed number, require numeric values, choose the highest value plus one, and update all relevant configurations consistently. Prefer Apple Generic Versioning; otherwise update the authoritative build setting rather than a generated plist.
    - For a repository-defined fake sentinel plus build-time timestamp, require the sentinel to remain unchanged, verify every released app target uses the version-controlled generator, and do not write the generated value into source files.
@@ -107,7 +118,7 @@ If the developer does not name a mode, use **Xcode manual**.
 Report:
 
 - target platform and build result
-- release comparison range
+- release-note comparison range and the main-branch note commit
 - marketing version, committed build-number convention, and embedded artifact build number or numbers
 - App Store and internal release-note destinations
 - release commit hash
