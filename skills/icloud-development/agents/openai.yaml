@@ -1,0 +1,4 @@
+interface:
+  display_name: "iCloud Development"
+  short_description: "Build and diagnose safe CloudKit synchronization"
+  default_prompt: "Use $icloud-development to design, validate, or diagnose this iCloud and CloudKit synchronization workflow."

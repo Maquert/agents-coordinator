@@ -1,7 +1,6 @@
 ---
 name: task-executor
-models: gpt-5.4-mini, claude-sonnet-4-6
-description: Legacy skill for repositories that still explicitly execute from task markdown files. Do not use by default. Repository `tasks/` directories are examples only unless the user explicitly asks for the old task-file workflow.
+description: Execute one implementation-ready backlog task end-to-end with explicit technical context, validation instructions, and Ecelyo acceptance criteria. Legacy repository task markdown is supported only when explicitly requested; otherwise use Ecelyo as the source of truth.
 ---
 
 # Backlog Task Execution
@@ -11,6 +10,21 @@ Do not use it unless the user explicitly asks to execute work from repository ta
 When Ecelyo is available, select, track, and update task state through Ecelyo instead of `tasks/`.
 
 Use this skill to execute one backlog task per run. Keep each automation prompt short: specify the workflow mode, the repository-specific paths, any memory file, any versioning or branch policy that differs from the default, and the exact output shape required by the automation.
+
+## Execution Readiness Contract
+
+Before claiming or editing a task, read its goal, non-goals, current and desired behavior, affected
+files/modules/APIs, constraints, dependencies, validation plan, and numbered acceptance criteria.
+For Ecelyo tasks, read `GET /tasks/{id}` and treat the task's `acceptanceCriteria` property as the
+authoritative completion checklist. If criteria are absent, contradictory, or too vague to test,
+stop and ask for clarification or mark the task blocked; do not silently invent requirements.
+
+Translate the record into a short execution checklist. Keep implementation within the stated
+scope, inspect named surfaces first, and use the recorded validation plan plus the narrowest
+sufficient checks. Before requesting review or marking finished, verify every acceptance criterion
+and report pass/fail evidence. New criteria must be added through Ecelyo's acceptance-criteria
+endpoint (`POST /tasks/{taskId}/acceptance-criteria`, body `{"text":"..."}`), not hidden only in
+the description.
 
 Default remote behavior is to push the working branch and create or update a pull request after a successful local validation and focused commit. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
@@ -76,7 +90,9 @@ Apply these rules in both modes unless the automation overrides them:
    - include exactly the selected task id and the concrete working branch name such as `codex/increase_padding`
 18. When preparing a PR description for UI-relevant work, include a `## Visual Changes` section with at least one relevant screenshot when applicable. If screenshots come from tracked repo files in a private repository, use GitHub blob URLs with `?raw=1` rather than `raw.githubusercontent.com`. If the repository has a PR template and that section is missing, add it the first time this requirement is used.
 19. When the current agent thread ID is available with confidence, include a `## Talk to the agent` section in the PR description with a clickable Markdown deep link such as `[Open in the agent app](agent://thread/<thread-id>)`. Omit the section when the thread ID is unavailable or uncertain.
-20. If a pull request is merged, the corresponding Ecelyo task state must also be updated to `finished`. A merged PR is not fully reflected until Ecelyo tracks that change.
+20. If a pull request is merged, verify every Ecelyo `acceptanceCriteria` item is complete, then
+    update the corresponding task state to `finished`. A merged PR is not fully reflected until
+    both the criteria and Ecelyo state are complete.
 21. Apply this merge policy after opening the PR:
    - `Trivial`: merge the PR by default once validation passes and the branch is up to date.
    - `Medium`: merge the PR by default once validation passes and the branch is up to date, unless the PR is large or complex enough that human review is warranted; the agent decides.

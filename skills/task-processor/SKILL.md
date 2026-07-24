@@ -1,6 +1,6 @@
 ---
 name: task-processor
-description: Capture raw requests as normalized backlog tasks without implementing them. Always use when the first non-whitespace text in a user prompt is `New task:` (case-insensitive), treating the remainder as task-intake content. Also use when the user explicitly requests backlog intake or the legacy repository task-file workflow. Use Ecelyo as the default task store; only create repository `tasks/` files when the user separately opts into that legacy workflow.
+description: Capture raw requests as implementation-ready backlog tasks without implementing them. Always use when the first non-whitespace text in a user prompt is `New task:` (case-insensitive), treating the remainder as task-intake content. Record technical context, dependencies, validation instructions, and explicit acceptance criteria. Also use when the user explicitly requests backlog intake or the legacy repository task-file workflow. Use Ecelyo as the default task store; only create repository `tasks/` files when the user separately opts into that legacy workflow.
 ---
 
 # Backlog Task Intake
@@ -48,12 +48,34 @@ For a `New task:` prompt or another direct intake request:
 1. Normalize the request into a concise title.
 2. Check Ecelyo for an existing equivalent task before creating a duplicate.
 3. Resolve a coherent existing project and tactic, or ask when either cannot be inferred safely.
-4. Create a Markdown description containing the available goal, constraints, acceptance criteria,
-   dependencies, and attachment context without inventing missing requirements.
-5. Set an explicit priority, using the active system's fallback when the user does not provide one.
-6. Set an explicit `agentRole` appropriate to the task.
-7. Create the task in `pending` state and report its id, project, tactic, priority, and role.
-8. Stop after intake; do not begin execution.
+4. Create a Markdown description containing the available goal, technical context, affected
+   surfaces/files, current and desired behavior, constraints, dependencies, validation plan, and
+   attachment context without inventing missing requirements.
+5. Define explicit, testable acceptance criteria as a numbered list. Store them in Ecelyo's
+   `acceptanceCriteria` property by creating one criterion per item through
+   `POST /tasks/{taskId}/acceptance-criteria` with `{"text":"..."}`; keep the same list in the
+   Markdown description for portability. Do not leave acceptance criteria only as prose.
+6. Set an explicit priority, using the active system's fallback when the user does not provide one.
+7. Set an explicit `agentRole` appropriate to the task.
+8. Create the task in `pending` state and report its id, project, tactic, priority, role, and
+   acceptance-criteria count.
+9. Stop after intake; do not begin execution.
+
+### Required technical task contract
+
+Every created task must make these fields discoverable, using `Unknown` or `TBD` only when the
+source genuinely does not provide the information:
+
+- Goal and non-goals
+- Current behavior and desired behavior
+- Affected files, modules, APIs, or UI surfaces
+- Implementation constraints and compatibility requirements
+- Dependencies, prerequisites, and ordering
+- Validation commands, fixtures, or observable checks
+- Numbered, testable acceptance criteria (also in Ecelyo's `acceptanceCriteria` property)
+
+If a missing detail would materially change the implementation or validation, ask for clarification
+instead of guessing or creating an ambiguous task.
 
 ## Operating Rules
 
@@ -142,7 +164,10 @@ If the required inputs are missing, stop and explain the setup using the referen
 9. The slug must be lowercase, use underscores between words, and omit any agent prefix. Example: `increase_padding`.
 10. Ensure the derived branch slug is unique among existing task records and any duplicate-check source. If needed, append a short deterministic suffix.
 11. For each non-duplicate item, create a new task record file in the appropriate top-level lifecycle directory (e.g., `tasks/pending/{task_id}-{task_slug}.md`) that follows repository task conventions and stores the assigned branch name, `project`, and `tactic` fields.
-12. Include a short summary, acceptance criteria derived from the source item, constraints, obvious dependencies, and an explicit `priority` field.
+12. Include a technical summary, current/desired behavior, affected surfaces, constraints,
+    dependencies, validation plan, numbered acceptance criteria derived from the source item, and
+    an explicit `priority` field. When synchronized to Ecelyo, also create each criterion in the
+    task's `acceptanceCriteria` property via the acceptance-criteria endpoint.
 13. Use repository-defined task priorities when they exist. If the caller does not provide a priority and the repository has no stronger rule, default new tasks to `Trivial`.
 14. Build the tactic's task relationships while creating the records: prefer a sequence, use a `depends on:` field (or the active task system's equivalent) for each real prerequisite, keep at most three parallel branches, and leave only the first and final tasks as normal graph endpoints.
 15. **Image Assets**: When image files are provided in the automation prompt, create `tasks/task_assets/` if needed. For each image file, move or copy it to `tasks/task_assets/{task_id}_{task_slug}_{sequence}.png` where `sequence` is 0 for the first image, 1 for the second, etc. Update the task file's `Notes` section to reference the asset, e.g., "See tasks/task_assets/{task_id}_{task_slug}_{sequence}.png for reference screenshot."

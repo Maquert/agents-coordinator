@@ -21,6 +21,12 @@ When their instructions conflict, preserve these batch invariants:
 2. Do not start the next task until the current task is merged and marked `finished`.
 3. Stop the batch when the current task cannot be completed, validated, or merged.
 
+Every task is gated on an implementation-ready record. Before claiming it, confirm the task has
+technical context (current/desired behavior, affected surfaces, constraints, dependencies, and a
+validation plan) plus numbered acceptance criteria. In Ecelyo, the criteria are the task's
+`acceptanceCriteria` property; the executor must check every item, not infer completion from a
+green build alone. If the record is missing or ambiguous, stop at that task and report the gap.
+
 ## Resolve The Batch
 
 Require a repository path and either:
@@ -74,7 +80,7 @@ Apply the `task-executor` branch rules:
 
 ### 3. Execute And Validate
 
-Implement only the current task. Use the narrowest sufficient validation first, then run every
+Implement only the current task. Follow its technical context and validation plan. Use the narrowest sufficient validation first, then run every
 repository-required merge check before pushing. If the repository provides
 `./scripts/xcode/run_unit_tests_ci.sh` for the applicable Xcode project, run it before pushing.
 
@@ -132,6 +138,7 @@ Report tasks in execution order with:
 - task id and title;
 - concrete branch;
 - validation result;
+- acceptance-criteria result for every criterion;
 - commit and push status;
 - PR URL and merge status; and
 - final Ecelyo state.
