@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Create a reusable setup package for a custom ChatGPT GPT/agent from instructions, skills, knowledge files, and desired behavior. Use when the user asks to create, configure, export, package, or document a custom ChatGPT agent/GPT, or asks for files and instructions to build one manually in ChatGPT.
 ---
 
-# Create ChatGPT Agent
+# ChatGPT Agent Creator
 
 Use this skill to produce a generic custom ChatGPT GPT setup package. The package should be usable in the ChatGPT GPT editor and should separate behavior instructions from reference knowledge.
 

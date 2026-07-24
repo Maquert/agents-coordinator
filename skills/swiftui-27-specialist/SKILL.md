@@ -11,7 +11,7 @@ For any compile error in a SwiftUI view that uses `@State` after an SDK update, 
 
 Use these references to understand what changed in SwiftUI for the 2027 OS releases. Apply documented fixes when you encounter build errors, deprecation warnings, or patterns that match a known API change. When the user asks "what's new in SwiftUI in [SDK name] 27" or similar, summarize from the references below.
 
-# SDK 27.0
+# SwiftUI 27 Specialist
 
 - `references/reorderable.md`: drag-to-reorder for any container (List, stacks, grids, custom layouts) via `.reorderable()` on `ForEach` plus `.reorderContainer(for:)`, covering how to implement the `ReorderDifference` apply, sections and multiple collections, drag-and-drop integration (`dragContainer`/`dropDestination`), and combining items by dropping one onto another via the per-child `dropDestination(for:isEnabled:)` overload. Available on iOS/macOS/watchOS/visionOS 27; tvOS unavailable.
 - `references/async-image.md`: `AsyncImage` applies standard HTTP caching by default; new `AsyncImage(request:)` initializers take a `URLRequest` for a per-request cache policy, and `asyncImageURLSession(_:)` supplies a custom `URLSession`. Available on iOS/macOS/watchOS/tvOS/visionOS 27.

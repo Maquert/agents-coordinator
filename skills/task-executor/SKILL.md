@@ -3,7 +3,7 @@ name: task-executor
 description: Execute one implementation-ready backlog task end-to-end with explicit technical context, validation instructions, and Ecelyo acceptance criteria. Legacy repository task markdown is supported only when explicitly requested; otherwise use Ecelyo as the source of truth.
 ---
 
-# Backlog Task Execution
+# Task Executor
 
 This is a legacy skill.
 Do not use it unless the user explicitly asks to execute work from repository task markdown files.

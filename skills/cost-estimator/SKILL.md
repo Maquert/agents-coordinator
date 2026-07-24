@@ -4,7 +4,7 @@ models: gpt-5.4-nano, claude-haiku-4-5-20251001
 description: Estimate request cost in USD from estimated token usage, inferred model, and known model pricing. Use whenever final response metadata includes estimated tokens, estimated cost, request expense, when the user asks to "Report usage" or otherwise requests a usage report, and when asking whether to append request usage to ~/.codex/usage.md.
 ---
 
-# Cost Estimation
+# Cost Estimator
 
 Use this skill whenever reporting final response metadata with token and cost estimates, whenever the user asks to "Report usage" or requests a usage report, and whenever asking whether to record usage in `~/.codex/usage.md`.
 

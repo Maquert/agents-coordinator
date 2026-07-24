@@ -9,7 +9,7 @@ Review SwiftUI code following these references to help you follow best practices
 
 When asked to provide general guidance about performance or best practices on a large codebase, the agent should scan the project to identify different smaller areas of the code and suggest focus areas to the user for evaluation one at a time. Provide the user with multiple choices if applicable. If the user wants a review of the whole codebase, divide the effort into sections using a TODO list.
 
-# References
+# SwiftUI Specialist
 - `references/structure.md`: Use when building any view with multiple sections (header/list/footer, content + counter, etc.) or reviewing view hierarchy. Covers when to factor sections into separate `View` structs vs. computed properties, init costs, and the single-child `Group` anti-pattern.
 - `references/dataflow.md`: Use when writing or reviewing how to correctly pass data to and store data in views — `@State`, `@Binding`, or model objects that provide data to views (prefer `@Observable` over `ObservableObject`). Covers narrowing value-type inputs to the fields a view actually reads, `@MainActor` and `Equatable` requirements on `@Observable` models, per-property observation tracking and its granularity traps, passing collection elements to row views, isolating `.onChange` side effects, and KeyPath vs. closure bindings.
 - `references/environment.md`: Use when code reads or writes `@Environment`, `EnvironmentKey`, `EnvironmentValues`, or `FocusedValue`. Covers performance pitfalls with closures and high-frequency updates.

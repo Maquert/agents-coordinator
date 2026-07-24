@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Use when git work is blocked by sandbox permissions, worktree metadata writes, index locks, non-interactive GPG signing, patch transfer between worktrees, or push/PR flows that fail because the current workspace cannot mutate the required git metadata.
 ---
 
-# Git Sandbox And Worktree Troubleshooting
+# Worktree Troubleshooter
 
 Use this skill when a task is blocked by git operations that fail because the current workspace cannot write the git metadata it needs.
 

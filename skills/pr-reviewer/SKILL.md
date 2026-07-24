@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Review GitHub pull request feedback and address requested code changes. Use when Codex needs to find the active PR for the current branch, read PR review comments with file and line context, decide whether reviewer feedback requires a code change, apply fixes, validate them, and commit and push the result back to the PR branch. Trigger on requests such as "review the PR comments" and similar prompts about addressing pull request review feedback.
 ---
 
-# GitHub Review
+# PR Reviewer
 
 Use this skill to turn PR feedback into repository changes. Delegate GitHub connectivity, PR lookup, and structured comment retrieval to `$gh-client`; keep this skill focused on review analysis, code edits, validation, and branch updates.
 

@@ -11,7 +11,7 @@ effort: high
 
 When helping with `-fbounds-safety` adoption or code changes, ask clarifying questions about the user's codebase and goals before suggesting changes. For complex tasks involving multiple files or non-trivial annotation decisions, use plan mode to propose an approach before implementing.
 
-# `-fbounds-safety` Language Extension
+# C Bounds Safety Checker
 
 `-fbounds-safety` is a C language extension that prevents out-of-bounds memory access by enforcing bounds safety at the language level. It inserts automatic bounds checks at runtime, rejects unsafe pointer operations at compile time, and requires programmers to provide bounds annotations so the compiler can guarantee safety. Out-of-bounds accesses become deterministic traps instead of exploitable vulnerabilities.
 

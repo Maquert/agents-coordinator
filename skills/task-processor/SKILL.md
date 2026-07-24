@@ -3,7 +3,7 @@ name: task-processor
 description: Capture raw requests as implementation-ready backlog tasks without implementing them. Always use when the first non-whitespace text in a user prompt is `New task:` (case-insensitive), treating the remainder as task-intake content. Record technical context, dependencies, validation instructions, and explicit acceptance criteria. Also use when the user explicitly requests backlog intake or the legacy repository task-file workflow. Use Ecelyo as the default task store; only create repository `tasks/` files when the user separately opts into that legacy workflow.
 ---
 
-# Backlog Task Intake
+# Task Processor
 
 Use this skill for task intake only. Do not implement the captured task in the same turn unless the
 user explicitly asks for both intake and implementation.

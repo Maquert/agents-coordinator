@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Assist agents testing Xcode projects with deterministic destinations, parallel macOS and iPhone phases, and a required per-project scripts/tests_config.sh contract. Use when working on xcodebuild test commands, simulator selection, xcresult capture, or cross-platform Apple test orchestration.
 ---
 
-# Xcode Test
+# Xcode Test Runner
 
 Use this skill to help agents test Xcode projects consistently. Load `xcode-terminal` and `xcsift` alongside this skill whenever you run Swift or Xcode tests.
 

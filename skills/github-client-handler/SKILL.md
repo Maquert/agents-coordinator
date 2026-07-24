@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Connect to GitHub from a local git repository by using the GitHub CLI (`gh`) and git. Use when Codex needs to verify GitHub access, identify the repository and current branch, locate the active pull request, fetch structured PR metadata, retrieve review threads or line comments with file and line information, or perform follow-up PR operations such as pushing branch updates or resolving clearly addressed review threads.
 ---
 
-# GitHub Client
+# GitHub Client Handler
 
 Use this skill as the GitHub access layer for repository work. Keep GitHub transport, authentication, PR discovery, and structured comment retrieval here so higher-level skills can stay focused on repository logic.
 

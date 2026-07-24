@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-haiku-4-5-20251001
 description: Use xcsift for all Swift and Xcode build commands. Pipe xcodebuild build, xcodebuild test, swift build, swift test through xcsift for structured TOON output with compile errors, warnings, test failures, code coverage, slow tests, and build timing. Essential for parsing Xcode build output, diagnosing compile errors, analyzing test results, and measuring code coverage in any Swift or Xcode project.
 ---
 
-# xcsift - Xcode Build Output Formatter
+# Xcode Output Parser
 
 xcsift parses and formats xcodebuild/SPM output into token-efficient TOON format optimized for LLM consumption. It extracts compile errors, warnings, test failures, code coverage, and build timing from verbose Xcode output.
 

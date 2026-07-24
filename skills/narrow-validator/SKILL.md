@@ -4,7 +4,7 @@ models: gpt-5.4-nano, claude-haiku-4-5-20251001
 description: Choose the smallest sufficient validation scope for a code change and avoid broad, redundant, or state-conflicting test runs. Use when Codex needs to decide which tests, screenshot contracts, linters, builds, or wrappers to run first, especially in recurring automations, UI work, Xcode workflows, or any repository with expensive broad validation scripts.
 ---
 
-# Narrow Validation First
+# Narrow Validator
 
 Use this skill to reduce validation cost without weakening confidence. Start from the changed surface, find the narrowest stable contract that covers it, and widen only when the focused path is missing or proves insufficient.
 

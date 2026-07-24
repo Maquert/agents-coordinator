@@ -11,7 +11,7 @@ description: >
   scroll-related questions.
 ---
 
-# SwiftUI ScrollView — Tips & Tricks
+# SwiftUI ScrollView Specialist
 
 ## The Core Pattern: Magnetic Scrolling
 

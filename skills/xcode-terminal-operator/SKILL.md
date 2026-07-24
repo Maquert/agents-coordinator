@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Build, test, archive, diagnose, and maintain Xcode projects from the terminal for AI-agent workflows. Use when Codex works on Xcode, iOS, macOS, watchOS, tvOS, visionOS, Swift Package, `.xcodeproj`, `.xcworkspace`, `.pbxproj`, scheme, simulator, `xcodebuild`, `xcrun`, `simctl`, `xcresulttool`, or Xcode CI/build/test/archive tasks.
 ---
 
-# Xcode Terminal
+# Xcode Terminal Operator
 
 ## Required Companion Skill
 

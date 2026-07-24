@@ -4,7 +4,7 @@ models: gpt-5.4-nano, claude-haiku-4-5-20251001
 description: Clean up software repository branches and worktrees safely and apply lightweight repository hygiene. Use when Codex needs to delete merged branches, prune stale worktrees, protect active task branches from deletion, or run narrow file hygiene such as removing stale localization markers, with optional validation afterwards.
 ---
 
-# Repository Cleanup
+# Repository Cleaner
 
 Use this skill for low-risk branch and workspace hygiene. Keep each automation prompt short: specify the main integration branch, the protected-branch sources, any memory file, any extra file hygiene, and the exact output shape required by the automation.
 

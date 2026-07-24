@@ -6,7 +6,7 @@ metadata:
   short-description: Shrink Git repositories safely
 ---
 
-# Git Repository Compaction
+# Git Repo Compactor
 
 Use this skill to reduce repository size without losing useful history or surprising collaborators. Treat history rewriting as destructive: inspect first, back up or use a fresh clone, explain impact, and get explicit user confirmation before force-pushing or deleting original refs.
 

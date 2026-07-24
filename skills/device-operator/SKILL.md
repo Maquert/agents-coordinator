@@ -3,7 +3,7 @@ name: device-operator
 models: gpt-5.4-mini, claude-sonnet-4-6
 description: "Verify iOS app behavior on device or simulator via screenshots, UI hierarchy, and touch interactions."
 ---
-# Device Interaction
+# Device Operator
 
 TRIGGER when: user asks to verify/test/check if the app works on device, after implementing a UI-affecting feature that needs device verification, user says "does it work", "test this", "check on device", user reports UI doesn't work as expected, need to debug touch/interaction issues.
 DO NOT TRIGGER when: user asks about unit tests only, build-only requests without device testing, code review without device testing, simulator configuration questions, changes that don't affect UI (e.g. comments, refactors, non-UI logic).

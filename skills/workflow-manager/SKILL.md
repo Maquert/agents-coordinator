@@ -4,7 +4,7 @@ models: gpt-5.4-mini, claude-sonnet-4-6
 description: Initialize and maintain lightweight project-governance files for software projects. Use when creating or updating AGENTS.md role instructions, setting default quality expectations, initializing a project git repository, creating versioned PRDs such as specifications/v1/prd.md, and maintaining governance files. Repository `tasks/` directories are legacy examples only unless the user explicitly asks for that workflow.
 ---
 
-# Software Project Workflow
+# Workflow Manager
 
 ## Overview
 
