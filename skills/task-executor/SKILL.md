@@ -62,7 +62,8 @@ task as a complete execution and do not pre-claim or parallelize the batch.
 3. Select only the next task. For priority selection, refresh `GET /tasks/priority` after each
    completed task; never snapshot or reserve the whole batch.
 4. Apply the pending or WIP execution mode below to the selected task, including its lock,
-   technical readiness contract, validation, PR, merge, cleanup, and Ecelyo synchronization.
+   technical readiness contract, validation, PR comment gate, merge, cleanup, and Ecelyo
+   synchronization.
 5. Start the next task only after the current task's PR is merged, its worktree and associated
    branches are deleted, and Ecelyo reports `finished`.
 6. Stop at the current task if it is unavailable, ambiguous, blocked, fails validation, cannot be
@@ -77,7 +78,7 @@ Batch invariants:
 
 Batch final output must report, for every task, its project and tactic (name + id), task id/title,
 branch, worktree cleanup, validation and acceptance-criteria results, commit/push status, PR URL and
-merge state, Ecelyo state, and an unambiguous `Task Status: **FINISHED**` or
+merge state, PR comment-gate result, Ecelyo state, and an unambiguous `Task Status: **FINISHED**` or
 `Task Status: **BLOCKED**` with the exact blocker in bold.
 
 ## Agent Task-Lock Protocol
@@ -123,12 +124,14 @@ Apply these rules in both modes unless the automation overrides them:
     apply the completion and cleanup gate below before updating the corresponding task state to
     `finished`. A merged PR is not fully reflected until both the criteria and Git cleanup are
     complete.
-21. Apply this merge policy after opening the PR:
+21. Before merging any pull request, apply the PR comment gate below. Do not merge while actionable
+    review comments or unresolved requested changes remain.
+22. Apply this merge policy after opening the PR:
    - `Trivial`: merge the PR by default once validation passes and the branch is up to date.
    - `Medium`: merge the PR by default once validation passes and the branch is up to date, unless the PR is large or complex enough that human review is warranted; the agent decides.
    - `High`: prefer human review, but the agent may merge when the implementation is clearly trivial, low-risk, and unlikely to conflict with other work.
    - `Blocker` or critical work: never merge the PR as the agent; leave it for human review.
-22. When deciding whether a `Medium` or `High` task should stay open for review, weigh diff size, complexity, architectural impact, destructive behavior, workflow risk, and conflict risk with parallel work.
+23. When deciding whether a `Medium` or `High` task should stay open for review, weigh diff size, complexity, architectural impact, destructive behavior, workflow risk, and conflict risk with parallel work.
 
 ## Pull Request Workflow Rule
 
@@ -141,6 +144,26 @@ Apply these rules in both modes unless the automation overrides them:
 - Whether the agent merges the PR or leaves it for human review depends on the priority-based merge policy above.
 - Do not create a new PR for follow-up fixes, refactoring based on review feedback, or addressing reviewer comments. Instead, update the original branch and push to it, which automatically updates the existing PR.
 - This maintains a clean 1:1 relationship between tasks and pull requests, making the project history clear and reviewable.
+
+## Pre-merge PR Comment Gate
+
+Before merging the task PR, load `github-cli-operator` and `pr-reviewer`, then inspect the current
+PR reviews, inline comments, review threads, and general discussion. Do not rely only on the PR
+approval state or an earlier snapshot of comments.
+
+For every comment or requested change:
+
+1. Classify it as actionable, already satisfied, stale, or intentionally not applicable.
+2. Address every actionable comment on the original task branch. Keep all fixes in the same PR;
+   never create a follow-up PR for review feedback.
+3. Run the narrowest relevant validation after the fixes.
+4. Commit the fixes with a concise verb-led message and push them to the PR branch.
+5. Re-fetch the PR comments after pushing and verify the addressed comments are resolved or have a
+   clear maintainer response. A comment is not addressed merely because code was changed locally.
+
+If a comment cannot be addressed, responded to, or verified as stale, stop and keep the task in its
+active or blocked state. Do not merge. The final task closeout must report the PR comment-gate
+result, including any comments left unchanged and why.
 
 ## Completion And Cleanup Gate
 
