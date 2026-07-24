@@ -104,14 +104,17 @@ Do not count an open pull request as completed. Verify that the pull request is 
 
 ### 5. Close Before Continuing
 
-Only after merge succeeds:
+Only after merge succeeds, apply the `task-executor` completion and cleanup gate:
 
-1. update the Ecelyo task to `finished`;
+1. confirm acceptance criteria and the task worktree are clean;
 2. complete any explicitly requested legacy task-file lifecycle update inside the task worktree;
-3. remove the task lock;
-4. confirm no uncommitted task changes remain;
-5. refresh the integration branch from its remote; and
-6. report the merged PR before selecting the next task.
+3. remove the dedicated task worktree from a different checkout;
+4. delete the associated local branch and remote branch (unless already removed or protected);
+5. verify the worktree and branch refs are gone;
+6. update the Ecelyo task to `finished`;
+7. remove the task lock;
+8. refresh the integration branch from its remote; and
+9. report the merged PR and cleanup before selecting the next task.
 
 The next iteration must start from the integration branch containing the prior task's merge.
 
@@ -129,7 +132,8 @@ When stopping after changes:
 - report the exact failed gate and PR URL when one exists; and
 - report how many tasks merged before the stop.
 
-Never mark a task `finished`, delete its lock, or count it toward the batch until its PR is merged.
+Never mark a task `finished`, delete its lock, or count it toward the batch until its PR is merged
+and its worktree and associated branches are deleted.
 
 ## Final Report
 
