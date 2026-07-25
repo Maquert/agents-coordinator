@@ -49,6 +49,17 @@
   `| --- | --- |`
   `| Skill | No skill used. |`
 
+## Mandatory Task Identification Before Execution
+
+Right before an agent starts execution, worktree creation, or coding for any task, it MUST explicitly present a Markdown table identifying the selected task:
+
+| Field | Value |
+| --- | --- |
+| ID | Task ID |
+| Name | Task Title |
+| Project | Project Name (ID) |
+| Tactic | Tactic Name (ID) |
+
 ## Mandatory Task Execution Closeout
 
 When an agent selects, executes, advances, or batch-processes a task, it must close the task

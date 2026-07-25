@@ -33,6 +33,7 @@ The point is to keep tactics coherent, move work visibly, and finish things.
 10. Task state must be updated promptly when reality changes so the system stays trustworthy.
 11. Every Ecelyo task must have an explicit `agentRole`; do not leave task ownership semantics implicit.
 12. Archived projects and archived tactics must never receive new tasks. Before creating or reassigning a task, verify that both destination containers are not archived. Do not silently reactivate an archived project or tactic to make an assignment fit.
+13. Right before beginning execution, worktree creation, or coding for any task, the agent MUST explicitly present a Markdown table identifying the task (ID, Name/Title, Project Name/ID, Tactic Name/ID) to the user.
 
 ## Work Selection
 

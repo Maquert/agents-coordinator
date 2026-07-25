@@ -26,6 +26,17 @@ and report pass/fail evidence. New criteria must be added through Ecelyo's accep
 endpoint (`POST /tasks/{taskId}/acceptance-criteria`, body `{"text":"..."}`), not hidden only in
 the description.
 
+### Task Identification Table Requirement
+
+Right before beginning execution, worktree creation, or coding for any task, the agent MUST explicitly present a Markdown table identifying the selected task:
+
+| Field | Value |
+| --- | --- |
+| ID | Task ID |
+| Name | Task Title |
+| Project | Project Name (ID) |
+| Tactic | Tactic Name (ID) |
+
 Default remote behavior is to push the working branch and create or update a pull request after a successful local validation and focused commit. Automations should mention remote-action details only when they need to opt out, change the PR target or metadata, or add extra remote steps.
 
 Task records must carry an assigned branch name from intake onward. The task file stores the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent starts the task, it should create or use the concrete git branch `<agent>/<branch>` using the **actual agent identity running the task**, such as `claude/increase_padding` for Claude or `codex/increase_padding` for Codex.
