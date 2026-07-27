@@ -19,6 +19,25 @@ Ecelyo is a completion-first task system.
 The point is not to accumulate tasks in progress.
 The point is to keep tactics coherent, move work visibly, and finish things.
 
+## Foundational Model
+
+Ecelyo organises work as:
+
+```text
+System → Project → Tactic → Task
+```
+
+- A **system** represents the deliverable or product being built.
+- A **project** represents a responsibility domain within that system. It may align with a team, but it is not defined by team membership.
+- A **tactic** represents one bounded strategy with one goal and one coherent end task.
+- A **task** represents an executable action within a tactic.
+
+Every element has exactly one parent: a task belongs to one tactic, a tactic to one project, and a project to one system. This restriction is intentional. Ecelyo prefers explicit structure over unlimited flexibility because a narrower model reduces cognitive load, ambiguity, and coordination cost.
+
+Ideas may originate anywhere and be captured at any time, but capture and execution are different processes. Execution is completion-first: existing work should be finished before new work is opened unless an explicit priority decision changes the plan.
+
+Execution should emerge from the workflow rather than repeated decisions during execution. Tactics should remain small enough to reach closure and renew the system's capacity to absorb new work. Tasks form a directed flow: sequential execution is the default, while parallelism appears only when the task graph explicitly branches into independent child tasks.
+
 ## Mandatory Rules
 
 1. Ecelyo, meaning the Ecelyo system and its board wherever it is surfaced, is the **sole** source of truth for tracked work. Repository `tasks/` files (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`) are a deprecated legacy workflow, not a parallel or backup record. Do not create, move, or edit `tasks/` files as part of Ecelyo-backed work — not to mirror state, not as a progress note — even if a repository's own `AGENTS.md`/`CLAUDE.md` describes a `tasks/` system as "the tracked project record." Treat that as stale, pre-Ecelyo documentation and flag the conflict to the user rather than following it. Only touch `tasks/` files when the user explicitly asks for that legacy workflow in the current conversation.
