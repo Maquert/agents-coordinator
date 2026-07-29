@@ -14,17 +14,19 @@ Use this skill to execute one backlog task per run. Keep each automation prompt 
 ## Execution Readiness Contract
 
 Before claiming or editing a task, read its goal, non-goals, current and desired behavior, affected
-files/modules/APIs, constraints, dependencies, validation plan, and numbered acceptance criteria.
-For Ecelyo tasks, read `GET /tasks/{id}` and treat the task's `acceptanceCriteria` property as the
-authoritative completion checklist. If criteria are absent, contradictory, or too vague to test,
-stop and ask for clarification or mark the task blocked; do not silently invent requirements.
+files/modules/APIs, constraints, dependencies, validation plan, and any existing acceptance
+criteria. For Ecelyo tasks, read `GET /tasks/{id}` and use its `acceptanceCriteria` property as the
+completion checklist when present. Empty or underspecified acceptance criteria are not a reason to
+stop: analyze the task, derive a small set of simple, testable criteria, and record them in Ecelyo
+before implementation.
 
 Translate the record into a short execution checklist. Keep implementation within the stated
 scope, inspect named surfaces first, and use the recorded validation plan plus the narrowest
 sufficient checks. Before requesting review or marking finished, verify every acceptance criterion
-and report pass/fail evidence. New criteria must be added through Ecelyo's acceptance-criteria
-endpoint (`POST /tasks/{taskId}/acceptance-criteria`, body `{"text":"..."}`), not hidden only in
-the description.
+and report pass/fail evidence. Criteria created or refined by the executor must be added through
+Ecelyo's acceptance-criteria endpoint (`POST /tasks/{taskId}/acceptance-criteria`, body
+`{"text":"..."}`), not hidden only in the description, and the final report must tell the user
+which criteria were created or changed.
 
 ### Task Identification Table Requirement
 
@@ -47,7 +49,14 @@ Ecelyo task ID in square brackets. For example, task
 `[E295A5A6E4D1]`. Apply this rule when creating a new PR and when updating an existing task PR;
 do not use the full UUID or an unrelated issue-number format instead.
 
-Task records must carry an assigned branch name from intake onward. The task file stores the canonical branch slug without an agent prefix, for example `branch: increase_padding`. When an agent starts the task, it should create or use the concrete git branch `<agent>/<branch>` using the **actual agent identity running the task**, such as `claude/increase_padding` for Claude or `codex/increase_padding` for Codex.
+Task records should carry an assigned branch name from intake onward. If the branch field is empty or
+missing, the executor is authorized to derive a canonical lowercase underscore slug from the task
+title, persist that slug to the task record when the active task system supports it, and continue.
+The task file stores the canonical branch slug without an agent prefix, for example
+`branch: increase_padding`. When an agent starts the task, it should create or use the concrete git
+branch `<agent>/<branch>` using the **actual agent identity running the task**, such as
+`claude/increase_padding` for Claude or `codex/increase_padding` for Codex. A missing branch is an
+intake defect to repair, not an execution blocker.
 
 If pull requests, labels, comments, branch names, worktree locks, or generated workflow text mention an agent identity, that identity must also match the **actual executing agent**. Never stamp `claude` on work performed by Codex, and never stamp `codex` on work performed by Claude, even if an older example, task note, or automation prompt used the wrong agent name.
 
@@ -290,13 +299,15 @@ Execution pattern:
    - Task status is `pending` (or the repository’s equivalent).
    - Missing priority is treated with the repository fallback, which is `Trivial` unless overridden.
 8. Resolve branch ownership from the task file:
-   - The task file must already declare the canonical branch slug assigned during intake, such as `increase_padding`.
+   - If the task file does not declare a canonical branch slug, derive and persist one from the task
+     title before creating the worktree; do not stop solely for this missing intake field.
    - The working git branch for this run must be `<actual-agent>/<branch>`, such as `codex/increase_padding` when Codex is executing the task or `claude/increase_padding` when Claude is executing it.
    - **Never execute a task on `main` and never execute it in the repository's main checkout/worktree.** If the current checkout is `main`, stop using it for task work immediately and create or switch to a dedicated task worktree first.
    - **Before creating the branch, ensure the main integration branch is fully up to date**: run `git checkout main && git pull origin main` (or the equivalent) so the new branch starts from the latest remote state. Never create a task branch off a stale local main.
    - **Always work in a dedicated git worktree**, not the main worktree checkout. Create the task worktree with `git worktree add <path> -b <branch>` from an up-to-date main. The main worktree checkout must remain on `main`, clean, and reserved for branch creation, pulls, and merges only.
    - If the current branch does not match that concrete branch name, create or switch to it from the repository’s base branch before doing work.
-   - If the task file does not declare a branch, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
+   - If the task file does not declare a branch, repair the intake defect by deriving a lowercase
+     underscore slug, persist it when supported, and report the generated branch in the closeout.
 9. Move the task detail file from `pending/` to `wip/` (and update its status field) before making implementation changes.
 10. Execute the task end-to-end:
    - Read only the code, docs, scripts, and tests required for the selected task.
@@ -316,6 +327,7 @@ Default output:
 - Task id / branch table
 - Branch used or created (and whether a `⚠️` warning was emitted)
 - Work completed
+- Acceptance criteria created or refined by the executor (or `none`)
 - Validation run
 - Local commit status
 - Push status
@@ -354,7 +366,8 @@ Execution pattern:
 9. The working git branch for this run must be `<actual-agent>/<branch>`, such as `codex/increase_padding` when Codex is executing the task or `claude/increase_padding` when Claude is executing it.
 10. If the current branch does not match that concrete branch name, create or switch to it from the current base state. If no worktree exists yet for the branch, create one from an up-to-date main: `git checkout main && git pull origin main`, then `git worktree add <path> -b <branch>`. The main worktree checkout must remain on `main`.
 11. Never repurpose the main checkout/worktree for WIP task changes, even temporarily. If the agent starts in the main checkout, it must leave that checkout clean and move the task work into a dedicated non-main worktree before editing files, running task validation, or creating commits.
-12. If no branch is declared, stop and warn the user with a leading `⚠️` instead of inventing one during execution.
+12. If no branch is declared, derive a lowercase underscore slug from the task title, persist it
+    when supported, and continue; report that the executor supplied the missing branch.
 13. Read only the code, docs, scripts, and tests needed for that task.
 14. Decide whether the task is already complete, incomplete, or blocked.
 15. If complete and the task's pull request is already merged, apply the completion and cleanup gate
@@ -377,6 +390,7 @@ Default output:
 - Task id / branch table
 - Branch used or created
 - Work completed
+- Acceptance criteria created or refined by the executor (or `none`)
 - Validation run
 - Local commit status
 - Push status
