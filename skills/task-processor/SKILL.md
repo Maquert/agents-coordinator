@@ -61,6 +61,28 @@ For a `New task:` prompt or another direct intake request:
    acceptance-criteria count.
 9. Stop after intake; do not begin execution.
 
+### Acceptance-criteria authority and exceptions
+
+Treat Ecelyo's `acceptanceCriteria` property as the authoritative completion contract for every
+normally captured task. During intake:
+
+- Derive a non-empty, numbered list of explicit, testable criteria from the raw request and its
+  stated validation expectations.
+- Create one Ecelyo acceptance-criteria record per item through the acceptance-criteria endpoint.
+- Keep the Markdown description's numbered list synchronized with the records; do not leave
+  criteria only in prose or only in the description.
+- If the raw request does not contain enough information to derive testable criteria without a
+  material assumption, pause and ask for clarification rather than creating an ambiguous task.
+- Do not silently replace missing criteria with internal interpretations, implementation notes, or
+  a generic "done" statement.
+
+If the user explicitly authorizes proceeding without authoritative acceptance criteria, treat that
+as a deliberate exception to the normal contract. Record the approval in the task description
+under an `## Execution exception` section, leave the Ecelyo property empty only when the user has
+explicitly approved that outcome, and report the exception in the intake result. A downstream
+executor may proceed only when that approval is visible in the current conversation or task notes;
+otherwise it must apply its normal missing-criteria gate and stop or mark the task blocked.
+
 ### Required technical task contract
 
 Every created task must make these fields discoverable, using `Unknown` or `TBD` only when the
