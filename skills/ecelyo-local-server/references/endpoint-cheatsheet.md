@@ -258,6 +258,74 @@ Error responses:
 - `404` — the resolved `projectId` or `tacticId` does not exist
 - `422` — the resolved tactic does not belong to the resolved project, the task is already assigned to that exact project/tactic, or the target project/tactic is archived (closed container)
 
+## Update Or Delete A Tactic
+
+### Rename a tactic or change its objective
+
+```bash
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"New name","objective":"Updated objective"}'
+```
+
+Send either or both fields. `title` cannot be empty after trimming.
+
+### Mark a tactic accomplished
+
+```bash
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"accomplished"}'
+```
+
+`status` is deliberately narrow. `ready`, `in_progress`, and `finished` are
+**derived** from the tactic's own task states and cannot be set directly —
+the server rejects an attempt to write one of them with `422` unless the
+tactic is currently `accomplished`, in which case that request is treated
+as "restore this tactic" (see below) rather than an illegal direct write.
+`accomplished` is the one status a caller can request outright. If the
+tactic still has unresolved (non-finished, non-archived) tasks, the server
+returns `422` with `resolutionRequired` rather than accomplishing it —
+resolve those tasks in the app first (archive, move, or finish them); the
+API does not choose a resolution on the caller's behalf.
+
+### Restore an accomplished tactic
+
+```bash
+curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"ready"}'
+```
+
+Only meaningful when the tactic is currently `accomplished` — the server
+reverts it to its task-derived status. Sending any non-`accomplished`
+status value to a tactic that is *not* currently accomplished is rejected
+with `422`, since that would be overriding a derived value rather than
+requesting a restore.
+
+### Delete a tactic
+
+```bash
+curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>"
+```
+
+**Destructive and cascading.** Deleting a tactic deletes every task nested
+under it. The response body includes `deletedTaskCount` so the caller
+knows the blast radius rather than discovering it later:
+
+```json
+{"success":true,"data":{"deletedTaskCount":5}}
+```
+
+Confirm the tactic is genuinely orphaned or intentionally being retired
+before calling this — there is no undo. Prefer the app's own delete
+confirmation when a human is available to review it.
+
+Error responses (PATCH and DELETE):
+- `400` — invalid tactic ID, invalid/unknown `status` value, or empty `title`
+- `404` — the tactic does not exist
+- `422` — `status` would override a derived value, or `accomplished` was requested with unresolved tasks still present
+
 ## Create Endpoints
 
 Only use these when the workflow explicitly needs app-side object creation.
