@@ -111,6 +111,9 @@ curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Public Health System","isActive":false}'
 curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Refine onboarding copy","projectId":"<project-id>","tacticId":"<tactic-id>","priority":"Medium","state":"pending","agentRole":"Localization Team"}'

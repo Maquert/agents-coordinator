@@ -330,6 +330,19 @@ Error responses (PATCH and DELETE):
 
 Only use these when the workflow explicitly needs app-side object creation.
 
+### System
+
+```bash
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Public Health System","isActive":false,"isShared":false}'
+```
+
+Fields:
+- `name` (required, non-empty string)
+- `isActive` (optional boolean; switches active selection to the new system when `true`)
+- `isShared` (optional boolean)
+
 ### Project
 
 ```bash
