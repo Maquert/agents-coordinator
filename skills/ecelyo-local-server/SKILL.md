@@ -43,6 +43,14 @@ Base URL: `http://$ECELYO_SERVER_IP:8080`.
 - Do not expect the server to be present on iPhone or iPad.
 - If `ECELYO_SERVER_IP` is unset, or the server is unreachable, stop and ask the user rather than guessing `localhost`.
 
+## Network Discovery (mDNS / Bonjour)
+
+Ecelyo local server instances advertise their presence on the local network via Multicast DNS (mDNS) / Bonjour under service type `_ecelyo._tcp.local.` (port 8080).
+
+- **Browse active local servers**: `dns-sd -B _ecelyo._tcp local.`
+- **Lookup server details**: `dns-sd -L "Ecelyo Server" _ecelyo._tcp local.`
+- **Specification Contract**: See [Local Server Network Discovery Specification v1](file:///Users/mhjaso/Developer/Projects/ecelyo_app/specifications/v1/local-server-discovery.md).
+
 ## Shared Rules
 
 1. Prefer the narrowest endpoint that answers the question.
