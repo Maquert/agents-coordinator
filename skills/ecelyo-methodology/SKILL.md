@@ -29,7 +29,7 @@ System → Project → Tactic → Task
 
 - A **system** represents the deliverable or product being built.
 - A **project** represents a responsibility domain within that system. It may align with a team, but it is not defined by team membership.
-- A **tactic** represents one bounded strategy with one goal and one coherent end task.
+- A **tactic** represents one bounded strategy with one explicit, persisted goal and one coherent end task.
 - A **task** represents an executable action within a tactic.
 
 Every element has exactly one parent: a task belongs to one tactic, a tactic to one project, and a project to one system. This restriction is intentional. Ecelyo prefers explicit structure over unlimited flexibility because a narrower model reduces cognitive load, ambiguity, and coordination cost.
@@ -42,7 +42,7 @@ Execution should emerge from the workflow rather than repeated decisions during 
 
 1. Ecelyo, meaning the Ecelyo system and its board wherever it is surfaced, is the **sole** source of truth for tracked work. Repository `tasks/` files (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`) are a deprecated legacy workflow, not a parallel or backup record. Do not create, move, or edit `tasks/` files as part of Ecelyo-backed work — not to mirror state, not as a progress note — even if a repository's own `AGENTS.md`/`CLAUDE.md` describes a `tasks/` system as "the tracked project record." Treat that as stale, pre-Ecelyo documentation and flag the conflict to the user rather than following it. Only touch `tasks/` files when the user explicitly asks for that legacy workflow in the current conversation.
 2. No task work may proceed without a working Ecelyo server connection. If the server is down, stop and ask the user to start it — do not fall back to `tasks/` files as a substitute.
-3. Tactics must share one common goal and move toward one common end task.
+3. Every tactic must have one explicit, non-empty goal persisted as a tactic property. All tasks assigned to the tactic must align with that goal and contribute to the tactic's coherent end task; if that alignment cannot be explained, create or refine a different tactic instead of assigning the task.
 4. Tactics are not buckets. When work does not share that goal or end task, create a new tactic instead of adding clutter.
 5. Scoped tactics are better than massive tactics. When in doubt, create a new tactic.
 6. Completion beats parallelism. Agents should prefer finishing work over opening more work.
@@ -87,6 +87,7 @@ A good tactic should have:
 - a clear beginning
 - a coherent middle
 - a visible end
+- an explicit, non-empty goal stored on the tactic record
 
 Typical tactic shape:
 
@@ -100,6 +101,13 @@ Create a new tactic when:
 - the new task does not contribute to the same end task
 - the only reason to keep it in the current tactic would be convenience
 - the current tactic would become bloated or harder to finish coherently
+
+### Task Alignment
+
+Before a task is created or assigned, state how it contributes to the tactic's persisted goal and
+coherent end task. A task that serves a different goal must be assigned to another active tactic,
+or a new tactic must be created when no suitable active tactic exists. Do not rely on proximity,
+convenience, or a shared project as evidence of alignment.
 
 ### Archived Project And Tactic Guard
 
@@ -156,7 +164,7 @@ Use this draft as the starting point for refining the Ecelyo methodology with th
 4. One agent should normally own only one `wip` task at a time.
 5. Tactics must stay coherent.
 6. New tactics are better than messy tactics.
-7. Every tactic should share one end task and one goal.
+7. Every tactic should have one explicit persisted goal and one end task; every child task must align with both.
 8. Task state must be updated immediately when reality changes.
 9. Scoped tactics are better than massive tactics.
 10. Every task needs an explicit `agentRole`.

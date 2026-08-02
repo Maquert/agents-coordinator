@@ -439,6 +439,35 @@ active queue. The deletion is immediate and cannot be undone through the API.
 - `404` — no task with that ID exists
 - `405` — no task ID provided (bare `DELETE /tasks`)
 
+### Create an acceptance criterion
+
+```bash
+curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria" \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Task builds correctly", "isCompleted": false}'
+```
+
+Accepts `text` or `title` keys and optional `isCompleted`. Also, `PATCH /tasks/<task-id>` accepts an `acceptanceCriteria` array of strings or objects (`[{"text": "Criterion 1", "isCompleted": true}, "Criterion 2"]`).
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "data": {
+    "criterion": {
+      "id": "<criterion-id>",
+      "text": "Task builds correctly",
+      "isCompleted": false
+    },
+    "criterionId": "<criterion-id>",
+    "taskSummary": {
+      "id": "<task-id>",
+      "updatedAt": "2026-08-02T10:00:00Z"
+    }
+  }
+}
+```
+
 ### Update an acceptance criterion
 
 ```bash
