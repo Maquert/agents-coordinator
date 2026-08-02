@@ -1,33 +1,43 @@
-Use the `task-executor` skill in `batch-task-execution` mode with a batch size of **1**. The
-single-task request is one atomic batch: apply the complete selection, execution, validation, PR,
-merge, cleanup, and Ecelyo closeout workflow before ending.
-If screenshot verification fails only because affected baselines are stale, rerun the relevant screenshot record workflow, update the references, rerun verification, and continue the task instead of marking it blocked.
-Prefer the narrowest dedicated snapshot or screenshot test that covers the changed surface before broader suites.
-If the repository exposes one canonical script to refresh all definitive screenshot baselines, use that script when the task needs a full multi-platform baseline refresh.
+Use the `task-executor` skill in `batch-task-execution` mode.
+Use `ecelyo-methodology` for work selection and sequencing, and
+`ecelyo-local-server` for Ecelyo connectivity, priority-queue reads, and task-state updates.
 
-Mode: `batch-task-execution` with batch size `1`.
+## Request interpretation
 
-Repository paths:
-- Pending tasks: `tasks/pending/`
-- WIP tasks: `tasks/wip/`
-- Finished tasks: `tasks/finished/`
-- Blocked tasks: `tasks/blocked/`
+- **"Next task"** means take exactly one task: use batch size `1`.
+- **"Next N tasks"** means execute an ordered batch of `N` tasks.
+- If the user names a project, select only tasks belonging to that Ecelyo project. Otherwise use
+  the project associated with the current repository or the project supplied by the surrounding
+  context; do not guess when the target is ambiguous.
 
-Mention the chosen task at the beginning of the session and mark it with this emoji "💻".
+## Selection rules
 
-Repository override:
-- Never invent a missing branch. Stop with the exact missing assignment and report the task as
-  blocked according to the task-executor closeout contract.
+- Verify the Ecelyo server with `GET /` before doing task work. If it is unavailable, stop and ask
+  the user to start it; never fall back to repository `tasks/` files.
+- Read `GET /tasks/priority` first and use that live endpoint as the source of truth. Confirm the
+  selected task's full record, project, tactic, state, acceptance criteria, and branch before
+  claiming it.
+- Select only the next task. For a batch, refresh `/tasks/priority` after every completed task;
+  never reserve or pre-claim the whole batch.
+- Keep at most one task in progress. A task is not complete until its validation, PR, merge,
+  worktree/branch cleanup, and Ecelyo `finished` update are complete.
+- For a batch with more than one task, do not select a `High` or `Blocker`/`Blocking` task for any
+  slot before the final slot when an eligible `Medium` or `Trivial` task is available. If no
+  eligible lower-priority task exists for an earlier slot, stop the batch rather than taking a
+  human-intervention task early. The final slot may select the highest-priority remaining task,
+  including `High` or `Blocker`/`Blocking`.
+- Apply the methodology's WIP, tactic-coherence, archived-project/tactic, and completion-first
+  rules. Move a task to `wip` with its live conversation deeplink and `agentTechnology` in the
+  same Ecelyo `PATCH`, and keep Ecelyo synchronized as the task advances.
 
-PR labeling:
-- Do not require any automation-specific PR label such as `codex-automation`.
-- If the repository or current task explicitly requires PR labels, follow those local instructions instead of adding automation-default labels.
+## Execution
 
-Pre-work:
-- Pull from the main branch before creating any worktree.
+Execute each selected task end to end using the `task-executor` skill's normal readiness,
+acceptance-criteria, validation, branch/worktree, commit, push, PR, review-gate, merge, cleanup,
+and Ecelyo closeout rules. Present the required task-identification table immediately before
+starting each task.
 
-Ecelyo deeplink requirement:
-- When taking a task and moving it to `wip` through the Ecelyo local server (see the `ecelyo-local-server` skill), set the task's `deeplinkUrl` field in the same `PATCH /tasks/{id}` call — do not send `{"state":"wip"}` alone.
-- `deeplinkUrl` must be the URL that reopens the live agent conversation/thread doing the work, e.g. `codex://threads/<thread-id>` for Codex or `claude://agents/<session-id>` for Claude — never the app's own `ecelyo://open/...` navigation URL.
-- Example: `curl -s -X PATCH "http://localhost:8080/tasks/<task-id>" -H 'Content-Type: application/json' -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'`.
-- If the session/thread id is not yet known when the task is taken, set `deeplinkUrl` as soon as it is available with a follow-up `PATCH /tasks/{id} {"deeplinkUrl":"..."}` before continuing further work on the task.
+For every task, report its project and tactic, task id and title, branch, worktree cleanup,
+acceptance-criteria results, validation, commit/push status, PR URL and merge state, Ecelyo state,
+and an unambiguous `Task Status: **FINISHED**` or `Task Status: **BLOCKED**` with the exact blocker.
+For a batch, include one closeout for each task and a final batch status.
