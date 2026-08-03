@@ -79,6 +79,33 @@ Choose one mode first:
 
 If the automation does not name the mode explicitly, infer it from the prompt and state the chosen mode in the response.
 
+## Tactic-First Objective Selection
+
+When the caller asks for the next objective, next task, or priority work without naming a
+specific task, select a complete tactic before selecting an individual task. Follow
+`ecelyo-methodology`: completion comes before opening unrelated work, and the next tactic means
+the next priority tactic in the active project/system queue, even when that tactic is already
+started. Continue executing its aligned tasks until its end task is complete and the tactic is
+closed; do not switch to a random higher-priority task from another tactic between those tasks.
+
+Apply this order:
+
+1. If a tactic objective is already selected and in progress, continue that tactic unless it is
+   blocked by an external dependency.
+2. Otherwise choose the next priority active tactic, including one that is already started, using
+   tactic priority/order rather than an ungrouped task-priority sort.
+3. Within that tactic, choose its next executable task according to the methodology's task
+   ordering and dependency flow, while preserving the one-task WIP limit.
+4. Re-read the tactic and its task state after each completed task. Keep selecting aligned tasks
+   from the same tactic until its end task is complete and the tactic is explicitly closed.
+5. Only after closure may the executor select the next priority tactic. If the tactic is blocked,
+   preserve the accurate active state and resolve or report that blocker before opening work in a
+   different tactic.
+
+An explicitly ordered task list or an explicitly named task overrides this tactic selection, but
+the executor must still verify that the task belongs to the requested tactic and must not silently
+expand the request into unrelated tactics.
+
 ### `batch-task-execution`
 
 Use this mode when the caller requests several tasks, an ordered list, or a batch size. Treat each
@@ -87,8 +114,10 @@ task as a complete execution and do not pre-claim or parallelize the batch.
 1. Require a repository path and either an ordered task-id list or a batch size (default `5`).
 2. Verify Ecelyo connectivity, repository instructions, remote/PR capability, task ownership, and
    that every candidate belongs to the target repository before claiming anything.
-3. Select only the next task. For priority selection, refresh `GET /tasks/priority` after each
-   completed task; never snapshot or reserve the whole batch.
+3. Select only the next tactic objective, then only its next task. For priority selection, refresh
+   the tactic and task state after each completed task; continue within that same tactic until it
+   is explicitly closed before selecting another tactic. Never snapshot or reserve the whole
+   batch.
 4. Apply the pending or WIP execution mode below to the selected task, including its lock,
    technical readiness contract, validation, PR comment gate, merge, cleanup, and Ecelyo
    synchronization.
@@ -268,7 +297,10 @@ When the repository provides a canonical script that refreshes all definitive pl
 
 ## Mode: pending-task-execution
 
-Use this mode when the caller wants one not-yet-started task taken from the backlog and finished end-to-end in priority order.
+Use this mode when the caller wants the next objective taken from the backlog and finished
+end-to-end in priority order. If no specific task is supplied, the objective is the next priority
+active tactic, not an arbitrary pending task; an already-started tactic remains the next objective
+until it is finished and closed.
 
 Definitions:
 
@@ -289,15 +321,23 @@ Execution pattern:
 1. Read `~/.agents/tasks/` and collect all claimed task ids. These are off-limits for the entire run.
 2. Inspect the pending task directory and collect eligible pending task files.
    - Eligible means the task file is under `pending/`, its status is `pending` or the repository equivalent, **and its id is not in the claimed set**.
-3. Read only the pending task files needed to determine priority and choose the highest-priority eligible task.
-   - When a repository-specific companion skill exposes an app-side priority queue such as Ecelyo's `GET /tasks/priority`, agents may read it first as advisory context, but repository task files and lock files remain the source of truth.
-4. Resolve ties by oldest creation date when available, otherwise by smallest stable id or filename order.
-5. Read the selected pending task file before reading broader code.
+3. Determine the next eligible tactic before comparing individual tasks. If a tactic objective is
+   already selected and in progress, keep it; otherwise choose the next priority active tactic,
+   including one that is already started. When a repository-specific companion skill exposes an
+   app-side priority queue such as Ecelyo's `GET /tasks/priority`,
+   use its tactic metadata and refresh it after each completed task; do not flatten the queue into
+   unrelated task priorities.
+4. Within the selected tactic, read only the task records needed to identify its next executable
+   task, respecting dependencies and the methodology's task ordering.
+5. Read the selected task file before reading broader code. After it finishes, repeat the scoped
+   tactic/task refresh until the tactic's end task is complete and the tactic is closed.
 6. Immediately write the lock file to `~/.agents/tasks/<task-id>.md` with `status: wip` before touching any code.
-7. Verify the task is truly not started:
+7. Verify the task is truly not started and that it belongs to the selected tactic:
    - Task file location is under `pending/`.
    - Task status is `pending` (or the repository’s equivalent).
    - Missing priority is treated with the repository fallback, which is `Trivial` unless overridden.
+   - The tactic and its parent project are active, and the task aligns with the tactic's persisted
+     goal and coherent end task.
 8. Resolve branch ownership from the task file:
    - If the task file does not declare a canonical branch slug, derive and persist one from the task
      title before creating the worktree; do not stop solely for this missing intake field.
