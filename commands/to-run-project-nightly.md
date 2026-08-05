@@ -38,4 +38,6 @@ Early exit:
 
 Final output:
 - If fixes were required, report what failed, what was changed, and what validation passed.
-- If nothing required changes, output only `NIGHTLY SUCCESS`.
+- After every local build, unit-test, and screenshot phase passes, write the ignored marker `.build-results/nightly/REPOSITORY_STABLE` containing the current commit SHA and UTC timestamp.
+  Do not write the marker when any phase fails or when validation is incomplete.
+- If nothing required changes, output exactly `NIGHTLY SUCCESS\nREPOSITORY STABLE`.
