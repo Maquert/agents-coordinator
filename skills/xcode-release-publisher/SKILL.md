@@ -11,10 +11,10 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 There are two supported release modes. Select one explicitly at the start of every release and state it in the handoff:
 
-- **Xcode manual** — the current default. The developer opens the pushed `release-candidate` branch in Xcode and owns the signed archive, App Store Connect upload, and final release action. Use the repository's local build phase or other documented local build-number generator, validate the embedded artifact locally when Xcode is available, and stop at the developer handoff. When the repository provides `scripts/xcode/archive_distribution_apps.sh`, treat it as the canonical manual archive workflow: after immediate approval for private-key use, execute it to archive every supported distribution scheme sequentially, including `Ecelyo` for generic macOS and `Ecelyo iOS` for generic iOS, with the repository's distribution signing inputs. Do not assume Xcode Cloud, trigger hosted workflows, create release tags, or merge the candidate unless the developer asks to continue after upload.
-- **Xcode Cloud** — opt in only when the developer explicitly requests it or the repository release request names it. Follow the repository's Xcode Cloud workflow, hooks, hosted build-number ownership, and distribution gates. Pushes to `release-candidate` may trigger hosted validation; do not tag or integrate until the hosted run succeeds. Do not use a local distribution-archive script in this mode; Xcode Cloud owns the hosted archive and distribution gate.
+- **Xcode Cloud** — the current default. Follow the repository's Xcode Cloud workflow, hooks, hosted build-number ownership, and distribution gates. Validate the release build configuration before pushing `release-candidate`. Pushes to `release-candidate` trigger hosted validation; do not tag or integrate until the hosted run succeeds. Do not use a local distribution-archive script in this mode; Xcode Cloud owns the hosted archive and distribution gate. If build configuration validation fails, create a task in Ecelyo under the "App Store" project and "Release" tactic, then stop.
+- **Xcode manual** — opt out only when the developer explicitly requests it or the repository release request names it. The developer opens the pushed `release-candidate` branch in Xcode and owns the signed archive, App Store Connect upload, and final release action. Use the repository's local build phase or other documented local build-number generator, validate the embedded artifact locally when Xcode is available, and stop at the developer handoff. When the repository provides `scripts/xcode/archive_distribution_apps.sh`, treat it as the canonical manual archive workflow: after immediate approval for private-key use, execute it to archive every supported distribution scheme sequentially, including `Ecelyo` for generic macOS and `Ecelyo iOS` for generic iOS, with the repository's distribution signing inputs. Do not assume Xcode Cloud, trigger hosted workflows, create release tags, or merge the candidate unless the developer asks to continue after upload.
 
-If the developer does not name a mode, use **Xcode manual**.
+If the developer does not name a mode, use **Xcode Cloud**.
 
 ## Release Contract
 
@@ -71,26 +71,43 @@ Perform this phase on the primary default-branch checkout before creating or ref
 7. Update any configured internal release-note destination. If release-note entries live in a `Localizable.xcstrings` or similar strings catalog, remove stale release-note entries and add the current list without disturbing unrelated localization data.
 8. Confirm that the marketing version, effective build-number plan, internal notes, App Store notes, app description, and beta tester notes describe the same release.
 
-## 3. Build and Validate the Release Candidate
+## 2.5 Validate Build Configuration (Xcode Cloud Mode Only)
+
+Before pushing release-candidate to trigger Xcode Cloud builds, perform fast structural checks on the release build configuration:
+
+1. Verify the Xcode project and workspace are discoverable and buildable.
+2. Verify all required distribution schemes exist and are accessible.
+3. Verify the build-number convention is correctly configured:
+   - For Xcode Cloud: confirm `CURRENT_PROJECT_VERSION` uses the 9999 sentinel or a valid numeric value, and that `ci_scripts/ci_pre_xcodebuild.sh` is present and correctly injects the cloud build number.
+   - Confirm every released app target has matching version settings.
+4. Verify `MARKETING_VERSION` matches the selected release version.
+5. Verify all entitlements, provisioning profiles, signing identities, and deployment targets are valid.
+6. If any validation fails:
+   - Preserve all coherent release work on `release-candidate` without pushing.
+   - Create an Ecelyo task in the "App Store" project under the "Release" tactic describing the specific validation failure (e.g., "invalid build configuration", "missing provisioning profile", "scheme not discoverable").
+   - Stop and report the validation blocker to the developer.
+7. If all validation passes, proceed to push release-candidate and report that Xcode Cloud is now working.
+
+## 3. Build and Validate the Release Candidate (Xcode Manual Mode Only)
+
+For Xcode Cloud mode, build configuration validation has already passed in section 2.5; proceed to push the candidate and defer hosted validation to Xcode Cloud.
+
+For Xcode manual mode only:
 
 1. Use the repository's documented fast release-contract entry points when available; otherwise discover the workspace or project and shared app scheme narrowly.
-2. Do not run local unit tests, screenshot tests, other test suites, builds, archives, or the repository's full validation wrapper by default. Run them only when the developer explicitly requests them for the release or when a specific failure requires a narrow diagnostic reproduction. In Xcode manual mode, when a signed archive is requested and approved, run the repository's canonical local archive script if present (for Ecelyo, `scripts/xcode/archive_distribution_apps.sh`) and validate every generated archive; the developer owns the final signed build, upload, and release action. In Xcode Cloud mode, do not run that local archive script; Xcode Cloud owns the normal hosted release gates after the candidate push.
+2. Do not run local unit tests, screenshot tests, other test suites, builds, archives, or the repository's full validation wrapper by default. Run them only when the developer explicitly requests them for the release or when a specific failure requires a narrow diagnostic reproduction. When a signed archive is requested and approved, run the repository's canonical local archive script if present (for Ecelyo, `scripts/xcode/archive_distribution_apps.sh`) and validate every generated archive; the developer owns the final signed build, upload, and release action.
 3. Run only fast structural checks and the repository's release-metadata validator when present. Refuse to publish a candidate missing its shared schemes, app description, App Store release notes, beta tester notes, required localizations, or version parity.
 4. Before any signed build, archive, export, upload, notarization, or other operation that can access a private key or trigger Keychain/SecurityAgent, obtain the developer's explicit approval immediately before execution. Release intent or an earlier request to publish is not sufficient private-key authorization. State which operation and identity will use the key and what prompt may appear; never launch it speculatively or in the background. If a prompt appears unexpectedly, stop the initiating process and wait for approval before retrying.
-5. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. In manual mode, an explicitly requested archive must use the repository's documented local archive workflow and all supported distribution schemes; do not substitute an Xcode Cloud workflow. Do not bypass signing or project settings merely to manufacture a passing result.
+5. Do not archive or submit to App Store Connect unless explicitly requested or the developer asked to publish through a documented repository release workflow. An explicitly requested archive must use the repository's documented local archive workflow and all supported distribution schemes; do not substitute an Xcode Cloud workflow. Do not bypass signing or project settings merely to manufacture a passing result.
 6. If a fast release-contract check fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag or push release tags as though validation passed.
-7. When publication uses Xcode Cloud mode:
-   - Treat the repository's workflow specification and `ci_scripts` hooks as authoritative.
-   - Verify the required schemes, actions, destinations, build-number ownership, and distribution gate before publication. For timestamp-based numbering, confirm every artifact contains a valid timestamp for its own compilation and never the committed fake sentinel; require identical artifact numbers only when the repository contract explicitly requires them.
-   - Defer hosted execution until the candidate branch is pushed in the next section, and do not create release tags yet.
 
 ## 4. Commit, Publish the Candidate, Tag, and Integrate Locally
 
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the version update and `RELEASE_NOTES.md` are present.
 2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
-3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. In Xcode manual mode, this push is the developer's Xcode handoff; do not push release tags yet. In Xcode Cloud mode, do not push release tags while hosted validation remains. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build.
+3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. In Xcode Cloud mode (default), this push triggers hosted validation; do not push release tags yet. Build configuration validation (section 2.5) must have passed before this push. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build. In Xcode manual mode, this push is the developer's Xcode handoff; do not push release tags yet.
 4. Do not call `gh pr create`, `gh pr edit`, `gh pr ready`, `gh pr merge`, or an equivalent API with `release-candidate` as the head branch. The absence of a pull request is an intentional branch-lifecycle requirement, not a blocker.
-5. When publication uses Xcode Cloud mode:
+5. For Xcode Cloud mode (default):
    - Observe the run automatically triggered by the `release-candidate` push when that is the repository contract; never trigger it separately.
    - Record the run URL, committed build-number convention, final artifact build number or numbers, destinations, and distribution result.
    - Fix hosted-only failures on the same candidate branch, push follow-up commits normally, and rerun without publishing immutable version tags. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
@@ -119,15 +136,17 @@ Perform this phase on the primary default-branch checkout before creating or ref
 
 Report:
 
-- target platform and build result
+- target platform
 - release-note comparison range and the main-branch note commit
-- marketing version, committed build-number convention, and embedded artifact build number or numbers
+- marketing version, committed build-number convention, and confirmed Xcode build configuration
 - App Store and internal release-note destinations
 - release commit hash
 - semantic-version and `release_notes` tag actions
 - pushed branch and tags
 - confirmation that no pull request was created for `release-candidate`
-- verified remote `release-candidate` commit after default-branch integration
-- selected release mode; Xcode Cloud run URL and distribution result only when hosted publication was requested
+- selected release mode:
+  - **Xcode Cloud (default):** report that build configuration validation passed, release-candidate was pushed, and Xcode Cloud is now building the release. Include the Xcode Cloud workflow URL when available.
+  - **Xcode manual (opt-out only):** report that release-candidate was pushed for developer handoff to Xcode for signed archive and TestFlight submission
+- verified remote `release-candidate` commit after integration (if auto-merge was requested)
 
 End with `RELEASE NOTES CREATED AT <CURRENT DATE>`, including day, month, year, hour, and minute.
