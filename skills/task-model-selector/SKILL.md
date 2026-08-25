@@ -57,3 +57,18 @@ Confidence: low
 - Keep each skill's `models:` list in priority order and use canonical identifiers consistently.
 - Add or remove a model only with a concrete reason tied to that skill's work. Do not bulk-update lists merely because a vendor releases a new model.
 - Audit model metadata and the Ecelyo catalog together when either changes, then preserve compatibility for existing task values.
+
+## User-Configured Routing Preferences
+
+These preferences are explicit user policy and are separate from installed skills' advisory
+`models:` metadata:
+
+- Prefer `GLM-5.2` for complex implementation or execution tasks.
+- Prefer `Kimi K3` for tasks whose primary risk is complex analysis, investigation, planning, or review.
+- Prefer `DeepSeek V4 Flash` for Medium and Trivial tasks when the task's agent and applicable skill
+  can leverage it.
+- If a task is Medium or Trivial but requires complex analysis, prefer `Kimi K3`; if it requires
+  complex implementation, prefer `GLM-5.2`.
+- Keep the applicable skill-derived models as ordered fallbacks after the user-configured preference.
+- Treat these identifiers as user-provided preferences unless the active model catalog confirms them;
+  do not claim catalog availability when no catalog is exposed.
