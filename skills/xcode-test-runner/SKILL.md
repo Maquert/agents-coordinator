@@ -30,6 +30,7 @@ source "$REPO_ROOT/scripts/tests_config.sh"
 - When both macOS and iPhone phases are required, start them in parallel and wait for both to finish before deciding whether to move on.
 - Do not stop after the first failing phase if the other phase is still running. Wait, collect both exit codes, then report the combined result.
 - For any UI change that affects screenshot-covered surfaces, treat recording and committing every affected `swift-snapshot-testing` baseline as a hard completion requirement, not an optional cleanup step.
+- For cross-platform feature changes, verify that macOS, iPadOS, and iOS exercise the shared implementation and that any compiler-flag or `Platforms/<platform>/` branch is limited to an explicitly justified native boundary. Do not accept separate platform feature implementations as a substitute for parity coverage.
 - Do not mark a UI task finished if any affected macOS, iPad, or iPhone screenshot reference is stale or unrecorded.
 - When a repo exposes screenshot record wrappers, rerun the affected macOS, iPad, and iPhone recording workflows before final verification.
 - After recording, rerun the normal screenshot verification workflows and the repo’s main unit-test wrapper; recording alone is not sufficient validation.

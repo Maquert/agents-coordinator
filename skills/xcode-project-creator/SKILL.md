@@ -17,7 +17,7 @@ Use this skill when creating or scaffolding a new Xcode app project.
 - Inject non-deterministic value creation through dependencies as well. Do not introduce direct `Date()`, `UUID()`, or similar runtime-generated values in app logic when `swift-dependencies` can provide the value.
 - Use the minimal entitlement set possible. Add no capabilities by default, including push notifications, Background Modes, iCloud, App Groups, Keychain Sharing, Associated Domains, Sign in with Apple, HealthKit, HomeKit, Siri, Wallet, or Maps.
 - Prefer the latest iOS SDK available in the active local Xcode install, but first inspect the installed Xcode and SDKs and discuss the local SDK version with the user.
-- Keep platform-specific files isolated, even when the initial platform folder only contains configuration.
+- Keep platform-specific files isolated, even when the initial platform folder only contains configuration. Implement each feature once in shared SwiftUI/domain code; use `#if os(...)` or `Platforms/<platform>/` only for irreducible native APIs, scene/navigation chrome, input adapters, entitlements, assets, or target configuration. Never duplicate feature logic or maintain parallel platform views merely because the targets differ.
 - Always create or update a root `.gitignore` for generated Apple projects. Use `assets/gitignore.apple.template` as the baseline and merge it with any existing project-specific ignore rules instead of overwriting.
 - Keep the physical filesystem hierarchy and Xcode Project Navigator hierarchy mirrored. Xcode groups and file references must point to the same relative paths as the files on disk.
 
@@ -81,7 +81,9 @@ ProjectName/
 
 Create folders for each selected platform. If only iPhone is selected, still create `Platforms/iPhone/` and `Configuration/iPhone.xcconfig`; do not create unused platform folders unless the user wants placeholders for future support.
 
-Keep shared SwiftUI app entry, common views, models, and services under `Shared/`. Put device idiom, scene configuration, asset variations, platform adapters, and platform-only settings under the matching `Platforms/<platform>/` folder.
+Keep shared SwiftUI app entry, feature views, models, and services under `Shared/`. Put device idiom, scene configuration, asset variations, platform adapters, and platform-only settings under the matching `Platforms/<platform>/` folder. A platform folder is not a second implementation area for a shared feature: isolate only the smallest platform boundary and preserve one shared state, data-flow, layout, and interaction contract.
+
+Before introducing a compiler-flag branch or platform file for a feature, document why the native API or OS convention cannot be expressed in shared code and add cross-platform coverage for the shared behavior.
 
 ## Filesystem And Xcode Group Mirroring
 
