@@ -25,6 +25,7 @@ If the developer does not name a mode, use **Xcode Cloud**.
 - Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Describe features users can experience when they start using the app and relevant fixes users would notice. Do not mention renames, legacy product identities, agent process, repository mechanics, or technical cleanup unless the developer explicitly asks for them. Do not claim changes unsupported by the release range.
 - Require version-controlled store metadata on `release-candidate`: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
+- For apps that display in-app release notes on startup (e.g., Ecelyo): update both the `ReleaseNotesPayload.current` struct and the localized strings each release so users see fresh notes. The app automatically triggers display when `generatedAt` is newer than the last-seen timestamp stored in user defaults; updating the timestamp is the mechanism for re-triggering display on each new version.
 - Keep every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, on the branch named exactly `release-candidate`.
 - Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `~/Developer/Projects/ecelyo_app-release`.
 - Never create, open, update, or merge a GitHub pull request whose head is `release-candidate`. In Xcode Cloud mode, GitHub's post-merge branch cleanup can delete this persistent branch and break Xcode Cloud's branch binding; in Xcode manual mode, the persistent branch remains the developer's upload handoff.
@@ -68,7 +69,17 @@ Perform this phase on the primary default-branch checkout before creating or ref
 4. The marketing version was already applied in Phase 0 (step 2 above); only touch the authoritative Xcode setting again here if this phase's recalculation changed the selected version.
 5. `RELEASE_NOTES.md` was already created in Phase 0; only append candidate-specific user-visible changes here, following the same App Store-notes tone, rather than recreating it from scratch.
 6. Create or update the localized app description, App Store release notes, and beta tester build notes in the repository metadata directory. These carry the version bumped in Phase 0 forward; keep beta notes practical and test-oriented, and include the platform, version, build-number check, and the most important changed flows.
-7. Update any configured internal release-note destination. If release-note entries live in a `Localizable.xcstrings` or similar strings catalog, remove stale release-note entries and add the current list without disturbing unrelated localization data.
+7. Update the in-app release notes display:
+   - **For Ecelyo:** Update `Shared/Domain/Models/ReleaseNotesPayload.swift`:
+     - Bump `version` to match the selected release version
+     - Update `generatedAt` to the current date/time (use today's date at a reasonable time like 10:00 AM)
+     - Update the `id` field to match today's date (format: YYYY-MM-DD)
+     - Ensure the `itemKeys` array references keys that exist in `Localizable.xcstrings`
+   - In `Ecelyo/Localizable.xcstrings`, update the localized strings for:
+     - `release_notes.title` (e.g., "What's New")
+     - `release_notes.item.*` entries (one for each bullet point in `RELEASE_NOTES.md`)
+   - Ensure the number and content of items match the `RELEASE_NOTES.md` notes from Phase 0
+   - This allows the app to display release notes to users on first launch after upgrading, with fresh content for each version
 8. Confirm that the marketing version, effective build-number plan, internal notes, App Store notes, app description, and beta tester notes describe the same release.
 
 ## 2.5 Validate Build Configuration (Xcode Cloud Mode Only)
