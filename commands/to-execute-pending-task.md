@@ -13,7 +13,7 @@ Use `ecelyo-methodology` for work selection and sequencing, and
 ## Selection rules
 
 - Verify the Ecelyo server with `GET /` before doing task work. If it is unavailable, stop and ask
-  the user to start it; never fall back to repository `tasks/` files.
+  the user to start it; never fall back to local files.
 - Read `GET /tasks/priority` first and use that live endpoint as the source of truth. Confirm the
   selected task's full record, project, tactic, state, acceptance criteria, and branch before
   claiming it.

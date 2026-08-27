@@ -98,10 +98,6 @@ Fields:
 - `state`
 - `priority`
 - `branch`
-- `repositoryTaskId` — optional. Links this server-side task to its repository
-  task-file numeric id (e.g. `1783751236` for
-  `tasks/pending/1783751236-*.md`). `null`/absent when the task has no repo
-  mirror.
 - `deeplinkUrl` — **required before moving a task to `wip`.** The URL that
   reopens the live agent conversation/thread doing the work, e.g.
   `codex://threads/<thread-id>` or `claude://agents/<session-id>`. This is
@@ -168,18 +164,6 @@ curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 
 You may also update `title`, `description`, `branch`, `repositoryTaskId`,
 `projectId`, or `tacticId` in the same payload.
-
-### Attach or correct a repository task-file link
-
-```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
-  -H 'Content-Type: application/json' \
-  -d '{"repositoryTaskId":"1783751236"}'
-```
-
-Use this to link an existing server task to its repo `tasks/pending/{id}-*.md`
-file retroactively, or to correct drift after a repo task file is renumbered
-or moved.
 
 ### Set the agent conversation deeplink
 
@@ -370,7 +354,6 @@ curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
     "tacticId":"<tactic-id>",
     "description":"",
     "branch":"",
-    "repositoryTaskId":"1783751236",
     "priority":"Medium",
     "state":"pending"
   }'
@@ -381,25 +364,7 @@ branch slug at creation time instead of a follow-up `PATCH` call — this sets
 the same field `PATCH /tasks/{id}` can update later, and the created task's
 response body echoes it back.
 
-`repositoryTaskId` is optional and defaults to `null`. Set it to the
-repository task file's numeric id (e.g. `1783751236` for
-`tasks/pending/1783751236-*.md`) at creation time so `GET /tasks`,
-`GET /tasks/{id}`, and `GET /tasks/priority` responses link straight back to
-the repo file — no fuzzy title-matching needed. It can also be set or
-corrected later via `PATCH /tasks/{id}`.
-
 `agentRole`, `agentTechnology`, `deeplinkUrl`, and `gitWorktree` are optional at creation time. Passing `agentTechnology` and `deeplinkUrl` during `POST /tasks` (e.g., when creating a task directly into `wip` state) persists both fields atomically in the creation call without requiring a follow-up `PATCH /tasks/{id}` request.
-
-**Task-level repo id mapping exists; project/tactic mapping does not.**
-`repositoryTaskId` on the task DTO links a server task to its repo
-`tasks/{lifecycle}/{id}-*.md` file directly — prefer reading/setting this
-field over fuzzy-matching on title. However, `GET /projects` / `GET /tactics`
-(and the `projectId`/`tacticId` nested in task DTOs) still only expose
-app-internal UUIDs; there is no equivalent field connecting them to the
-repository's numeric epoch IDs used by
-`tasks/projects/{project_id}-*/tactics/{tactic_id}-*.md` (see `AGENTS.md`).
-Locate the matching repo project/tactic directory by fuzzy-matching on title
-until that gap is filed and closed the same way.
 
 ## Mock Agent Shortcuts
 
@@ -516,4 +481,4 @@ Removes a single acceptance criterion from the task.
 
 - There is no `/missions` endpoint.
 - The server is macOS-only.
-- The app server does not replace repository task files, lock files, branches, or PR workflow.
+- The app server is the source of truth for Ecelyo task state; branches and pull requests remain repository concerns.

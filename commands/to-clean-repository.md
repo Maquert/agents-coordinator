@@ -18,7 +18,7 @@ Use git-repo-compactor to delete stale information from the repository, such as 
 - Refresh refs with `git fetch --prune origin`.
 - Run `git worktree list --porcelain` and inspect every linked worktree with `git status --short --branch` before deleting anything. Resolve all worktrees that share the same common Git repository only once.
 - Protect `main`, `release/*`, and `hotfix/*` branches.
-- Query Ecelyo, the sole source of truth for task state, and protect branches and worktree paths referenced by active tasks. Do not use repository `tasks/` files or `~/.agents/tasks` as task-state authority.
+- Query Ecelyo, the sole source of truth for task state, and protect branches and worktree paths referenced by active tasks.
 - When available, inspect active agent sessions and protect any worktree they are currently using.
 - If a branch is not reachable from `main`/`origin/main`, report it as "not reachable from main" and resolve the ambiguity before deleting it by checking GitHub and Ecelyo. Do not equate reachability failure with an unmerged branch.
 - Use `gh pr list --state merged --head <branch>` or equivalent GitHub merge verification to confirm a merged PR when Git reachability does not prove safety. Treat a merged PR as authoritative evidence even when the branch's original commit IDs are absent from `main`.

@@ -1,6 +1,6 @@
 ---
 name: ecelyo-methodology
-description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record — repository `tasks/` files are a deprecated legacy workflow. Use together with `ecelyo-local-server` when actual task state must be read or updated.
+description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record. Use together with `ecelyo-local-server` when actual task state must be read or updated.
 ---
 
 # Ecelyo Methodology
@@ -40,8 +40,8 @@ Execution should emerge from the workflow rather than repeated decisions during 
 
 ## Mandatory Rules
 
-1. Ecelyo, meaning the Ecelyo system and its board wherever it is surfaced, is the **sole** source of truth for tracked work. Repository `tasks/` files (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`) are a deprecated legacy workflow, not a parallel or backup record. Do not create, move, or edit `tasks/` files as part of Ecelyo-backed work — not to mirror state, not as a progress note — even if a repository's own `AGENTS.md`/`CLAUDE.md` describes a `tasks/` system as "the tracked project record." Treat that as stale, pre-Ecelyo documentation and flag the conflict to the user rather than following it. Only touch `tasks/` files when the user explicitly asks for that legacy workflow in the current conversation.
-2. No task work may proceed without a working Ecelyo server connection. If the server is down, stop and ask the user to start it — do not fall back to `tasks/` files as a substitute.
+1. Ecelyo, meaning the Ecelyo system and its board wherever it is surfaced, is the **sole** source of truth for tracked work. Do not create local task-record files as a parallel or backup record. If repository instructions describe another task store, treat them as stale and flag the conflict to the user rather than following them.
+2. No task work may proceed without a working Ecelyo server connection. If the server is down, stop and ask the user to start it — do not use local files as a substitute.
 3. Every tactic must have one explicit, non-empty goal persisted as a tactic property. All tasks assigned to the tactic must align with that goal and contribute to the tactic's coherent end task; if that alignment cannot be explained, create or refine a different tactic instead of assigning the task.
 4. Tactics are not buckets. When work does not share that goal or end task, create a new tactic instead of adding clutter.
 5. Scoped tactics are better than massive tactics. When in doubt, create a new tactic.
@@ -158,8 +158,8 @@ Use `ecelyo-local-server` to:
 
 Use this draft as the starting point for refining the Ecelyo methodology with the user:
 
-1. Ecelyo, meaning the Ecelyo system and its board, is the sole source of truth for important tracked work. Repository `tasks/` files are a deprecated legacy workflow, not a valid substitute or mirror.
-2. No Ecelyo connection, no task work — and no falling back to `tasks/` files instead.
+1. Ecelyo, meaning the Ecelyo system and its board, is the sole source of truth for important tracked work. Do not create local task-record files as a substitute or mirror.
+2. No Ecelyo connection, no task work — and no local-file fallback.
 3. Completion is more important than new starts, and work should be prioritized in this order: critical tasks, blocked-task resolution, unclaimed in-progress tasks, pending tasks by priority, then trivial or maintenance work.
 4. One agent should normally own only one `wip` task at a time.
 5. Tactics must stay coherent.

@@ -1,22 +1,16 @@
 ---
 name: ecelyo-local-server
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Ecelyo's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state — repository `tasks/` files are a deprecated legacy workflow (see `task-processor` and the optional legacy mode of `task-executor`) and must not be created as part of normal Ecelyo-backed task work.
+description: Connect to Ecelyo's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state.
 ---
 
 # Ecelyo Local Server
 
 Use this skill when Codex needs to communicate with Ecelyo's local HTTP server over HTTP.
 
-**Ecelyo is the sole system of record for task state.** Do not create, move, or edit files under
-a repository `tasks/` directory (`tasks/pending/`, `tasks/wip/`, `tasks/blocked/`, `tasks/finished/`,
-or any similarly-named lifecycle folder) as part of normal task tracking — not to "mirror" Ecelyo
-state, not as a progress note, and not because a repository's own `AGENTS.md`/`CLAUDE.md` describes
-a `tasks/` workflow. That file-based workflow is legacy (`task-processor` and the optional legacy
-mode of `task-executor`) and is off by default. If a repository's own instructions still describe `tasks/` as the tracked record,
-treat that as stale documentation, not authorization — flag the conflict to the user instead of
-following it silently. Only touch `tasks/` files when the user explicitly asks for that legacy
-workflow in the current conversation.
+**Ecelyo is the sole system of record for task state.** Do not create local task-record files as a
+parallel mirror, progress note, or fallback. If repository instructions disagree with Ecelyo, treat
+those instructions as stale and flag the conflict to the user instead of following them silently.
 
 Use this skill as the required task-system bridge when Ecelyo-backed task work is in scope.
 No task may proceed when the Ecelyo server is unreachable.
@@ -64,7 +58,7 @@ Ecelyo local server instances advertise their presence on the local network via 
    - `wip`
    - `blocked`
    - `finished`
-8. Never create, move, or edit repository `tasks/` files as part of normal task tracking, even when the Ecelyo server is unreachable. If the server is down, stop and ask the user to start it (see Failure Handling) — do not fall back to the deprecated `tasks/` workflow unless the user explicitly asks for it in the current conversation.
+8. Never create local task-record files as part of normal task tracking. If the server is down, stop and ask the user to start it (see Failure Handling); do not use a local file fallback.
 9. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
 10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
 11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
@@ -142,9 +136,8 @@ swift run --package-path tools/mock-agent mock-agent update-task <task-id> --sta
 
 ### With `task-processor`
 
-`task-processor` is a legacy, off-by-default skill for repository `tasks/` files. Do not pair with
-it, and do not create `tasks/` files, unless the user has explicitly asked for that legacy workflow
-in the current conversation.
+Use `task-processor` for Ecelyo backlog intake when the user requests task capture. It creates and
+updates records through the live Ecelyo server.
 
 Use this skill when intake should be informed by the currently open app state.
 
@@ -158,8 +151,7 @@ Use this skill when intake should be informed by the currently open app state.
 ### With `task-executor`
 
 `task-executor` is the canonical single-task and ordered-batch execution skill. When Ecelyo is in
-scope, use its live task state and do not create, move, or edit `tasks/` files unless the user has
-explicitly asked for the legacy file workflow.
+scope, use its live task state and do not create local task-record files.
 
 Use this pairing when executing an existing task and the app should reflect current progress.
 

@@ -5,10 +5,10 @@
 - Commands, skills, worktrees, and any other agent resources must be checked under `~/.agents` first unless stated otherwise.
 
 ## Default Task System
-- The default task system for all agents is the Ecelyo system, not repository `tasks/` directories.
+- The default task system for all agents is the Ecelyo system; task, project, and tactic records live there.
 - A prompt whose first non-whitespace text is `New task:` (case-insensitive) must load and use the `task-processor` skill for task intake.
 - For a `New task:` prompt, capture the remainder as a task and do not implement it in the same turn unless the user explicitly asks for both intake and implementation.
-- The `New task:` prefix authorizes task intake but does not by itself opt into legacy repository task markdown files. Keep Ecelyo as the task store unless the prompt separately requests the legacy file workflow.
+- The `New task:` prefix authorizes task intake. Keep Ecelyo as the task store.
 - The default methodology for all agents working for you is `ecelyo-methodology`.
 - By default, agents must load and use the `ecelyo-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Ecelyo local HTTP server as the primary workflow state for task progress updates.
@@ -16,9 +16,7 @@
 - The `ecelyo-methodology` skill is mandatory and is the shared philosophy reference for how work should be structured in Ecelyo. Read it alongside `ecelyo-local-server` when the workflow depends on Ecelyo.
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
-- Stop using repository `tasks/`, including flows managed by `workflow-manager`, for the moment.
-- Treat repository `tasks/` directories as legacy examples only. They exist to show what a well-defined task can look like and are no longer part of the active workflow.
-- Do not create, update, move, or rely on task markdown files under `tasks/` unless the user explicitly says to use that legacy example workflow.
+- Do not create local task-record files as a parallel or fallback workflow; synchronize task state through Ecelyo.
 - No task may proceed without a working Ecelyo server connection.
 - If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Ecelyo connectivity as a blocking error, not as a degraded mode.
@@ -112,7 +110,7 @@ with a vague status such as “done,” “implemented,” “ready,” or “PR
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
 - For task workflows, verify Ecelyo local server connectivity early when the run depends on task state or task updates.
-- Do not create repository task markdown files as a fallback, convenience step, or side effect when Ecelyo-backed work is requested.
+- Do not create local task-record files as a fallback, convenience step, or side effect when Ecelyo-backed work is requested.
 - For task creation and reassignment in Ecelyo, evaluate tactic fit explicitly before adding work.
 - Whenever creating an Ecelyo task, assign an explicit `agentRole` at creation time.
 - When creating or updating descriptions in Ecelyo, prefer clean Markdown structure over plain prose blobs.
@@ -122,7 +120,7 @@ with a vague status such as “done,” “implemented,” “ready,” or “PR
 - Surface failed Ecelyo synchronization as a blocking error, not as a quiet note or optional warning.
 - Make clear that no task work can proceed until the Ecelyo server responds.
 - When the Ecelyo API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Ecelyo project issue under `/Users/mhjaso/Developer/Projects/ecelyo_app`, using the project issues area and the `local server improvements` tactic.
-- When a task file or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
+- When the Ecelyo task record or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.
 - Mock implementations and debug-only code must never ship in release builds; guard them under the `DEBUG` compiler flag and keep release codepaths free of mock/debug-only dependencies.
 - By default, petitions for this `~/.agents` project must be committed on `main` and pushed to `origin` unless the user explicitly says otherwise.
