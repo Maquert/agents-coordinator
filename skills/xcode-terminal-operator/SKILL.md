@@ -36,6 +36,12 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
    - Do not repeatedly poll a running xcodebuild unless you expect a state change, timeout decision, or new actionable output.
 16. Avoid overlapping Xcode validations that share package resolution, derived data, simulators, or snapshot outputs unless the repository explicitly supports that concurrency.
 
+Unit-test coverage is a release gate: maintain at least 80% application-source coverage, measured
+from an `xcodebuild test` result bundle with code coverage enabled. Use `xccov` or an equivalent
+checked-in threshold script to fail below 80%; `xcsift -c` reports coverage but does not replace the
+threshold gate. Exclude only generated code, test support, fixtures, and other explicitly
+documented non-application sources.
+
 ## Agent Rules
 
 - Prefer discovery commands before build commands: `xcodebuild -list -json`, `-showdestinations`, `-showTestPlans`, `-showBuildSettings -json`, `xcodebuild -showsdks -json`, and `xcrun simctl list --json`.
@@ -49,6 +55,10 @@ Load and follow `xcsift` for every Swift or Xcode build/test command. Always pip
 - Capture result bundles under `.build-results/` or another repo-local ignored path.
 - When a wrapper script is much broader than the changed surface, prefer an equivalent focused `xcodebuild test -only-testing:...` command first and use the wrapper as fallback.
 - Do not treat screenshot diffs as disposable local noise when tests were run for validation; record the updated images, keep them in the worktree, and commit them with the task so review happens in the PR.
+- Use Point-Free `swift-snapshot-testing` for durable SwiftUI screenshot assertions. Every new or
+  changed user-visible screen or interaction contract must produce a reviewed baseline for every
+  supported UI platform contract; for a project supporting macOS, iPhone, and iPad, that means
+  all three variants. Keep fixtures deterministic and reset shared mutable state between tests.
 - Do not hand-edit `.pbxproj` unless no safer project-management path exists. If editing is unavoidable, preserve ordering, inspect diffs carefully, and run `xcodebuild -list -json` afterward.
 - Keep command output token-efficient: use `xcsift`, JSON flags, `--jq`, or focused file reads instead of raw logs.
 

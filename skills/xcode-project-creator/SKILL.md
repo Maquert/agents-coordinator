@@ -199,4 +199,25 @@ If validation is still blocked:
 
 
 ## Testing
-- Use swift-snapshot-testing (https://github.com/pointfreeco/swift-snapshot-testing) for screenshot testing.
+- Scaffold a real unit-test target with the initial project and keep application-source coverage
+  at or above 80%. Measure coverage from an `xcodebuild test` run with code coverage enabled and
+  enforce the threshold from the generated `.xcresult` using `xccov` or an equivalent checked-in
+  script; `xcsift -c` is useful for reporting but must not be the only threshold gate.
+- Organize tests by purpose, keeping domain and persistence behavior in unit tests and UI
+  contracts in screenshot tests. Use deterministic fixtures, injected clocks/IDs, and isolated
+  in-memory stores so coverage does not depend on iCloud, network services, or a particular user
+  account.
+- Use Point-Free `swift-snapshot-testing`
+  (https://github.com/pointfreeco/swift-snapshot-testing) for durable SwiftUI screenshot tests.
+  Add the package product to the test target when screenshot coverage is scaffolded; do not use
+  custom pixel-diffing or `ImageRenderer`-only assertions as the long-term regression mechanism.
+- Every new or changed user-visible SwiftUI screen, layout, navigation surface, or interaction
+  contract must have screenshot coverage for every supported UI platform contract (including
+  macOS, iPhone, and iPad when those targets are selected). Store reviewed PNG baselines in the
+  repository with platform-specific names or directories, and commit intentional baseline updates
+  with the code change.
+- Provide narrow, reproducible test commands or no-argument repository wrappers for unit tests,
+  platform screenshot contracts, and the complete validation gate. Run iOS screenshot contracts
+  sequentially when they share derived data, simulator state, or snapshot output. Record new
+  baselines only after confirming the host renders the intended UI and the asserted region is
+  correct.
