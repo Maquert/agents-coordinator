@@ -51,7 +51,9 @@
     "internetAccessPolicy": "allow",
     "nonWorkspaceFileAccess": "allow",
     "nonWorkspaceFileAccessPolicy": "AGENT_SETTING_POLICY_ALLOW",
+    "remoteControlEnabled": true,
     "remoteControlHostname": "macbook-pro-16-de-miguel-local-deep-nova",
-    "toolExecutionPolicy": "always-proceed"
+    "toolExecutionPolicy": "always-proceed",
+    "verboseAgentChat": false
   }
 }
