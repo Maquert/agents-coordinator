@@ -10,6 +10,7 @@
 - For a `New task:` prompt, capture the remainder as a task and do not implement it in the same turn unless the user explicitly asks for both intake and implementation.
 - The `New task:` prefix authorizes task intake. Keep Ecelyo as the task store.
 - The default methodology for all agents working for you is `ecelyo-methodology`.
+- Ecelyo local-server mutations authenticate with the `ECELYO_SERVER_TOKEN` environment variable. Agents must source it from the shell environment, pass it as an `Authorization: Bearer` header, and never print, commit, or include its value in task descriptions, logs, or responses.
 - By default, agents must load and use the `ecelyo-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Ecelyo local HTTP server as the primary workflow state for task progress updates.
 - Treat Ecelyo as a task-system philosophy, not only as an app or HTTP server.
