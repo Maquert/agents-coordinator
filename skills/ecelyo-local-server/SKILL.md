@@ -30,19 +30,25 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 
 ## macOS Constraint
 
-Ecelyo's local server is **macOS-only** and lives on the LAN, not `localhost`. The host is set once
-in the `ECELYO_SERVER_IP` environment variable (in `~/.zshenv`, so every shell and agent picks it up).
-Base URL: `http://$ECELYO_SERVER_IP:8080`.
+Ecelyo's local server is **macOS-only** and lives on the LAN, not `localhost`. Discover the current
+host through Bonjour before each connection; never assume the value in `ECELYO_SERVER_IP` is still
+current. Authenticated endpoints require `ECELYO_SERVER_TOKEN` in the header
+`Authorization: Bearer $ECELYO_SERVER_TOKEN`. Never print or persist the token.
 
 - Do not expect the server to be present on iPhone or iPad.
-- If `ECELYO_SERVER_IP` is unset, or the server is unreachable, stop and ask the user rather than guessing `localhost`.
+- If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers, stop and
+  ask the user to select or provide the intended server. A manually configured `ECELYO_SERVER_IP`
+  or URL is only a fallback; do not silently guess `localhost`.
 
 ## Network Discovery (mDNS / Bonjour)
 
 Ecelyo local server instances advertise their presence on the local network via Multicast DNS (mDNS) / Bonjour under service type `_ecelyo._tcp.local.` (port 8080).
 
-- **Browse active local servers**: `dns-sd -B _ecelyo._tcp local.`
-- **Lookup server details**: `dns-sd -L "Ecelyo Server" _ecelyo._tcp local.`
+- **Required default**: browse `_ecelyo._tcp.local.`, resolve exactly one service with `dns-sd -L`,
+  then resolve its advertised hostname with `dns-sd -G v4` to obtain the current IP and port.
+- **Repository client**: `swift run --package-path tools/mock-agent mock-agent discover` performs
+  the same Bonjour resolution and prints the current base URL.
+- Discovery must fail clearly when zero or multiple servers are advertised; never choose an arbitrary server.
 - **Specification Contract**: See [Local Server Network Discovery Specification v1](file:///Users/mhjaso/Developer/Projects/ecelyo_app/specifications/v1/local-server-discovery.md).
 
 ## Shared Rules
@@ -68,11 +74,12 @@ Ecelyo local server instances advertise their presence on the local network via 
 
 ## Quick Start
 
-1. Check connectivity with `GET /`.
-2. Discover systems with `GET /systems`.
-3. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
-4. Read the active task queue with `GET /tasks/priority` first when selecting work. Use `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does not answer.
-5. Update task state or assignment with `PATCH /tasks/{id}`.
+1. Discover the current server through Bonjour and set the connection URL for this operation.
+2. Check connectivity with `GET /`.
+3. Discover systems with authenticated `GET /systems`.
+4. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
+5. Read the active task queue with `GET /tasks/priority` first when selecting work. Use `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does not answer.
+6. Update task state or assignment with `PATCH /tasks/{id}`.
 
 ## Preferred Commands
 

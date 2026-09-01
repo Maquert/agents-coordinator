@@ -22,8 +22,8 @@
 - If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Ecelyo connectivity as a blocking error, not as a degraded mode.
 - If the Ecelyo local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
-- When another agent (on a different computer) needs to find the Ecelyo local server, default to the no-install, no-code path: have the human open the Ecelyo app's Settings → Local Server section, which already displays the live URL with a Copy button, and paste that address to the agent directly. Do not default to terminal commands (`dns-sd`, `mock-agent discover`, `curl`) or ask someone to install a discovery app — assume the person doing this may not be a programmer.
-- Only offer Bonjour/mDNS discovery commands (`dns-sd`, `tools/mock-agent`'s `discover` subcommand) when the person is already comfortable in a terminal, or when they explicitly ask for a fully automated discovery flow instead of a manually copied address.
+- Before every Ecelyo connection, prefer automatic Bonjour/mDNS discovery of the `_ecelyo._tcp.local.` service. Do not rely on a cached `ECELYO_SERVER_IP` or previously copied URL because the server's LAN address may change. Resolve the single advertised service to its current host and port, then authenticate with `ECELYO_SERVER_TOKEN` using `Authorization: Bearer`.
+- If Bonjour discovery is unavailable, finds zero servers, or finds multiple servers, report that condition and ask the user to select or provide the intended server. A manually copied URL or `ECELYO_SERVER_IP` is a fallback only; do not silently guess `localhost`.
 - Write Ecelyo task, tactic, and related descriptions in Markdown by default so they stay readable for both agents and humans.
 - Ecelyo tasks must always have an `agentRole`.
 - Preferred default Ecelyo agent roles:

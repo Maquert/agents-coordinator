@@ -5,11 +5,18 @@ Use this reference only when you need the exact endpoint or payload shape.
 ## Base URL
 
 ```text
-http://$ECELYO_SERVER_IP:8080
+http://<bonjour-resolved-host>:8080
 ```
 
-The server's LAN IP is set once in the `ECELYO_SERVER_IP` environment variable (`~/.zshenv`). If it's
-unset, ask the user for the IP instead of guessing `localhost`.
+Discover the current host through Bonjour before each operation using `_ecelyo._tcp.local.`. Do not
+rely on a cached `ECELYO_SERVER_IP`; it is only a manual fallback when Bonjour is unavailable or the
+user selects a specific server. Authenticated endpoints require:
+
+```text
+Authorization: Bearer $ECELYO_SERVER_TOKEN
+```
+
+Never print or persist the token.
 
 ## Response Format
 
@@ -30,7 +37,11 @@ curl -s "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
 ## Connectivity
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/"
+# Resolve exactly one advertised server before constructing the URL.
+dns-sd -B _ecelyo._tcp local.
+dns-sd -L "<advertised-instance-name>" _ecelyo._tcp local.
+dns-sd -G v4 "<advertised-hostname>.local."
+curl -s -H "Authorization: Bearer $ECELYO_SERVER_TOKEN" "http://<resolved-host>:8080/"
 ```
 
 Expected success body:
