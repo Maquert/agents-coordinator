@@ -1,0 +1,8 @@
+interface:
+  display_name: "Personal Xcode Distribution"
+  short_description: "Set up personal Xcode Cloud distribution"
+  brand_color: "#0A84FF"
+  default_prompt: "Use $xcode_personal_projects_distribution to validate this personal Apple project's signing and Xcode Cloud distribution setup."
+
+policy:
+  allow_implicit_invocation: true
