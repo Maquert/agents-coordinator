@@ -3,12 +3,21 @@ name: ecelyo---patch
 description: Creates a new patch release
 ---
 
-Execute the Xcode release publisher workflow to create a new patch version.
+Ecelyo Release Build Routine (v2)
 
-1. Merge the previous release-candidate branch with origin/main just to make sure the patch number has been update: that's the goal.
-2. Overwrite the release-candidate branch with origin/main.
-3. Bump the patch version in git.
-4. Create release notes, tags, and documents; apply code changes.
-5. Push to origin/release-candidate
+Execute the Xcode Cloud release build workflow for the current version.
 
-Report the version number created, the platforms archived, and confirmation of TestFlight submission. If any step fails, halt and report the error.
+1. Fetch latest origin/main to ensure release-candidate includes all recent changes.
+2. Reset release-candidate to origin/main (fast-forward to latest).
+3. Push release-candidate to trigger Xcode Cloud build.
+4. Verify MARKETING_VERSION matches the configured release version (do not modify).
+5. Confirm push succeeded and build is queued.
+
+Report:
+
+Current version (from MARKETING_VERSION)
+release-candidate commit SHA
+Platforms queued for build (macOS, iOS, visionOS)
+Confirmation that Xcode Cloud build was triggered
+
+If any step fails, halt and report the error.

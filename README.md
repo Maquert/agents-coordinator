@@ -12,6 +12,9 @@ This is implemented through symlinks inside each platform folder such as `.claud
 
 - `skills/`: reusable Codex skills for GitHub workflows, project planning, Xcode work, task automation, cost estimation, and related agent behaviors.
 - `commands/`: markdown command prompts and task execution notes.
+
+The tactic execution command `commands/to-execute-next-open-tactic.md` selects one active tactic
+with pending work and no `wip` task, then executes it sequentially through Ecelyo.
 - `codex/`: Codex-local configuration artifacts.
 - `worktrees/`: ignored working directory for local git worktrees.
 

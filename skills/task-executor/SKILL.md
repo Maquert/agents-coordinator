@@ -31,6 +31,29 @@ Use `GET /tasks/priority` when the user asks for the next task. Follow Ecelyo's 
 completion-first tactic selection. A `wip` task belongs to another agent unless the user explicitly
 reassigns it. Keep one task in progress per agent.
 
+## Thread naming
+
+Rename the live agent thread as soon as the execution unit is resolved and before beginning any
+editing, worktree creation, or code execution. Use the exact names stored in Ecelyo and do not add
+agent prefixes, IDs, or status labels.
+
+- For an individual task, use: `<task title> (<tactic title>)`.
+- When the instruction is to complete an entire tactic, use: `<tactic title> (<project title>)`.
+- Keep the tactic-level format for the whole tactic run; do not replace it with individual task
+  titles while processing that tactic sequentially.
+
+Use the active agent platform's thread-title operation (for example, Codex's thread-title tool).
+This display title is separate from the Ecelyo `deeplinkUrl`, which must still point to the live
+conversation in the task's `wip` update. If the title cannot be changed, report that limitation
+before execution rather than silently using a misleading title.
+
+Examples:
+
+```text
+Fix PapiplanApp compile break and test-host persistence crash (Test-Host Crash Regression Fix)
+Efficient priority queue reads (Server)
+```
+
 Before editing, update the selected task in one request:
 
 ```json
