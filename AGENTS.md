@@ -128,6 +128,7 @@ with a vague status such as “done,” “implemented,” “ready,” or “PR
 - When the user says `Commit the changes` or `Comit the changes`, interpret it as: group related changes, choose one commit message per group, stage each group, create local git commits, and push them to `origin/main` for this project unless the user explicitly says otherwise.
 - If a pull request is updated after its related task was already marked finished, the agent must move that task back to `in progress`.
 - Do not ask the user to review a draft pull request. When user review is needed, the agent must mark the pull request ready for review first or create it as a non-draft pull request.
+- Every pull request created or updated by an agent must carry a label matching that agent's name. This agent's name is `Codex`, so apply the `Codex` label to all handled pull requests; if the label does not exist, create it when permitted or report the permission blocker.
 - Pull request merge policy by task priority:
   - `Trivial`: agents should open and merge the PR by default.
   - `Medium`: agents should open and merge the PR by default unless the PR is large or complex enough that human review is warranted; the agent decides.
