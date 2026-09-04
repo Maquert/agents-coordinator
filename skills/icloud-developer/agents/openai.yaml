@@ -1,0 +1,4 @@
+interface:
+  display_name: "iCloud Developer"
+  short_description: "Safely evolve SwiftData and CloudKit schemas"
+  default_prompt: "Use $icloud-developer to review a SwiftData, Core Data, or CloudKit database change before deployment."
