@@ -22,8 +22,8 @@
 - If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
 - Treat missing Ecelyo connectivity as a blocking error, not as a degraded mode.
 - If the Ecelyo local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
-- Before every Ecelyo connection, prefer automatic Bonjour/mDNS discovery of the `_ecelyo._tcp.local.` service. Do not rely on a cached `ECELYO_SERVER_IP` or previously copied URL because the server's LAN address may change. Resolve the single advertised service to its current host and port, then authenticate with `ECELYO_SERVER_TOKEN` using `Authorization: Bearer`.
-- If Bonjour discovery is unavailable, finds zero servers, or finds multiple servers, report that condition and ask the user to select or provide the intended server. A manually copied URL or `ECELYO_SERVER_IP` is a fallback only; do not silently guess `localhost`.
+- Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable to reduce unnecessary discovery steps. Perform automatic Bonjour/mDNS discovery of the `_ecelyo._tcp.local.` service only when needed (such as when `ECELYO_SERVER_IP` is unset, empty, or unreachable). When discovering via Bonjour, resolve the single advertised service to its current host and port, cache the resolved IP in `ECELYO_SERVER_IP` for subsequent connections, and authenticate with `ECELYO_SERVER_TOKEN` using `Authorization: Bearer`.
+- If Bonjour discovery is unavailable, finds zero servers, or finds multiple servers (and no valid cached `ECELYO_SERVER_IP` responds), report that condition and ask the user to select or provide the intended server. A manually copied URL or `ECELYO_SERVER_IP` is a fallback only; do not silently guess `localhost`.
 - Write Ecelyo task, tactic, and related descriptions in Markdown by default so they stay readable for both agents and humans.
 - Ecelyo tasks must always have an `agentRole`.
 - Preferred default Ecelyo agent roles:

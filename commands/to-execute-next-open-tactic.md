@@ -1,16 +1,18 @@
 Use the `task-executor` skill in `batch-task-execution` mode to execute one complete Ecelyo tactic.
 Use `ecelyo-methodology` for tactic selection and sequencing, and `ecelyo-local-server` for
-Bonjour discovery, live reads, and task-state updates.
+Ecelyo connectivity (using cached `ECELYO_SERVER_IP` or Bonjour discovery when needed), live reads, and task-state updates.
 
 ## Selection contract
 
 Select exactly one active tactic before starting work:
 
-1. Discover the Ecelyo server through Bonjour under `_ecelyo._tcp.local.`. Deduplicate repeated
-   interface announcements by advertised instance name. Stop if there is no instance or more than
-   one distinct instance; never silently choose a server or fall back to `localhost`.
-2. Resolve the selected instance with `dns-sd -L`, resolve its advertised hostname with
-   `dns-sd -G v4`, and use the resolved non-loopback address and advertised port. Require
+1. Use the cached `ECELYO_SERVER_IP` environment variable if available and reachable. If unset or
+   unreachable, discover the Ecelyo server through Bonjour under `_ecelyo._tcp.local.` (deduplicating
+   repeated interface announcements by advertised instance name; stopping if there is no instance or
+   more than one distinct instance; never silently choosing a server or falling back to `localhost`),
+   and cache the resolved IP in `ECELYO_SERVER_IP`.
+2. When resolving via Bonjour, resolve the selected instance with `dns-sd -L`, resolve its advertised
+   hostname with `dns-sd -G v4`, and use the resolved non-loopback address and advertised port. Require
    `ECELYO_SERVER_TOKEN` and send it only as `Authorization: Bearer ...`; never print or persist it.
 3. Verify `GET /` succeeds, then read `GET /systems` and `GET /tasks/priority`. Use the active
    system unless the user explicitly supplied a system or project filter. If there is no unique

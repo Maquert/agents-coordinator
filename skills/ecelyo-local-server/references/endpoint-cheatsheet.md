@@ -5,12 +5,10 @@ Use this reference only when you need the exact endpoint or payload shape.
 ## Base URL
 
 ```text
-http://<bonjour-resolved-host>:8080
+http://$ECELYO_SERVER_IP:8080
 ```
 
-Discover the current host through Bonjour before each operation using `_ecelyo._tcp.local.`. Do not
-rely on a cached `ECELYO_SERVER_IP`; it is only a manual fallback when Bonjour is unavailable or the
-user selects a specific server. Authenticated endpoints require:
+Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable. When `ECELYO_SERVER_IP` is unset or unreachable, discover the current host through Bonjour using `_ecelyo._tcp.local.`, then cache the resolved IP in `ECELYO_SERVER_IP` for subsequent operations. Authenticated endpoints require:
 
 ```text
 Authorization: Bearer $ECELYO_SERVER_TOKEN
