@@ -20,6 +20,7 @@ If the developer does not name a mode, use **Xcode Cloud**.
 
 - Default the target platform to macOS. Honor an explicitly requested Apple platform.
 - Use semantic versioning. The normal release is a patch bump. Use a minor bump when any database/model field changes, or when the developer explicitly requests a feature/minor release. Never choose a major bump unless the developer explicitly requests it. Keep a `0.x` app on `0.x` unless a major release is explicitly requested. Refuse to reuse or move an existing immutable version tag.
+- Before selecting the app release version, load `icloud-developer` when available and run its iCloud impact preflight. Compare the candidate with the latest immutable `icloud/vMAJOR.MINOR.PATCH` tag, or report `no iCloud baseline tag` when none exists. Include the affected commits, exact build, candidate commit, impact level, and whether CloudKit Console deployment is required. A build number never replaces a commit or schema baseline.
 - Before any release work, require `release-candidate` to be recreated directly from the latest `origin/main`; it must be up-to-date with `origin/main`, never based on a rebase of an older candidate. Verify the two refs match before adding release changes.
 - Follow the repository's build-number convention. In the absence of one, increment the highest numeric build number among the released app targets by one. When the repository commits a fake sentinel and generates timestamp-based build numbers during compilation, preserve the sentinel, never commit a generated build number, and validate the embedded artifact value instead. If a Unix epoch-minute value exceeds Apple's `CFBundleVersion` component limits, preserve the exact minute in an ordered 4.2.2-digit encoding such as `NNNN.NN.NN` rather than embedding an invalid oversized integer.
 - Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Describe features users can experience when they start using the app and relevant fixes users would notice. Do not mention renames, legacy product identities, agent process, repository mechanics, or technical cleanup unless the developer explicitly asks for them. Do not claim changes unsupported by the release range.
@@ -98,6 +99,19 @@ Before pushing release-candidate to trigger Xcode Cloud builds, perform fast str
    - Create an Ecelyo task in the "App Store" project under the "Release" tactic describing the specific validation failure (e.g., "invalid build configuration", "missing provisioning profile", "scheme not discoverable").
    - Stop and report the validation blocker to the developer.
 7. If all validation passes, proceed to push release-candidate and report that Xcode Cloud is now working.
+
+## 2.6 iCloud Impact Gate
+
+When `icloud-developer` is available, use its [iCloud impact and versioning protocol](../icloud-developer/references/icloud-versioning.md) during every release. Before publishing the candidate:
+
+1. Identify the latest immutable `icloud/vMAJOR.MINOR.PATCH` tag and compare it with the candidate's commits and changed content. If no marker exists, report `no iCloud baseline tag`.
+2. Report the exact affected commits, candidate commit, build number, impact level, and whether the change affects the CloudKit schema or only synchronization/configuration.
+3. If persisted properties, entities, relationships, indexes, field types, or schema definitions changed, require the reviewed CloudKit Console Development-to-Production deployment and a signed-device import/export smoke test before the release can be tagged or published.
+4. If only sync code, entitlements, container selection, lifecycle, logging, or other configuration changed, require the focused sync validation and still include the iCloud warning in the release handoff.
+5. After the final release gates and any required Production verification pass, create and push the next immutable annotated `icloud/v...` tag on the exact validated release commit. Never move or reuse that tag. Do not create a marker that claims Production verification when Console access or the deployment result is unknown.
+
+The release report must include the complete iCloud warning block from the protocol. A successful
+local or hosted build does not replace CloudKit Production schema verification.
 
 ## 3. Build and Validate the Release Candidate (Xcode Manual Mode Only)
 
