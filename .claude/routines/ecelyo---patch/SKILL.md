@@ -1,6 +1,6 @@
 ---
 name: ecelyo---patch
-description: Creates a new patch release
+description: Creates a new release
 ---
 
 Ecelyo Release Build Routine (v2)
