@@ -19,7 +19,7 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 2. Normalize the request into a concise title.
 3. Check Ecelyo for an equivalent existing task before creating a duplicate.
 4. Resolve an active project and tactic. Infer them only when the context makes the assignment reliable; otherwise ask the user.
-5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, and an explicit `agentRole`.
+5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, an explicit `agentRole`, and a due date.
 6. Add every acceptance criterion through Ecelyo's acceptance-criteria endpoint.
 7. Stop after intake; do not begin execution.
 
@@ -31,7 +31,8 @@ For any explicit backlog-intake request:
 2. Read systems, projects, tactics, and the relevant task queue before assigning work.
 3. Check the destination project and tactic are active and that the task fits the tactic's persisted goal.
 4. If the user requests a new project or tactic, create it in Ecelyo under the active system with a clear title and objective.
-5. Write a Markdown task description containing:
+5. Assign every created task a due date based on the intake batch size: use the current calendar date plus 2 calendar days when the batch contains fewer than 5 tasks; for batches of 5 or more, use plus 3 calendar days by default and plus 4 calendar days when the batch is exceptionally large or needs additional coordination. Store the resulting date explicitly as an ISO-8601 `dueDate` value when creating the task.
+6. Write a Markdown task description containing:
    - Goal and non-goals
    - Current and desired behavior
    - Affected files, modules, APIs, or UI surfaces
@@ -39,15 +40,16 @@ For any explicit backlog-intake request:
    - Dependencies and ordering
    - Validation plan
    - The same numbered acceptance criteria stored in Ecelyo
-6. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
-7. Use `Trivial` when no priority is supplied and no stronger project rule applies.
-8. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
-9. Report the created project, tactic, task, priority, role, branch slug, and acceptance-criteria count.
+7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
+8. Use `Trivial` when no priority is supplied and no stronger project rule applies.
+9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
+10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count.
 
 ## Required task contract
 
 Every task must have an active project and tactic, a non-empty goal, an explicit role, a canonical
-lowercase underscore branch slug without an agent prefix, and testable acceptance criteria. Use
+lowercase underscore branch slug without an agent prefix, an explicit due date, and testable
+acceptance criteria. Use
 `Unknown` or `TBD` only when the source genuinely does not provide the information. If a missing
 detail would materially change implementation or validation, ask instead of guessing.
 
