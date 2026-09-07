@@ -33,6 +33,23 @@
   - `Localization Team`: updates wording, semantics, and internationalization-related behavior; can make code changes when needed.
   - `Product Designer`: focuses on visual descriptions, images, assets, icons, and aesthetic refinement; may make minimal code changes when needed.
 - Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
+
+## Task and Thread Relation
+
+- A task-level execution thread represents one Ecelyo task. Use the title format
+  `[Project name] (Tactic name) Task name`, prefixed with `> ` for `wip`, `X ` for `blocked`, or
+  `= ` for `finished`. The task's `deeplinkUrl` is the canonical link from that task to the exact
+  live conversation executing it.
+- A tactic-level execution thread represents the whole tactic run. Use only
+  `[Project name] (Tactic name)`, with the same state prefix; do not append `Complete tactic`, a
+  task name, an ID, or another suffix. This compact title is intentional when the user asks to
+  complete a tactic or when no specific task is selected yet, and it remains unchanged while
+  processing child tasks sequentially. The thread's effective state is the tactic's state, not the
+  Codex session's UI status. When a child task is executed in that thread, its `deeplinkUrl` must
+  point to the same conversation.
+- To relate any record back to its thread, read the task's `deeplinkUrl` and distinguish the
+  execution level: task state for task-level threads, tactic state for tactic-level threads. Do not
+  infer state from a conversation merely being open or from an unrelated child task.
 - When the `ecelyo-methodology` skill is in use and the Ecelyo API is missing an operation needed to preserve the methodology, record that as follow-up work for the Ecelyo project under the `local server improvements` tactic.
 - When an agent needs to perform a task-related API action that the Ecelyo server does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/ecelyo_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.

@@ -34,24 +34,49 @@ reassigns it. Keep one task in progress per agent.
 ## Thread naming
 
 Rename the live agent thread as soon as the execution unit is resolved and before beginning any
-editing, worktree creation, or code execution. Use the exact names stored in Ecelyo and do not add
-agent prefixes, IDs, or status labels.
+editing, worktree creation, or code execution. Use the exact project, tactic, and current task names
+stored in Ecelyo. The base title format is:
 
-- For an individual task, use: `<task title> (<tactic title>)`.
-- When the instruction is to complete an entire tactic, use: `<tactic title> (<project title>)`.
-- Keep the tactic-level format for the whole tactic run; do not replace it with individual task
-  titles while processing that tactic sequentially.
+```text
+[Project name] (Tactic name) Current task name
+```
 
-Use the active agent platform's thread-title operation (for example, Codex's thread-title tool).
-This display title is separate from the Ecelyo `deeplinkUrl`, which must still point to the live
-conversation in the task's `wip` update. If the title cannot be changed, report that limitation
-before execution rather than silently using a misleading title.
+Prefix the base title with the execution state. Apply the corresponding title immediately when the
+Ecelyo state changes:
+
+- `> ` — the thread is active and the task is being executed (`wip`);
+- `X ` — the task is blocked (`blocked`); and
+- `= ` — the task is finished (`finished`).
+
+At the start of work, once the task is claimed, use the active form:
+
+```text
+> [Project name] (Tactic name) Current task name
+```
+
+For a tactic-level execution thread, use only the project and tactic names. When the instruction is
+to complete an entire tactic, or when no specific task has been selected yet, use this compact title
+and keep it for the whole tactic run while processing child tasks sequentially:
+
+```text
+> [Project name] (Tactic name)
+```
+
+Do not append `Complete tactic`, a child-task name, an ID, or another suffix to a tactic-level title.
+Task-level threads continue to use the current task name after the tactic name.
+
+Do not add agent prefixes, IDs, or additional status labels. Use the active agent platform's
+thread-title operation (for example, Codex's thread-title tool). This display title is separate
+from the Ecelyo `deeplinkUrl`, which must still point to the live conversation in the task's `wip`
+update. If the title cannot be changed, report that limitation before execution rather than
+silently using a misleading title.
 
 Examples:
 
 ```text
-Fix PapiplanApp compile break and test-host persistence crash (Test-Host Crash Regression Fix)
-Efficient priority queue reads (Server)
+> [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
+X [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
+= [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
 ```
 
 Before editing, update the selected task in one request:
