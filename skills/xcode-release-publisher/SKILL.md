@@ -16,6 +16,26 @@ There are two supported release modes. Select one explicitly at the start of eve
 
 If the developer does not name a mode, use **Xcode Cloud**.
 
+## Developer-Owned Apple Access Boundary
+
+App Store Connect, TestFlight, Xcode Cloud's web console, Apple Developer, and CloudKit Console
+access are reserved exclusively for the developer/account owner. This is an ownership boundary,
+not merely a missing-credential workaround.
+
+- The agent must not open these services to sign in, use a saved browser session, enter or request
+  passwords or two-factor codes, use App Store Connect API keys, or operate Apple-hosted records.
+- The agent must not create or modify Xcode Cloud workflows, app records, tester groups, build
+  assignments, metadata, submissions, CloudKit schemas, or Production data through Apple services.
+- The agent must not upload, submit, distribute, or verify a build in App Store Connect or
+  TestFlight. The developer performs those actions and supplies any hosted result if needed.
+- Repository-side preparation, local unsigned validation, GitHub operations, and observable CI
+  status checks may proceed without Apple account access. A hosted URL is a handoff reference, not
+  permission to open the service or proof that processing, distribution, or tester assignment
+  succeeded.
+- Never ask the developer to paste Apple passwords, one-time codes, private keys, or API secrets in
+  chat. If an Apple-hosted gate is required, stop at the developer handoff and state exactly what
+  remains for the account owner.
+
 ## Release Contract
 
 - Default the target platform to macOS. Honor an explicitly requested Apple platform.
@@ -33,7 +53,8 @@ If the developer does not name a mode, use **Xcode Cloud**.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the candidate branch and validated tags directly. Review the candidate through its local diff and hosted artifacts; do not use a pull request for this persistent branch.
 - After the required release gates pass, integrate `release-candidate` with local Git rather than GitHub's merge operation only when the developer requests integration. In Xcode Cloud mode, keep `origin/release-candidate` intact so Xcode Cloud retains its branch binding. Never use `gh pr merge`, the GitHub merge API, or the GitHub merge button for this branch.
-- Honor explicit credential-ownership boundaries. When the developer reserves App Store Connect credentials or console access, complete repository-side preparation and validation only; do not open, authenticate with, or operate App Store Connect, and report the user-owned hosted handoff clearly.
+- Honor the Developer-Owned Apple Access Boundary above for every release, regardless of release
+  mode or whether the developer explicitly asks for a hosted verification step.
 - Keep release preparation proportional to the selected mode. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. In Xcode manual mode, run the narrowest requested local build/archive validation when Xcode is available; do not upload or access App Store Connect. In Xcode Cloud mode, run only fast repository and metadata contract checks before pushing and let Xcode Cloud perform the normal release validation.
 - In Xcode manual mode, the final manual step before handoff is archiving every supported distribution platform. In the Ecelyo project, run `scripts/xcode/archive_distribution_apps.sh`; do not substitute ad hoc archive commands. Obtain immediate private-key approval before running it.
 
