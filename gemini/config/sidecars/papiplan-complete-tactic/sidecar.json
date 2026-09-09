@@ -1,11 +1,10 @@
 {
   "builtin": "schedule",
-  "restart_policy": "always",
   "args": [
     "0 9 * * *",
     "agentapi",
     "new-conversation",
     "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks."
   ],
-  "display_name": "Ecelyo - Complete tactic"
+  "display_name": "Papiplan - Complete tactic"
 }
