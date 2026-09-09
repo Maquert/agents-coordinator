@@ -282,6 +282,9 @@ returns `422` with `resolutionRequired` rather than accomplishing it —
 resolve those tasks in the app first (archive, move, or finish them); the
 API does not choose a resolution on the caller's behalf.
 
+`accomplished` is Ecelyo's canonical completed state. Do not archive a completed tactic; archiving
+is reserved for the human owner.
+
 ### Restore an accomplished tactic
 
 ```bash
@@ -351,6 +354,13 @@ curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects/<project-id>/tactics" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Core Development","objective":"Ship the v1 features"}'
 ```
+
+Creating a tactic is a complete workflow contract, not only this container `POST`: persist a
+non-empty Markdown objective/description and explicit priority, then create one initial parent
+task, one final QA task, and any necessary middle tasks. The current endpoint example exposes only
+`title` and `objective`; if the server cannot persist the required tactic priority, treat that as a
+missing server capability and record it under Ecelyo's `local server improvements` tactic instead
+of silently omitting it.
 
 ### Task
 

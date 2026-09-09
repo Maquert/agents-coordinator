@@ -47,6 +47,11 @@ Treat a prompt beginning with `New task:` as task-capture-only unless the user a
 implementation. Load `task-processor`, create the record in Ecelyo, assign an active project and
 tactic, add explicit acceptance criteria, and stop before changing product code.
 
+When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic,
+create the complete tactic package: non-empty Markdown description/objective, explicit
+priority, one initial parent task, one final QA task, and only necessary middle tasks.
+Mark a completed tactic `accomplished` in Ecelyo and never archive it; archiving is human-only.
+
 ## Specifications and design system
 
 - Use `specifications/v1/prd.md` for the initial product requirements document.

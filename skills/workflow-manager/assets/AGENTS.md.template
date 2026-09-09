@@ -25,6 +25,12 @@
 - Use the live Ecelyo server for intake, selection, progress updates, blockers, and completion.
 - Do not create local task records, checklists, lock files, or mirrored state.
 - Keep tactics coherent, with one persisted goal and a clear completion point.
+- A request to create an Ecelyo tactic means creating the complete package: non-empty Markdown
+  description/objective, explicit priority, one initial parent task, one final QA task, and only
+  necessary middle tasks. Mark completed tactics `accomplished`; never archive them, since archiving
+  is reserved for the human owner.
+- At tactic closeout, report a table of the tactic name, every agent-worked `finished` or `blocked`
+  task, and each pull-request URL/state, followed by remaining work and a brief done/left summary.
 - Before implementation, ensure the task has an active project and tactic, an explicit role, a branch slug, and testable acceptance criteria.
 - Synchronize task state promptly; use `wip` only while work is actively owned and `finished` only after validation and delivery gates pass.
 

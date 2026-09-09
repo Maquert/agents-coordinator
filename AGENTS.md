@@ -17,6 +17,9 @@
 - The `ecelyo-methodology` skill is mandatory and is the shared philosophy reference for how work should be structured in Ecelyo. Read it alongside `ecelyo-local-server` when the workflow depends on Ecelyo.
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
+- When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic, interpret that as a complete tactic-creation request: persist the tactic with a non-empty Markdown description/objective, an explicit priority, and its tasks in Ecelyo. Always include one initial parent task and one final QA task, adding only the necessary middle tasks; give every task an explicit `agentRole` and preserve the intended ordering and relationships.
+- Weekly Maintenance tactics are named for the current ISO week and month (for example, `37/september`). Reuse the current week's Maintenance tactic instead of creating a duplicate; if it is already `accomplished` or otherwise closed and Ecelyo supports restoration, reopen it before adding more work. Do not reuse an older-week or unrelated tactic.
+- Agents may mark a tactic completed using Ecelyo's canonical `accomplished` status when its task chain is complete, but must never archive or manually close a tactic. Archiving and closing are human-owned actions. A current-week Maintenance tactic may be reopened for additional work until the week ends.
 - Do not create local task-record files as a parallel or fallback workflow; synchronize task state through Ecelyo.
 - No task may proceed without a working Ecelyo server connection.
 - If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
@@ -33,6 +36,7 @@
   - `Localization Team`: updates wording, semantics, and internationalization-related behavior; can make code changes when needed.
   - `Product Designer`: focuses on visual descriptions, images, assets, icons, and aesthetic refinement; may make minimal code changes when needed.
 - Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
+- If the Ecelyo server cannot persist a required tactic priority or another part of the complete tactic package, treat that as a missing server capability, record the required follow-up under Ecelyo's `local server improvements` tactic, and do not silently omit the field or create an incomplete tactic.
 
 ## Task and Thread Relation
 
@@ -107,6 +111,10 @@ For a batch, include one closeout row per task and a final batch status. The fin
 unambiguous: use `Task Status: **FINISHED**` only when the task is fully resolved, or
 `Task Status: **BLOCKED**` when any required gate remains unresolved. Do not end a task execution
 with a vague status such as “done,” “implemented,” “ready,” or “PR pending.”
+
+## Mandatory Tactic Completion Summary
+
+When a tactic reaches its completed (`accomplished`) state, include a Markdown table naming the tactic and every task the agent worked on whose final state is `finished` or `blocked`, with each task's state and pull-request URL/state. State any remaining unresolved work below the table. End with a brief summary of what was completed and what remains; if nothing remains, say so explicitly.
 
 ## Skill Routing
 - Unless stronger local instructions override it, load and use `ecelyo-methodology` as the default methodology skill for work done for this user.

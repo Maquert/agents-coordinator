@@ -45,6 +45,12 @@ For any explicit backlog-intake request:
 9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
 10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count.
 
+## Complete tactic requests
+
+When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic, create the complete tactic package in Ecelyo: a non-empty Markdown description/objective, an explicit priority, one initial parent task, one final QA task, and only the necessary middle tasks. Give every task an explicit `agentRole`, acceptance criteria, and ordering/parent relationships that support the tactic goal. Do not report success after creating only the tactic record. If the server cannot persist tactic priority or another required field, record the missing capability under `local server improvements` instead of silently omitting it.
+
+When the final QA task and all required work are finished, mark the tactic `accomplished`, Ecelyo's canonical completed status. Never archive it; archiving belongs to the human owner.
+
 ## Required task contract
 
 Every task must have an active project and tactic, a non-empty goal, an explicit role, a canonical

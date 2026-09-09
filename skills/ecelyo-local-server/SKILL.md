@@ -61,19 +61,22 @@ Ecelyo local server instances advertise their presence on the local network via 
 3. Treat Ecelyo as the source of truth for task state and task selection when this workflow is active.
 4. Treat Ecelyo as a workflow philosophy, not only a transport. Tactics should stay coherent rather than becoming buckets of unrelated tasks.
 5. Reuse an existing tactic when the new task clearly belongs to the same tactical arc. If it does not, prefer creating a new tactic.
-6. Each tactic should normally include a meaningful starting task and a meaningful final task that makes tactic completion explicit.
-7. When updating task state through the server, use the API's canonical values:
+6. A request to create a tactic is a request for the complete tactic package: persist a non-empty Markdown objective/description, an explicit priority, one initial parent task, one final QA task, and any necessary middle tasks. Do not report success after creating only the tactic record.
+7. If the server cannot persist tactic priority or another required package field, treat it as a missing server capability and record the follow-up under Ecelyo's `local server improvements` tactic instead of silently omitting it.
+8. When all tactic work and final QA are complete, mark the tactic `accomplished` (Ecelyo's canonical completed status). Never archive it; archiving is reserved for the human owner.
+9. When a tactic reaches `accomplished`, the agent's closeout must include a table of the tactic name, every agent-worked `finished` or `blocked` task, and each task's pull-request URL/state, followed by any remaining work and a brief done/left summary.
+10. When updating task state through the server, use the API's canonical values:
    - `pending`
    - `wip`
    - `blocked`
    - `finished`
-8. Never create local task-record files as part of normal task tracking. If the server is down, stop and ask the user to start it (see Failure Handling); do not use a local file fallback.
-9. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
-10. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
-11. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
-12. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
-13. **Whenever you move a task to `wip`, set `deeplinkUrl` and `agentTechnology` in the same `PATCH` call**. `deeplinkUrl` must be a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. `agentTechnology` must be the name of the active AI agent (e.g., "Codex", "Claude", "Antigravity"). These fields are required, not optional. The deeplink is distinct from the app's own `ecelyo://open/...` navigation links, which must never be used as the value here.
-14. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
+11. Never create local task-record files as part of normal task tracking. If the server is down, stop and ask the user to start it (see Failure Handling); do not use a local file fallback.
+12. If the server does not respond, stop the task workflow and ask the user to start the server before continuing.
+13. Do not invent endpoints. If an endpoint is missing, say so and use the closest supported route.
+14. Prefer TOON for normalized arrays of systems, projects, tactics, tasks, or priority-queue entries that will be consumed by an agent.
+15. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
+16. **Whenever you move a task to `wip`, set `deeplinkUrl` and `agentTechnology` in the same `PATCH` call**. `deeplinkUrl` must be a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. `agentTechnology` must be the name of the active AI agent (e.g., "Codex", "Claude", "Antigravity"). These fields are required, not optional. The deeplink is distinct from the app's own `ecelyo://open/...` navigation links, which must never be used as the value here.
+17. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
 
 ## Quick Start
 
@@ -155,6 +158,7 @@ Use this skill when intake should be informed by the currently open app state.
 - Read `GET /projects` and `GET /tactics` to avoid creating duplicate app-side structures.
 - Decide whether the work belongs in an existing tactic or needs a new tactic to keep tactic boundaries coherent.
 - When creating a new tactic, make sure the tactic has or will have a clear starting task and a clear final task.
+- When a user explicitly requests tactic creation, create the complete tactic package described in Shared Rules: description/objective, priority, initial parent task, final QA task, and any necessary middle tasks.
 - When creating a new task, choose an explicit `agentRole` that matches the intended kind of work.
 - Only create app-side entities with `POST /projects`, `POST /projects/{projectId}/tactics`, or `POST /tasks` when the user explicitly wants app-state creation too.
 

@@ -54,6 +54,24 @@ Execution should emerge from the workflow rather than repeated decisions during 
 12. Archived projects and archived tactics must never receive new tasks. Before creating or reassigning a task, verify that both destination containers are not archived. Do not silently reactivate an archived project or tactic to make an assignment fit.
 13. Right before beginning execution, worktree creation, or coding for any task, the agent MUST explicitly present a Markdown table identifying the task (ID, Name/Title, Project Name/ID, Tactic Name/ID) to the user.
 
+## Complete Tactic Creation
+
+When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic, treat it as a request for the complete tactic package, not an empty tactic record. Create or persist:
+
+- a non-empty Markdown description/objective;
+- an explicit tactic priority;
+- one initial parent task;
+- one final QA task; and
+- only the necessary middle tasks, each with an explicit `agentRole`, acceptance criteria, and relationships/order that support the tactic goal.
+
+The initial parent task establishes the tactic's scope and the final QA task verifies the delivered outcome and closes the tactical arc. Do not report the tactic as created until its required tasks exist. If the server cannot persist tactic priority or another required part of this package, treat that as a missing server capability and record the follow-up under Ecelyo's `local server improvements` tactic rather than silently omitting it.
+
+When all required work and final QA are complete, mark the tactic with Ecelyo's canonical completed status, `accomplished`. Never archive the tactic after completion; archiving is reserved for the human owner.
+
+At tactic closeout, give the human a compact visibility report: a Markdown table with the tactic
+name, every task the agent worked on that ended `finished` or `blocked`, and each task's pull-request
+URL/state. Follow it with any remaining unresolved work and a brief summary of what is done and left.
+
 ## Work Selection
 
 When selecting work:
@@ -91,9 +109,9 @@ A good tactic should have:
 
 Typical tactic shape:
 
-- first task: define scope, establish the base, or remove the main blocker
+- first task: the initial parent task that defines scope, establishes the base, or removes the main blocker
 - middle tasks: execute the coherent body of work
-- last task: integrate, verify, clean up, or explicitly close the tactic
+- last task: the final QA task that verifies, integrates, or explicitly closes the tactic
 
 Create a new tactic when:
 
