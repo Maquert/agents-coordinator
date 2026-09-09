@@ -54,6 +54,7 @@
 - When an agent needs to perform a task-related API action that the Ecelyo server does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/ecelyo_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
 - If the needed project issue or tactic does not exist, create it.
+- If an agent updates an existing task's description (rescoping, clarifying, correcting a stale premise), it must add a follow-up child task capturing that update and start working on it immediately, so the change is not lost to a later edit, a concurrent agent, or a dropped session.
 
 ## Response Metadata
 - At the end of every response, include a compact Markdown table with columns `Item` and `Value`.
