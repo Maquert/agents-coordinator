@@ -18,8 +18,8 @@
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
 - When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic, interpret that as a complete tactic-creation request: persist the tactic with a non-empty Markdown description/objective, an explicit priority, and its tasks in Ecelyo. Always include one initial parent task and one final QA task, adding only the necessary middle tasks; give every task an explicit `agentRole` and preserve the intended ordering and relationships.
-- Weekly Maintenance tactics are named for the current ISO week and month (for example, `37/september`). Reuse the current week's Maintenance tactic instead of creating a duplicate; if it is already `accomplished` or otherwise closed and Ecelyo supports restoration, reopen it before adding more work. Do not reuse an older-week or unrelated tactic.
-- Agents may mark a tactic completed using Ecelyo's canonical `accomplished` status when its task chain is complete, but must never archive or manually close a tactic. Archiving and closing are human-owned actions. A current-week Maintenance tactic may be reopened for additional work until the week ends.
+- Weekly Maintenance tactics are named for the current ISO week and month (for example, `37/september`). Reuse the current week's Maintenance tactic instead of creating a duplicate; if it is already `finished` or otherwise closed and Ecelyo supports restoration, reopen it before adding more work. Do not reuse an older-week or unrelated tactic.
+- Agents must mark a completed tactic as `finished` when its task chain is complete, and are explicitly forbidden from closing, accomplishing, or archiving tactics. Accomplishing, closing, and archiving are human-owned lifecycle actions. A finished current-week Maintenance tactic may be reopened or reused for additional work until the week ends.
 - Do not create local task-record files as a parallel or fallback workflow; synchronize task state through Ecelyo.
 - No task may proceed without a working Ecelyo server connection.
 - If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
@@ -114,7 +114,7 @@ with a vague status such as “done,” “implemented,” “ready,” or “PR
 
 ## Mandatory Tactic Completion Summary
 
-When a tactic reaches its completed (`accomplished`) state, include a Markdown table naming the tactic and every task the agent worked on whose final state is `finished` or `blocked`, with each task's state and pull-request URL/state. State any remaining unresolved work below the table. End with a brief summary of what was completed and what remains; if nothing remains, say so explicitly.
+When a tactic reaches its completed (`finished`) state, include a Markdown table naming the tactic and every task the agent worked on whose final state is `finished` or `blocked`, with each task's state and pull-request URL/state. State any remaining unresolved work below the table. End with a brief summary of what was completed and what remains; if nothing remains, say so explicitly.
 
 ## Skill Routing
 - Unless stronger local instructions override it, load and use `ecelyo-methodology` as the default methodology skill for work done for this user.

@@ -113,12 +113,16 @@ active state and record the blocker in Ecelyo; do not claim completion.
 The final response must include task title and ID, project, tactic, branch, validation, pull request
 URL and state, cleanup result, acceptance-criteria result, and an unambiguous task status.
 
-When a tactic reaches its completed (`accomplished`) state, also include a clearly labeled tactic
-completion summary. The summary must contain a Markdown table with the tactic name and every task
-the agent worked on whose final state is `finished` or `blocked`, plus each task's state and its
-pull-request URL/state (`N/A` when no pull request exists). After the table, identify any remaining
-unresolved tasks or gates so the human can see what is left. End with a brief, short summary of what
-was completed and what remains; explicitly say when nothing remains.
+When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
+completion summary. Agents mark a completed tactic as `finished` using
+`PATCH /tactics/{id} {"status":"finished"}`; agents are explicitly forbidden from accomplishing,
+closing, or archiving tactics, which remain human-owned lifecycle actions. A finished current-week
+Maintenance tactic may be reopened or reused when additional work arrives during the same week.
+The summary must contain a Markdown table with the tactic name and every task the agent worked on
+whose final state is `finished` or `blocked`, plus each task's state and its pull-request URL/state
+(`N/A` when no pull request exists). After the table, identify any remaining unresolved tasks or
+gates so the human can see what is left. End with a brief, short summary of what was completed and
+what remains; explicitly say when nothing remains.
 
 ## Batch mode
 
