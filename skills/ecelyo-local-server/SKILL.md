@@ -27,6 +27,7 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 - Create app-side projects, tactics, or tasks when the workflow explicitly needs them.
 - Verify that the local server is reachable before an automation depends on it.
 - Ensure every created Ecelyo task has an explicit `agentRole`.
+- Load and follow `ecelyo-methodology` before registering any task, including task intake and reassignment.
 
 ## macOS Constraint
 
@@ -77,6 +78,7 @@ Ecelyo local server instances advertise their presence on the local network via 
 15. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
 16. **Whenever you move a task to `wip`, set `deeplinkUrl` and `agentTechnology` in the same `PATCH` call**. `deeplinkUrl` must be a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. `agentTechnology` must be the name of the active AI agent (e.g., "Codex", "Claude", "Antigravity"). These fields are required, not optional. The deeplink is distinct from the app's own `ecelyo://open/...` navigation links, which must never be used as the value here.
 17. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
+18. Before registering a task, verify that its tactic has a non-empty, scoped Markdown description stating the tactic's bounded goal and coherent end task. Do not create, reuse, or leave a tactic with an empty or generic description.
 
 ## Quick Start
 

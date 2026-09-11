@@ -142,6 +142,8 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - For task creation and reassignment in Ecelyo, evaluate tactic fit explicitly before adding work.
 - Whenever creating an Ecelyo task, assign an explicit `agentRole` at creation time.
 - When creating or updating descriptions in Ecelyo, prefer clean Markdown structure over plain prose blobs.
+- Before registering any task in Ecelyo, agents must load and follow `ecelyo-methodology` to validate tactic fit, task alignment, WIP discipline, and the required `agentRole`.
+- Every tactic used for task registration must have a non-empty, scoped Markdown description that states its bounded goal and coherent end task. Do not create, reuse, or leave a tactic with an empty or generic description.
 - Prefer an existing tactic only when the new work shares the same tactical arc; otherwise create a new tactic instead of piling unrelated tasks into an existing one.
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.
 - If Ecelyo connectivity fails during a task-dependent workflow, stop immediately and ask the user to start the server.
