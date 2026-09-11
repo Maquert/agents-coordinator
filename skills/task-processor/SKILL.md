@@ -50,6 +50,18 @@ When a user refers to the Ecelyo app, server, or methodology and asks to create 
 
 When the final QA task and all required work are finished, mark the tactic `accomplished`, Ecelyo's canonical completed status. Never archive it; archiving belongs to the human owner.
 
+### UI tactic design gate
+
+For any tactic involving UI, visual design, layout, interaction design, screenshots, or renders:
+
+1. Include a dedicated Design task with `agentRole: Product Designer` before every implementation task. Use the required initial parent task as this Design task when possible; if a separate coordination parent is necessary, place the Design task immediately after it and still before all implementation tasks.
+2. Make the Design task document the new renders and the exact implementation specification, including the relevant states, dimensions, tokens, assets, copy, platform or device variants, and acceptance criteria. The renders and specification must be committed and merged before implementation begins.
+3. Treat the merged design task as the implementation gate: implementation tasks must follow that one exact specification and must not start while the required renders or specification are unmerged.
+4. Set `needsHumanReview: true` on the Design task by default and normally require a human to approve the merged renders/specification before implementation begins. Record the approval in the task; if human approval is explicitly waived for a simple case, record that waiver instead.
+5. Implementation tasks may set `needsHumanReview: false` when human review is not needed for that implementation task. Do not infer this setting for the Design task or use it to bypass the design gate.
+
+For a UI tactic, report the Design task, the merged renders/specification, the human approval or explicit waiver, and each implementation task's `needsHumanReview` setting as part of intake.
+
 ## Required task contract
 
 Every task must have an active project and tactic, a non-empty goal, an explicit role, a canonical
