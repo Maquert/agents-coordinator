@@ -1,50 +1,34 @@
 ---
 name: release-candidate-hotfix
-description: Apply urgent fixes to the release-candidate branch with 99% confidence before pushing. Requires local build verification to prevent cascading failures.
+description: Diagnose and repair a failed release-candidate build, verify locally, integrate the fix through a PR, and create an immutable timestamped build milestone.
 ---
 
 # Release Candidate Hotfix Workflow
 
-Use this skill when the current release-candidate build is failing and needs an urgent fix. **Critical: Do NOT push to release-candidate until local build verification confirms 100% success.**
+Use this skill when the current `release-candidate` Xcode Cloud build fails and an urgent fix is
+required. Never push an unverified fix to `release-candidate`, and never push directly to `main`.
 
-## Procedure
+1. Inspect the hosted failure and reproduce the root cause in a dedicated linked worktree on a
+   non-`main` branch. Preserve unrelated work and change only the required files.
+2. Verify the fix locally with the repository's Xcode wrapper and `xcsift` output parsing. At
+   minimum, run the Release build for the affected scheme; test additional architectures or
+   configurations when the failure could be architecture/configuration-specific. Do not proceed
+   while any compiler error remains.
+3. Commit the focused hotfix and open a pull request into `main`. The PR must contain only the
+   hotfix and its required tests/metadata. Do not commit or push the fix directly to `main`.
+4. After the PR is merged, fetch `origin/main` and recreate the persistent
+   `~/Developer/Projects/ecelyo_app-release` worktree's `release-candidate` from that commit.
+5. Push `release-candidate` to trigger Xcode Cloud again. Use `--force-with-lease` only for the
+   intentional branch recreation, never an unchecked force push.
+6. After the account owner confirms the hosted build succeeds, create and push an annotated,
+   immutable milestone tag named `<marketing-version>-<UTC-timestamp>`, such as
+   `1.4.2-20260911-143000`. Never reuse an existing tag.
+7. If the fix introduced release metadata or other new release-related changes not already
+   merged, integrate them through a separate PR into `main` before the next candidate reset.
 
-1. **Apply the fix to main branch first**
-   - Navigate to the primary repo: `cd ~/Developer/Projects/ecelyo_app`
-   - Understand the root cause by examining compilation errors
-   - Make the necessary code changes to fix the build issue
+## Required guarantees
 
-2. **Local Build Verification (MANDATORY - 99% guarantee requirement)**
-   - Build locally: `xcodebuild build -project Ecelyo.xcodeproj -scheme Ecelyo -configuration Release -derivedDataPath .derivedData/Release 2>&1 | grep -E "error:"`
-   - **DO NOT proceed if there are any errors** — fix all issues first
-   - Verify the output shows ZERO errors
-   - Only after confirming zero errors, proceed to commit
-
-3. **Commit and push to main**
-   - `git add [files]`
-   - `git commit -m "Fix [issue description]"`
-   - `git push origin main`
-
-4. **Sync release-candidate with the fix**
-   - Navigate to release worktree: `cd ~/Developer/Projects/ecelyo_app-release`
-   - Fetch and update: `git fetch origin && git reset --hard origin/main`
-   - Push to release-candidate: `git push origin release-candidate --force-with-lease`
-
-5. **Verify Xcode Cloud rebuild**
-   - Monitor the next build
-   - Confirm the build succeeds
-
-## Critical Requirements
-
-- **100% local build verification BEFORE any push** — compile locally and confirm zero errors
-- **Find and fix ALL errors**, not just the first one visible
-- **Do not push** until you have 99% guarantee no failures will happen
-- **Understand root causes** — don't just apply surface-level fixes
-- **Test thoroughly** — different architectures (x86_64, arm64), different configurations
-
-## Why This Order
-
-- Local build verification prevents cascading failures that waste Xcode Cloud build time
-- Fixes go to main first because it's the source of truth
-- release-candidate gets synced from main, not modified separately
-- User doesn't have to keep telling you about new errors
+- Understand the root cause; do not mask symptoms or alter baselines to hide a failure.
+- Find and fix all relevant errors before pushing the candidate.
+- Keep the remote `release-candidate` branch available for Xcode Cloud.
+- Report the hotfix PR, validated commit, local build result, hosted result, and timestamp tag.

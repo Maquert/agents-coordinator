@@ -1,116 +1,73 @@
 ---
 name: ecelyo-release
-description: Generate releases for Ecelyo from origin/main without version bumps. Always uses the current MARKETING_VERSION and generates release notes from the last two git-tagged releases. Pushes to release-candidate branch to trigger Xcode Cloud TestFlight builds. Use for Ecelyo scheduled release automation.
+description: Prepare Ecelyo releases and Xcode Cloud builds from the persistent release-candidate branch, including semantic-version bumps, immutable milestone tags, release notes, and PR integration into main.
 ---
 
-# Ecelyo Release Generation
+# Ecelyo Release Workflow
 
-This skill encodes the Ecelyo release workflow with three enforced rules.
+Use `release-candidate` for every normal release and every requested Xcode Cloud build.
+All release-related changes must return to `main` through a pull request; never push release
+changes directly to `main`.
 
-## Three Enforced Rules
+## Release and build rules
 
-1. **Never bump version number** — Use the current `MARKETING_VERSION` from `Configuration/Base.xcconfig` unchanged. Do not modify it unless explicitly authorized.
-2. **Use last two git tags** — Generate release notes by comparing the last two semantic-version tags in the repository. Do not interactively select versions or version ranges.
-3. **Push to release-candidate only** — This workflow is for TestFlight via Xcode Cloud. Push the release-candidate branch to trigger the hosted build. Do not create tags, submit to App Store Connect, or perform integration.
+1. A normal release bumps `MARKETING_VERSION` according to the Xcode release contract:
+   patch by default, minor for persisted model/database fields or an explicitly requested
+   feature/minor release, and major only when explicitly requested. Never reuse an existing
+   immutable semantic-version tag.
+2. A new release version receives an annotated immutable tag named exactly `<version>` after
+   the candidate has passed the required hosted gates.
+3. Every build, including ordinary releases, receives an additional annotated immutable
+   milestone tag named `<version>-<UTC-timestamp>`, for example `1.4.2-20260911-143000`.
+   The timestamp must make the tag unique; never move or overwrite an existing build tag.
+4. Release notes compare the commits after the latest relevant semantic-version baseline
+   with the candidate changes. Build tags are milestones and must not become competing note
+   baselines. Include only user-visible features and fixes.
+5. Xcode Cloud is the default release mode. Pushing `release-candidate` triggers the hosted
+   build; do not open or operate Apple-hosted services. The account owner handles Xcode Cloud,
+   TestFlight, App Store Connect, Apple Developer, and CloudKit Console actions.
 
-## Workflow
+## Normal release
 
-### 1. Get Current Version
+1. Verify the primary checkout is clean and current with `origin/main`, fetch tags, inspect
+   the latest immutable semantic-version tag, and confirm GitHub authentication and remotes.
+2. Recreate the persistent sibling worktree at `~/Developer/Projects/ecelyo_app-release` from
+   the latest `origin/main`, checking that `release-candidate` is the only release branch used.
+3. Select the semantic version, update the authoritative marketing-version setting, and create
+   `RELEASE_NOTES.md` plus required localized store/beta metadata and in-app release notes.
+4. Run the fast release metadata and Xcode Cloud build-configuration checks. Do not push if
+   they fail; create the appropriate Ecelyo release task and report the blocker.
+5. Commit the complete release change on `release-candidate`, review the diff, and push the
+   branch. Do not create the version or build tags until the hosted build succeeds.
+6. After the owner confirms the hosted build and distribution gates pass, create and push the
+   exact-version tag and the unique timestamped build tag on the validated candidate commit.
+7. Open a PR with `release-candidate` as head and `main` as base containing only release-related
+   changes. Merge that PR through GitHub after review/required protection checks. Do not use a
+   local merge as a substitute. Keep the persistent remote branch available for Xcode Cloud.
+8. Verify the merged `main`, the release tags, and the remote `release-candidate` ref.
 
-```bash
-grep "MARKETING_VERSION" Configuration/Base.xcconfig | awk '{print $NF}'
-```
+## New build without a version bump
 
-Save this as `CURRENT_VERSION`.
+1. Start from the latest `origin/main` in the persistent release worktree and use the existing
+   `MARKETING_VERSION`.
+2. Add only requested build/release-note or hotfix changes, run the fast configuration checks,
+   commit on `release-candidate`, and push it to trigger Xcode Cloud.
+3. After the owner confirms the build succeeds, create and push only the unique
+   `<version>-<UTC-timestamp>` annotated tag on that build commit.
+4. Open and merge a PR for any new release-related changes; do not create a PR for an unchanged
+   commit merely to mark a build.
 
-### 2. Find Last Two Git Tags
+## Hotfixes and failures
 
-```bash
-git tag -l --sort=-version:refname | head -2
-```
+Use `release-candidate-hotfix` when the hosted build fails. Fix the root cause in a dedicated
+worktree/branch, verify locally, merge the fix into `main` through a PR, then recreate
+`release-candidate` from the merged `origin/main`, push it, and repeat hosted validation and
+timestamp tagging. Never push directly to `main`.
 
-These tags define the release-note comparison range:
-- Tag 1 (older baseline): compare FROM this commit
-- Tag 2 (most recent): compare TO this commit
+## Stop conditions and report
 
-If fewer than two tags exist, report this and stop.
-
-### 3. Generate Release Notes
-
-Run:
-
-```bash
-git log TAG1..TAG2 --oneline --no-merges
-```
-
-Filter the result to user-visible changes only (features, fixes users can experience). Group related changes. Rewrite as customer-facing release notes for `RELEASE_NOTES.md`.
-
-Do not include:
-- Technical renames or refactoring
-- Internal cleanup
-- Dependency updates (unless user-visible)
-- Test or CI infrastructure changes
-
-### 4. Update RELEASE_NOTES.md
-
-Create or update `RELEASE_NOTES.md` at the project root with the generated notes.
-
-Format:
-```
-# What's New in Ecelyo [CURRENT_VERSION]
-
-- Feature or fix users can experience
-- Another user-visible change
-- ...
-```
-
-### 5. Ensure Release Candidate is Up to Date
-
-In the release worktree (`~/Developer/Projects/ecelyo_app-release`):
-
-```bash
-git fetch origin main
-git checkout release-candidate
-git reset --hard origin/main
-```
-
-This ensures release-candidate exactly matches origin/main before release changes are added.
-
-### 6. Commit Release Notes
-
-```bash
-git add RELEASE_NOTES.md
-git commit -m "Prepare [CURRENT_VERSION] release notes"
-```
-
-Do not update MARKETING_VERSION, build numbers, or any other versioning.
-
-### 7. Push to Release Candidate
-
-```bash
-git push origin release-candidate
-```
-
-This push triggers Xcode Cloud to build for TestFlight.
-
-### 8. Verify Push Success
-
-Confirm the push succeeded and Xcode Cloud received the trigger.
-
-Report:
-
-| Item | Value |
-| --- | --- |
-| Current version | `CURRENT_VERSION` |
-| Release notes comparison | `TAG1` → `TAG2` |
-| Release notes file | `RELEASE_NOTES.md` (created/updated) |
-| Release candidate commit | `<SHA>` |
-| Push status | Success, Xcode Cloud triggered |
-
-## Error Handling
-
-- If fewer than two git tags exist, report this and stop.
-- If release-candidate cannot be synced to origin/main, report the exact Git error and stop.
-- If the push to release-candidate fails, report the exact push error and stop.
-
-Do not attempt to tag the release, create a GitHub pull request, submit to App Store Connect, or perform any other action beyond pushing the release-candidate branch.
+Stop on missing tags, an unsafely dirty worktree, a failed configuration check, a failed hosted
+gate, an existing conflicting immutable tag, or a push/PR error. Report the exact error and the
+furthest completed step. Each completed release report includes the version, comparison range,
+notes/metadata destinations, candidate commit, build-number convention, hosted result, both tag
+actions, PR URL/status, and verified remote refs.
