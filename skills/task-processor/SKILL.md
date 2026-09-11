@@ -32,14 +32,13 @@ For any explicit backlog-intake request:
 3. Check the destination project and tactic are active and that the task fits the tactic's persisted goal.
 4. If the user requests a new project or tactic, create it in Ecelyo under the active system with a clear title and objective.
 5. Assign every created task a due date based on the intake batch size: use the current calendar date plus 2 calendar days when the batch contains fewer than 5 tasks; for batches of 5 or more, use plus 3 calendar days by default and plus 4 calendar days when the batch is exceptionally large or needs additional coordination. Store the resulting date explicitly as an ISO-8601 `dueDate` value when creating the task.
-6. Write a Markdown task description containing:
-   - Goal and non-goals
-   - Current and desired behavior
-   - Affected files, modules, APIs, or UI surfaces
-   - Constraints and compatibility requirements
-   - Dependencies and ordering
-   - Validation plan
-   - The same numbered acceptance criteria stored in Ecelyo
+6. Write the task description as Markdown only, using these headings in this order:
+   - `## Summary` — the goal, current behavior, desired behavior, and non-goals.
+   - `## Requirements` — numbered, testable requirements; use the same numbered criteria stored in Ecelyo.
+   - `## Technical details` — affected files, modules, APIs, UI surfaces, constraints, compatibility requirements, dependencies, and ordering.
+   - `## Blockers` — known blockers, or `None identified.` when there are no blockers.
+   - `## Validation` — the validation plan and test coverage expected.
+   Do not write descriptions as unstructured prose or plain-text labels. Keep all formatting valid Markdown.
 7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
 8. Use `Trivial` when no priority is supplied and no stronger project rule applies.
 9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
