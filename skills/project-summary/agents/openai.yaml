@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Summary"
+  short_description: "Summarize builds and blocked tasks"
+  default_prompt: "Summarize the latest build contents and blocked tasks in tables only."
