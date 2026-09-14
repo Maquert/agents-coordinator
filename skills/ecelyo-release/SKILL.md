@@ -80,7 +80,7 @@ Every release/build handoff must use this table and must not add Apple-service o
 | Release-note comparison | `<semantic-tag> → candidate` |
 | Release notes / metadata | `<paths>` |
 | Candidate commit | `<SHA>` |
-| Build-number convention | `<sentinel or committed-number rule>` |
+| Build number | `<hosted build number or Xcode Cloud assigned>` |
 | Xcode configuration | `<passed / not run / failed>` |
 | Requires iCloud schema deploy | `Yes / No / Unknown` |
 | Candidate push | `<status>` |

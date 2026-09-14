@@ -186,7 +186,7 @@ scheme discovery details as a blocker:
 | Main-branch note commit | `<SHA or N/A>` |
 | Release notes / metadata | `<paths>` |
 | Candidate commit | `<SHA>` |
-| Build-number convention | `<sentinel or committed-number rule>` |
+| Build number | `<hosted build number or Xcode Cloud assigned>` |
 | Xcode configuration | `<passed / not run / failed>` |
 | Requires iCloud schema deploy | `Yes / No / Unknown` |
 | Candidate push | `<status>` |
