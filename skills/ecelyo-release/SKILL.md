@@ -66,8 +66,24 @@ timestamp tagging. Never push directly to `main`.
 
 ## Stop conditions and report
 
-Stop on missing tags, an unsafely dirty worktree, a failed configuration check, a failed hosted
-gate, an existing conflicting immutable tag, or a push/PR error. Report the exact error and the
-furthest completed step. Each completed release report includes the version, comparison range,
-notes/metadata destinations, candidate commit, build-number convention, hosted result, both tag
-actions, PR URL/status, and verified remote refs.
+Stop on missing tags, an unsafely dirty worktree, a failed required release gate, an existing
+conflicting immutable tag, or a push error. Report the exact error and furthest completed step.
+Do not present scheme discovery details as a blocker in the handoff table.
+
+Every release/build handoff must use this table and must not add Apple-service or pull-request rows:
+
+| Detail | Value |
+|---|---|
+| Target platform | macOS (or requested platform) |
+| Release mode | Xcode Cloud or Xcode manual |
+| Marketing version | `<version>` |
+| Release-note comparison | `<semantic-tag> → candidate` |
+| Release notes / metadata | `<paths>` |
+| Candidate commit | `<SHA>` |
+| Build-number convention | `<sentinel or committed-number rule>` |
+| Xcode configuration | `<passed / not run / failed>` |
+| Requires iCloud schema deploy | `Yes / No / Unknown` |
+| Candidate push | `<status>` |
+| Build milestone tag | `<version>-<UTC-timestamp>` or `Not created` |
+| Hosted build | `<status>` |
+| Blocker | `<none or concise actionable blocker>` |

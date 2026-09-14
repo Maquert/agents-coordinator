@@ -174,19 +174,25 @@ For Xcode manual mode only:
 
 ## Final Output
 
-Report:
+Report only this table. Do not add Apple-hosted-service or pull-request rows, and do not present
+scheme discovery details as a blocker:
 
-- target platform
-- release-note comparison range and the main-branch note commit
-- marketing version, committed build-number convention, and confirmed Xcode build configuration
-- App Store and internal release-note destinations
-- release commit hash
-- immutable semantic-version and timestamped build-tag actions
-- pushed branch and tags
-- pull request URL and confirmation that it contains only the new release-related changes
-- selected release mode:
-  - **Xcode Cloud (default):** report that build configuration validation passed, release-candidate was pushed, and Xcode Cloud is now building the release. Include the Xcode Cloud workflow URL when available.
-  - **Xcode manual (opt-out only):** report that release-candidate was pushed for developer handoff to Xcode for signed archive and TestFlight submission
-- verified remote `release-candidate` commit after integration (if auto-merge was requested)
+| Detail | Value |
+|---|---|
+| Target platform | macOS (or requested platform) |
+| Release mode | Xcode Cloud or Xcode manual |
+| Marketing version | `<version>` |
+| Release-note comparison | `<semantic-tag> → candidate` |
+| Main-branch note commit | `<SHA or N/A>` |
+| Release notes / metadata | `<paths>` |
+| Candidate commit | `<SHA>` |
+| Build-number convention | `<sentinel or committed-number rule>` |
+| Xcode configuration | `<passed / not run / failed>` |
+| Requires iCloud schema deploy | `Yes / No / Unknown` |
+| Candidate push | `<status>` |
+| Build milestone tag | `<version>-<UTC-timestamp>` or `Not created` |
+| Semantic-version tag | `<version>` or `Not created` |
+| Hosted build | `<status>` |
+| Blocker | `<none or concise actionable blocker>` |
 
 End with `RELEASE NOTES CREATED AT <CURRENT DATE>`, including day, month, year, hour, and minute.
