@@ -85,6 +85,13 @@ task manager's equivalent). “Implemented,” “PR opened,” and “ready” 
 statuses. A finished task must satisfy its delivery, validation, review, merge, cleanup, and task
 state gates; report each gate when relevant.
 
+## Tests before continuation
+
+Do not continue to the next task or dependent workflow while a required test or validation gate is
+failing. First diagnose and fix the test or the product defect, then rerun the affected test and the
+required broader gate. If the failure is proven pre-existing or environmental, stop and request or
+record explicit human acceptance before continuing; a rerun alone is not a fix.
+
 ## Final communication checklist
 
 Before sending a task-manager update, verify that it answers:
