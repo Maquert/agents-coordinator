@@ -1,0 +1,4 @@
+interface:
+  display_name: "iCloud Sync"
+  short_description: "Build and diagnose safe iCloud synchronization"
+  default_prompt: "Use $icloud-sync to design, validate, or diagnose this iCloud synchronization workflow."

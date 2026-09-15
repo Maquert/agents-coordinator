@@ -1,0 +1,4 @@
+interface:
+  display_name: "iCloud Persistence"
+  short_description: "Safely evolve persistence models and CloudKit schemas"
+  default_prompt: "Use $icloud-persistence to review a SwiftData, Core Data, or CloudKit schema change before deployment."

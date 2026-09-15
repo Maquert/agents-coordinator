@@ -1,9 +1,9 @@
 ---
-name: icloud-development
-description: Develop, review, release, and diagnose Apple iCloud synchronization backed by CloudKit, Core Data, or SwiftData. Use for CloudKit schema evolution and Production promotion, container and entitlement changes, local-to-cloud migrations, multi-device merge behavior, sync startup failures, CloudKit/Core Data logs, fallback storage, retry behavior, or release validation across macOS, iPhone, and iPad.
+name: icloud-sync
+description: Develop, diagnose, and validate iCloud synchronization across CloudKit, Core Data, and SwiftData. Use for import/export failures, multi-device convergence, fallback lifecycle, sync logs, runtime smoke tests, or release validation; use icloud-persistence for model and schema design.
 ---
 
-# iCloud Development
+# iCloud Sync
 
 Build iCloud synchronization as a multi-writer data system. Protect user data first, distinguish
 CloudKit failures from application migration failures, and treat Production schema changes as a
@@ -72,6 +72,24 @@ Treat schema deployment as part of shipping a model change:
 
 Do not assume Production permits just-in-time type or field creation. Do not promote a partial
 schema when the application writes an atomic graph spanning multiple record types.
+
+## Required schema warm-up launch
+
+Whenever the build contains a SwiftData model change or any iCloud database change (including Core
+Data models, CloudKit record types, fields, indexes, containers, or persistence configuration),
+make its app launch the first runtime validation action after building:
+
+1. Launch the intended app target and configuration in the documented Development environment,
+   or use the authorized signed-device configuration when the workflow explicitly requires it.
+2. Wait until the app is fully open and its persistence stack has initialized.
+3. Keep the app open for 10 seconds, timed from the ready state, then close it cleanly.
+
+This window gives SwiftData/CloudKit mirroring an opportunity to initialize and upload the new
+Development schema so a human can review and deploy it to Production. It is not proof of Production
+deployment or synchronization convergence. Record the target, configuration, environment,
+commit/build, open/ready/close times, and first actionable startup or migration error. If launch,
+persistence initialization, or the full 10-second window fails, block schema readiness and report
+the exact evidence.
 
 For destructive evolution, design an explicit versioned migration and rollback plan. Never delete
 Production fields, record types, zones, or user records without separate authorization and a

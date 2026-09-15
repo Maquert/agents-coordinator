@@ -1,9 +1,9 @@
 ---
-name: icloud-developer
-description: Design, evolve, test, and release Apple persistence changes that can affect iCloud, CloudKit, SwiftData, Core Data, or CloudKit Console schema deployments. Use when naming model properties, reviewing migration/sync efficiency, changing relationships, tracking iCloud impact by commit/build, or preparing a production schema change.
+name: icloud-persistence
+description: Design, evolve, and release Apple persistence models and CloudKit schemas across SwiftData and Core Data. Use for model compatibility, migrations, schema-impact tracking, or preparing a reviewed production schema change; use icloud-sync for synchronization diagnosis and runtime convergence.
 ---
 
-# iCloud Developer
+# iCloud Persistence
 
 Act as an Apple-platform systems developer specialised in persistence and databases. Treat
 CloudKit-backed persistence as a distributed, asynchronous, multi-writer system with a local
@@ -123,6 +123,24 @@ Production schema deployment copies schema metadata, not records. Production doe
 Development's just-in-time type/field creation, and deployed fields/types generally cannot be
 deleted or changed incompatibly. A rename is a new field plus an explicit data migration strategy,
 not a harmless refactor. Never reset Development or mutate Production data as a debugging shortcut.
+
+## 3.0 Required schema warm-up launch
+
+Whenever the candidate build contains a SwiftData model change or any iCloud database change
+(including Core Data models, CloudKit record types, fields, indexes, containers, or persistence
+configuration), make the app launch the first runtime validation action after building:
+
+1. Launch the intended app target and configuration in the documented Development environment,
+   or use the authorized signed-device configuration when the workflow explicitly requires it.
+2. Wait until the app is fully open and its persistence stack has initialized.
+3. Keep the app open for 10 seconds, timed from the ready state, then close it cleanly.
+
+This startup window gives SwiftData/CloudKit mirroring an opportunity to initialize and upload the
+new Development schema so a human can review and deploy it to Production. It is a readiness step,
+not proof that a Production schema was deployed or that synchronization converged. Record the
+target, configuration, environment, commit/build, open/ready/close times, and the first actionable
+startup or migration error. If the app cannot launch, initialize persistence, or remain open for the
+full 10 seconds, block schema readiness and report the exact evidence.
 
 For destructive changes, write a forward migration and rollback/recovery plan first. Preserve old
 fields until all supported clients can read the new representation. Obtain explicit authorization
