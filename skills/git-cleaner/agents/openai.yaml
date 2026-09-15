@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Cleaner"
+  short_description: "Audit and safely clean stale Git data"
+  default_prompt: "Use $git-cleaner to audit stale Git branches and worktrees safely."
