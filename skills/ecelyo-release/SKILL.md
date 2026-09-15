@@ -20,9 +20,12 @@ changes directly to `main`.
 3. Every build, including ordinary releases, receives an additional annotated immutable
    milestone tag named `<version>-<UTC-timestamp>`, for example `1.4.2-20260911-143000`.
    The timestamp must make the tag unique; never move or overwrite an existing build tag.
-4. Release notes compare the commits after the latest relevant semantic-version baseline
-   with the candidate changes. Build tags are milestones and must not become competing note
-   baselines. Include only user-visible features and fixes.
+4. Regenerate release notes every time from the last eight semantic-version tags. Select tags
+   matching `^(v)?MAJOR.MINOR.PATCH$`; ignore timestamped build tags and other markers. Compare
+   the oldest selected tag through candidate `HEAD`, including user-visible changes across those
+   releases and commits since the newest tag. If fewer than eight semantic tags exist, use all
+   available and report the count; stop only when none exist. Include only user-visible features
+   and fixes.
 5. Xcode Cloud is the default release mode. Pushing `release-candidate` triggers the hosted
    build; do not open or operate Apple-hosted services. The account owner handles Xcode Cloud,
    TestFlight, App Store Connect, Apple Developer, and CloudKit Console actions.
