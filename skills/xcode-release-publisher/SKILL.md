@@ -5,7 +5,7 @@ description: Prepare and publish Xcode releases and builds through the persisten
 
 # Xcode Release Publisher
 
-Prepare the complete release candidate, not only its notes. Load and follow `xcode-terminal-operator` and `xcode-output-parser` for Xcode discovery and builds, and `github-cli-operator` for GitHub authentication, branch pushes, and tags.
+Prepare the complete release candidate, not only its notes. This is the authoritative release workflow for Ecelyo and other Xcode projects. Select `Xcode Cloud` or `Xcode manual` as a mode parameter at the start; the shared preparation and release-note logic stays the same, while validation, signing, hosted handoff, tagging, and integration follow the selected mode. Load and follow `xcode-terminal-operator` and `xcode-output-parser` for Xcode discovery and builds, and `github-cli-operator` for GitHub authentication, branch pushes, and tags.
 
 ## Release Modes
 
