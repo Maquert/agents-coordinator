@@ -9,12 +9,20 @@ This is the canonical execution skill for one Ecelyo task per run. Ecelyo is the
 select, claim, update, and close work through the live server. Do not create local task records,
 lock files, or mirrored workflow state.
 
+Whenever communicating with the human during execution—including clarification, progress, review,
+blocker, or closeout messages—also load and use `task-manager-assistant`. Every such message must
+identify the task by title and ID plus its project and tactic names and IDs, include direct artifact
+links and inline visuals when relevant, and make the requested decision or next action explicit.
+
 ## Readiness
 
 Before editing, verify `GET /` and read `GET /tasks/{id}`. Use the task's goal, non-goals, affected
 surfaces, constraints, dependencies, validation plan, and `acceptanceCriteria` as the execution
-contract. If criteria are missing or materially ambiguous, add clear criteria through Ecelyo or
-stop and ask the user.
+contract. If criteria are missing, analyze the task and create a small set of agent-proposed criteria
+through Ecelyo, then tell the human what was added. If criteria or other details are materially
+ambiguous, ask a targeted question with a proposed default while continuing safe, reversible
+investigation; pause only when the ambiguity is a real scope, permission, or irreversible-action
+gate.
 
 Right before starting work, present:
 
@@ -112,6 +120,9 @@ active state and record the blocker in Ecelyo; do not claim completion.
 
 The final response must include task title and ID, project, tactic, branch, validation, pull request
 URL and state, cleanup result, acceptance-criteria result, and an unambiguous task status.
+Use `task-manager-assistant` to make that closeout human-readable: include direct links to relevant
+files or review artifacts, show useful renders or screenshots inline when possible, and mark an
+unresolved gate as `**BLOCKED**` with its owner and required next action.
 
 When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
 completion summary. Agents mark a completed tactic as `finished` using

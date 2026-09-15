@@ -8,6 +8,11 @@ description: "Capture raw requests as implementation-ready Ecelyo backlog tasks 
 Use this skill for backlog intake only. Do not implement the captured work in the same turn unless
 the user explicitly requests both intake and implementation.
 
+When intake requires clarification or a human-facing report, also load `task-manager-assistant`.
+Name the captured task by title and ID (never ID alone), include its project and tactic names and
+IDs, document any assumptions or answers in the Ecelyo record, and provide a direct task link when
+the server supplies one.
+
 Ecelyo is the only task store. Read and write projects, tactics, tasks, and acceptance criteria
 through the live Ecelyo server. Do not create a parallel local task record or repository mirror.
 
@@ -42,7 +47,7 @@ For any explicit backlog-intake request:
 7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
 8. Use `Trivial` when no priority is supplied and no stronger project rule applies.
 9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
-10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count.
+10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
 
 ## Complete tactic requests
 
