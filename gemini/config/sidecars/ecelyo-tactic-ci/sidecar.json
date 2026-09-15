@@ -1,0 +1,10 @@
+{
+  "builtin": "schedule",
+  "args": [
+    "0 */3 * * *",
+    "agentapi",
+    "new-conversation",
+    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks."
+  ],
+  "display_name": "Ecelyo Tactic CI"
+}
