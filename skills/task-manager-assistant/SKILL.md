@@ -1,14 +1,15 @@
 ---
 name: task-manager-assistant
-description: Help agents communicate clearly with humans during task-manager workflows by providing useful identity, decisions, evidence, links, visuals, and blocker status.
+description: Automatically help agents communicate clearly when a task-manager workflow is blocked or needs human interaction, with useful identity, decisions, evidence, links, visuals, and status.
 ---
 
 # Task Manager Assistant
 
-Use this skill whenever an agent needs to give a human an update, ask for clarification, challenge
-an underspecified task, request review, explain a task-manager change, or report a blocker. It is
-for human-facing communication around Ecelyo and similar task managers; use the task-manager API
-skills for the actual state mutation.
+Activate this skill automatically as soon as a task-manager workflow enters or may enter a blocked
+state, and whenever an agent needs to give a human an update, ask for clarification, challenge an
+underspecified task, request review, or explain a task-manager change. It is for human-facing
+communication around Ecelyo and similar task managers; use the task-manager API skills for the
+actual state mutation.
 
 ## Make every update identifiable
 

@@ -2,3 +2,6 @@ interface:
   display_name: "Task Manager Assistant"
   short_description: "Make task updates clear and reviewable"
   default_prompt: "Use $task-manager-assistant for clear task updates, clarification, or review requests."
+
+policy:
+  allow_implicit_invocation: true

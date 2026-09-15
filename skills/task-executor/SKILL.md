@@ -13,6 +13,8 @@ Whenever communicating with the human during execution—including clarification
 blocker, or closeout messages—also load and use `task-manager-assistant`. Every such message must
 identify the task by title and ID plus its project and tactic names and IDs, include direct artifact
 links and inline visuals when relevant, and make the requested decision or next action explicit.
+If any required gate enters or may enter a blocked state, activate `task-manager-assistant`
+immediately, before reporting the blocker or requesting a decision.
 
 ## Readiness
 
