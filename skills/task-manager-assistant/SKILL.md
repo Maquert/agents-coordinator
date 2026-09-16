@@ -11,6 +11,27 @@ underspecified task, request review, or explain a task-manager change. It is for
 communication around Ecelyo and similar task managers; use the task-manager API skills for the
 actual state mutation.
 
+## Proactive human handoff (mandatory)
+
+Never wait for the human to ask what needs review or to request a screenshot. As soon as a task
+enters a human-review gate, may become blocked on a human decision, or reaches a state where the
+next safe action depends on the human, proactively show the smallest useful review package in the
+same update:
+
+- identify the exact task, project, and tactic using their canonical titles and IDs;
+- state the specific decision required and the acceptance criterion or dependency it gates;
+- show the relevant renders, screenshots, or other visuals inline in the conversation, with a
+  caption naming the state and viewport/device;
+- provide direct artifact and Ecelyo links, and say explicitly when an artifact is unavailable;
+- give one actionable question or approval choice, then continue safe reversible preparation
+  without waiting when possible.
+
+Do not send a vague “please review” update, do not merely attach a visual to the task-manager
+record, and do not end the turn before showing a relevant visual when one exists. If the required
+visual does not exist, say that the review gate cannot yet be meaningfully answered and create or
+retrieve the smallest reviewable artifact when that is within scope; otherwise identify the exact
+owner and action needed to produce it.
+
 ## Make every update identifiable
 
 Never refer to a task by ID alone. In the same sentence or table, include:
