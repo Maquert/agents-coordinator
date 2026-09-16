@@ -55,6 +55,12 @@ When a user refers to the Ecelyo app, server, or methodology and asks to create 
 
 When the final QA task and all required work are finished, mark the tactic `accomplished`, Ecelyo's canonical completed status. Never archive it; archiving belongs to the human owner.
 
+### Test-improvement tactic naming
+
+When a tactic's primary goal is improving tests, test coverage, fixtures, snapshots, regression protection, test determinism, or test infrastructure, name the tactic with the exact `Test - <concise outcome>` prefix. For example: `Test - Add fixtures to task view`.
+
+Use this prefix only when test improvement is the tactic's main focus. An implementation or UI tactic that merely includes validation work keeps its product-focused name.
+
 ### UI tactic design gate
 
 For any tactic involving UI, visual design, layout, interaction design, screenshots, or renders:
