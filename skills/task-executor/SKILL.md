@@ -76,10 +76,15 @@ Do not append `Complete tactic`, a child-task name, an ID, or another suffix to 
 Task-level threads continue to use the current task name after the tactic name.
 
 Do not add agent prefixes, IDs, or additional status labels. Use the active agent platform's
-thread-title operation (for example, Codex's thread-title tool). This display title is separate
-from the Ecelyo `deeplinkUrl`, which must still point to the live conversation in the task's `wip`
-update. If the title cannot be changed, report that limitation before execution rather than
-silently using a misleading title.
+thread-title operation:
+- In **Codex**: use Codex's thread-title tool.
+- In **Antigravity**: update the `title` field in `~/.gemini/antigravity/annotations/<conversation-id>.pbtxt`.
+- In **Claude**: update the session title via platform tooling when available.
+
+This display title is separate from the Ecelyo `deeplinkUrl`, which must still point to the live
+conversation in the task's `wip` update (e.g. `antigravity://conversations/<conversation-id>`,
+`codex://threads/<thread-id>`, or `claude://agents/<agent-id>`). If the title cannot be changed,
+report that limitation before execution rather than silently using a misleading title.
 
 Examples:
 
@@ -94,8 +99,8 @@ Before editing, update the selected task in one request:
 ```json
 {
   "state": "wip",
-  "deeplinkUrl": "codex://threads/<thread-id>",
-  "agentTechnology": "Codex"
+  "deeplinkUrl": "antigravity://conversations/<conversation-id>",
+  "agentTechnology": "Antigravity"
 }
 ```
 
