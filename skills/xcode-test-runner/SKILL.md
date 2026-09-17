@@ -13,7 +13,7 @@ Use this skill to help agents test Xcode projects consistently. Load `xcode-term
 Every project that uses this workflow must contain `scripts/tests_config.sh`.
 
 - If the file is missing, create it before running tests.
-- Prefer the bundled installer: `~/.codex/skills/xcode-test/scripts/install_tests_config.sh <repo-root>`.
+- If using the bundled installer, pass the project's explicit simulator OS: `TEST_IOS_SIMULATOR_OS=<version> scripts/install_tests_config.sh <repo-root>`.
 - Source it in every test or build script that needs test destinations:
 
 ```bash
@@ -23,8 +23,9 @@ source "$REPO_ROOT/scripts/tests_config.sh"
 ## Standards
 
 - Always use explicit destinations. Do not auto-pick a simulator.
-- Hardcode the iPhone simulator to `iPhone 17` on `iOS 26.4`.
-- If that simulator/runtime is unavailable, fail clearly instead of substituting another device or OS.
+- Read the simulator device and OS from the repository's `scripts/tests_config.sh`; that project-owned configuration is the source of truth, not a global version in this skill.
+- Resolve the configured OS exactly. If the configured simulator/runtime is unavailable, fail clearly instead of substituting another device or OS.
+- Do not change a project's development or screenshot OS baseline to match this skill. Record the chosen development baseline in the project's technical requirements and test configuration; keep it separate from deployment targets.
 - Capture each phase into its own derived data path and result bundle path.
 - Pipe all `xcodebuild` output through `xcsift -f toon` with `2>&1`.
 - When both macOS and iPhone phases are required, start them in parallel and wait for both to finish before deciding whether to move on.
