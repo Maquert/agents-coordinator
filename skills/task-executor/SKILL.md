@@ -26,6 +26,10 @@ ambiguous, ask a targeted question with a proposed default while continuing safe
 investigation; pause only when the ambiguity is a real scope, permission, or irreversible-action
 gate.
 
+## Parent-task prerequisite
+
+Before claiming or starting a task, inspect its `parentIds` and read each parent task from Ecelyo. A task with no parents is eligible under this gate. If it has parents, every parent must have state `finished` before the child may be claimed or work may begin. If any parent is unfinished, blocked, missing, or its state cannot be verified, do not claim or reassign the child, set it to `wip`, create its worktree, or begin implementation; choose another ready task or wait for the prerequisite to finish. Recheck this gate immediately before claiming so a stale task listing cannot bypass it.
+
 Right before starting work, present:
 
 | Field | Value |
