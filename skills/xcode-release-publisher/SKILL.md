@@ -11,7 +11,7 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 There are two supported release modes. Select one explicitly at the start of every release and state it in the handoff:
 
-- **Xcode Cloud** — the current default. Follow the repository's Xcode Cloud workflow, hooks, hosted build-number ownership, and distribution gates. Validate the release build configuration before pushing `release-candidate`. Pushes to `release-candidate` trigger hosted validation; do not tag or integrate until the hosted run succeeds. Do not use a local distribution-archive script in this mode; Xcode Cloud owns the hosted archive and distribution gate. If build configuration validation fails, create a task in Ecelyo under the "App Store" project and "Release" tactic, then stop.
+- **Xcode Cloud** — the current default. Follow the repository's Xcode Cloud workflow, hooks, hosted build-number ownership, and distribution gates. Validate the release build configuration before pushing `release-candidate`. Pushes to `release-candidate` trigger hosted validation. Treat that hosted run as a non-blocking handoff: do not synchronously wait for it, repeatedly poll it, or keep this task open solely for Xcode Cloud. After the push, make at most one immediate status check if available, record the run URL and last observed status, report the handoff, and finish this execution while the run is pending or in progress. Hosted success remains mandatory before any later action that depends on it, including publishing a semantic-version tag or integrating the candidate; if such an action is requested while the run is pending, report the pending gate and hand off without waiting. Do not use a local distribution-archive script in this mode; Xcode Cloud owns the hosted archive and distribution gate. If build configuration validation fails, create a task in Ecelyo under the "App Store" project and "Release" tactic, then stop.
 - **Xcode manual** — opt out only when the developer explicitly requests it or the repository release request names it. The developer opens the pushed `release-candidate` branch in Xcode and owns the signed archive, App Store Connect upload, and final release action. Use the repository's local build phase or other documented local build-number generator, validate the embedded artifact locally when Xcode is available, and stop at the developer handoff. When the repository provides `scripts/xcode/archive_distribution_apps.sh`, treat it as the canonical manual archive workflow: after immediate approval for private-key use, execute it to archive every supported distribution scheme sequentially, including `Ecelyo` for generic macOS and `Ecelyo iOS` for generic iOS, with the repository's distribution signing inputs. Do not assume Xcode Cloud, trigger hosted workflows, create release tags, or merge the candidate unless the developer asks to continue after upload.
 
 If the developer does not name a mode, use **Xcode Cloud**.
@@ -119,7 +119,7 @@ Before pushing release-candidate to trigger Xcode Cloud builds, perform fast str
    - Preserve all coherent release work on `release-candidate` without pushing.
    - Create an Ecelyo task in the "App Store" project under the "Release" tactic describing the specific validation failure (e.g., "invalid build configuration", "missing provisioning profile", "scheme not discoverable").
    - Stop and report the validation blocker to the developer.
-7. If all validation passes, proceed to push release-candidate and report that Xcode Cloud is now working.
+7. If all validation passes, proceed to push `release-candidate`, then hand off to Xcode Cloud without waiting. Record the run URL and last status available from one immediate check; if pending or in progress, finish this execution and report the hosted gate as pending. Do not describe the hosted build as successful unless success is confirmed.
 
 ## 2.6 iCloud Impact Gate
 
@@ -136,7 +136,7 @@ local or hosted build does not replace CloudKit Production schema verification.
 
 ## 3. Build and Validate the Release Candidate (Xcode Manual Mode Only)
 
-For Xcode Cloud mode, build configuration validation has already passed in section 2.5; proceed to push the candidate and defer hosted validation to Xcode Cloud.
+For Xcode Cloud mode, build configuration validation has already passed in section 2.5; proceed to push the candidate and hand off hosted validation to Xcode Cloud. Do not wait or poll for completion; the candidate-preparation execution can finish with the hosted gate reported as pending. Any later tag or integration action remains gated on confirmed hosted success.
 
 For Xcode manual mode only:
 
@@ -154,10 +154,10 @@ For Xcode manual mode only:
 3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. In Xcode Cloud mode (default), this push triggers hosted validation; do not push release tags yet. Build configuration validation (section 2.5) must have passed before this push. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build. In Xcode manual mode, this push is the developer's Xcode handoff; do not push release tags yet.
 4. Do not call `gh pr create`, `gh pr edit`, `gh pr ready`, `gh pr merge`, or an equivalent API with `release-candidate` as the head branch. The absence of a pull request is an intentional branch-lifecycle requirement, not a blocker.
 5. For Xcode Cloud mode (default):
-   - Observe the run automatically triggered by the `release-candidate` push when that is the repository contract; never trigger it separately.
-   - Record the run URL, committed build-number convention, final artifact build number or numbers, destinations, and distribution result.
-   - Fix hosted-only failures on the same candidate branch, push follow-up commits normally, and rerun without publishing immutable version tags. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
-   - Require the final hosted archive and intended distribution to succeed before continuing.
+   - The `release-candidate` push triggers the run when that is the repository contract; never trigger it separately.
+   - Make at most one immediate status check, then record the run URL, last observed status, and any build number, destinations, or distribution result actually available. Do not wait synchronously or repeatedly poll. If pending or in progress, hand off and finish this execution; do not keep the task open for Xcode Cloud.
+   - Hosted success is still required before publishing immutable version tags or integrating the candidate. If a later requested action encounters a pending run, report the gate and hand off without waiting. Never claim artifact or distribution details that have not been observed.
+   - If a hosted failure is reported or observed, fix it on the same candidate branch, push follow-up commits normally, and hand off to the newly triggered run without publishing immutable version tags. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
 6. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head. Refuse to move an existing semantic-version tag.
 7. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
 8. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
@@ -191,7 +191,7 @@ Report:
 - pushed branch and tags
 - confirmation that no pull request was created for `release-candidate`
 - selected release mode:
-  - **Xcode Cloud (default):** report that build configuration validation passed, release-candidate was pushed, and Xcode Cloud is now building the release. Include the Xcode Cloud workflow URL when available.
+  - **Xcode Cloud (default):** report that build configuration validation passed, `release-candidate` was pushed, the run URL when available, and the last observed hosted status. If pending or in progress, explicitly say the hosted gate was handed off and remains pending; do not wait for completion or imply success. Report artifact build numbers, destinations, and distribution only when actually observed.
   - **Xcode manual (opt-out only):** report that release-candidate was pushed for developer handoff to Xcode for signed archive and TestFlight submission
 - verified remote `release-candidate` commit after integration (if auto-merge was requested)
 
