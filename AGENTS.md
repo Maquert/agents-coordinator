@@ -40,6 +40,14 @@
 - Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
 - If the Ecelyo server cannot persist a required tactic priority or another part of the complete tactic package, treat that as a missing server capability, record the required follow-up under Ecelyo's `local server improvements` tactic, and do not silently omit the field or create an incomplete tactic.
 
+## Weekly Maintenance Tactics
+
+- A Weekly Maintenance tactic is an open, rolling intake for small, low-risk, coherent maintenance work during one ISO week. It is not a single-delivery feature tactic and it must not be treated as complete when its current task graph temporarily has no remaining executable task.
+- Use the canonical name format `<ISO week>/<Month>`, for example `39/September`. The tactic description must contain the literal phrase `Weekly Maintenance` so agents can recognize that they are working inside this rolling weekly container even when its title is shown without project context.
+- Before selecting or creating work in one, read its title and description and state in the execution update that the task belongs to a Weekly Maintenance tactic. Keep additions small, non-risky, aligned with maintenance, and within the active ISO week; unrelated work belongs in another tactic.
+- Keep the tactic open throughout its named ISO week. Do not mark it `finished`, `accomplished`, `closed`, or `archived` because the currently visible tasks are done. Close the previous week's tactic only after the week has rolled over through the human-owned lifecycle action, and use the new current-week tactic for subsequent work.
+- At week rollover, do not add new work to the old tactic. Verify the new `<ISO week>/<Month>` tactic and its description before continuing.
+
 ## Task and Thread Relation
 
 - A task-level execution thread represents one Ecelyo task. Use the title format
