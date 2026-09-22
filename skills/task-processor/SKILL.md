@@ -49,6 +49,14 @@ For any explicit backlog-intake request:
 9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
 10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
 
+### Product Manager and Product Designer ambiguity gate
+
+For any task with `agentRole: Product Manager` or `agentRole: Product Designer`:
+
+- Include this explicit decision gate in the Markdown description, under `## Blockers` or `## Validation`: `If any requirement, product decision, visual detail, measurement, ownership, or acceptance detail is ambiguous or uncertain, ask the human what to do before proceeding and record the answer in Ecelyo.`
+- Add a dedicated acceptance criterion with the same check: `Any ambiguity or doubt is raised to the human before proceeding and the answer is recorded in Ecelyo; if no human clarification is needed, mark this criterion completed.`
+- Create that criterion with `isCompleted: true` when intake finds no ambiguity requiring human input. Otherwise create it with `isCompleted: false`, identify the open question in the task, and do not treat the task as ready for execution until the human answer is recorded.
+
 ## Complete tactic requests
 
 When a user refers to the Ecelyo app, server, or methodology and asks to create a tactic, create the complete tactic package in Ecelyo: a non-empty Markdown description/objective, an explicit priority, one initial parent task, one final QA task, and only the necessary middle tasks. Give every task an explicit `agentRole`, acceptance criteria, and ordering/parent relationships that support the tactic goal. Do not report success after creating only the tactic record. If the server cannot persist tactic priority or another required field, record the missing capability under `local server improvements` instead of silently omitting it.
