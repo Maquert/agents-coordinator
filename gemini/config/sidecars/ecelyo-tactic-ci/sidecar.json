@@ -1,7 +1,8 @@
 {
   "builtin": "schedule",
+  "restart_policy": "always",
   "args": [
-    "0 */3 * * *",
+    "0 */4 * * *",
     "agentapi",
     "new-conversation",
     "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks."
