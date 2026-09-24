@@ -1,11 +1,35 @@
 ---
 name: xcode-release-publisher
-description: Prepare and publish releases for Xcode projects by deriving customer-facing notes, selecting a semantic version, honoring the repository-defined build-number system, updating release metadata and localization catalogs, preparing either an Xcode manual or explicitly requested Xcode Cloud release, pushing the persistent release-candidate branch, tagging the validated candidate, and integrating it locally without a GitHub pull request for that branch. Use when Codex needs to generate, cut, prepare, validate, or publish a release for an Xcode app or Apple-platform project.
+description: Prepare and publish versioned releases or internal builds for Xcode projects by honoring the repository-defined version/build system, updating release metadata only for versioned releases, preparing either an Xcode manual or explicitly requested Xcode Cloud release, pushing the persistent release-candidate branch, tagging every validated build, and integrating release-only changes back into main through a pull request. Use when Codex needs to generate, cut, prepare, validate, or publish a release or build for an Xcode app or Apple-platform project.
 ---
 
 # Xcode Release Publisher
 
 Prepare the complete release candidate, not only its notes. Load and follow `xcode-terminal-operator` and `xcode-output-parser` for Xcode discovery and builds, and `github-cli-operator` for GitHub authentication, branch pushes, and tags.
+
+## Release Intent and Version Decision
+
+Classify the developer's request before changing release metadata:
+
+- **"Nueva build" / "new build"** means an internal build only. Keep the current
+  `MARKETING_VERSION` unchanged, do not create or rewrite release notes unless explicitly
+  requested, and only advance/publish the repository-defined build as well as the required
+  per-build timestamp tag.
+- For every other release request, ask explicitly whether the developer wants to bump the
+  marketing version before editing `MARKETING_VERSION`. Do not infer a patch, minor, or major
+  bump from the word “release” alone. If the answer is no, use the build-only path above.
+- If the developer confirms a version bump, record the chosen target version and continue with
+  the normal release-note and version-parity workflow. If they do not specify the bump level,
+  propose the repository's normal default and wait for confirmation before changing it.
+
+Every validated build receives an annotated timestamp tag in the form
+`<marketing-version>-<UTC timestamp>` even when the marketing version is unchanged. A semantic
+version tag is created only for a confirmed versioned release and only after the hosted/manual
+build gate succeeds.
+
+The version decision must be visible in the handoff table. A build-only request must explicitly
+show `Marketing version: unchanged (<current version>)` and must never silently become a new
+semantic release.
 
 ## Release Modes
 
@@ -73,27 +97,50 @@ Apply this protocol whenever Xcode Cloud is the selected release mode:
 - For apps that display in-app release notes on startup (e.g., Ecelyo): update both the `ReleaseNotesPayload.current` struct and the localized strings each release so users see fresh notes. The app automatically triggers display when `generatedAt` is newer than the last-seen timestamp stored in user defaults; updating the timestamp is the mechanism for re-triggering display on each new version.
 - Keep every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, on the branch named exactly `release-candidate`.
 - Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `~/Developer/Projects/ecelyo_app-release`.
-- Never create, open, update, or merge a GitHub pull request whose head is `release-candidate`. In Xcode Cloud mode, GitHub's post-merge branch cleanup can delete this persistent branch and break Xcode Cloud's branch binding; in Xcode manual mode, the persistent branch remains the developer's upload handoff.
+- Create a GitHub pull request from `release-candidate` back to `main` for release-only changes
+  (release notes, version metadata, startup-panel notes, build fixes, hotfixes, and required
+  screenshot references). Do not include unrelated product work. Merge it only after the exact
+  candidate has passed the required hosted/manual gate, and recreate the persistent remote branch
+  if hosting automation deletes it after the merge.
+- Whenever release notes are created or refreshed, including for a build-only request that
+  explicitly asks for new notes, the release-notes PR is mandatory and must be merged back into
+  `main` after the exact candidate passes the required hosted/manual gate. Do not leave a notes PR
+  open merely because the marketing version did not change. A build-only request with no notes
+  changes still needs no PR when `release-candidate` has no release-only diff.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
-- Push the candidate branch and validated tags directly. Review the candidate through its local diff and hosted artifacts; do not use a pull request for this persistent branch.
-- After the required release gates pass, integrate `release-candidate` with local Git rather than GitHub's merge operation only when the developer requests integration. In Xcode Cloud mode, keep `origin/release-candidate` intact so Xcode Cloud retains its branch binding. Never use `gh pr merge`, the GitHub merge API, or the GitHub merge button for this branch.
+- Push the candidate branch directly, then use the pull request for review and integration. Push
+  only validated immutable semantic-version tags and per-build timestamp tags.
+- After the required release gates pass, merge the release-only pull request into `main`. Verify
+  that the merged `main` contains only the intended release changes and that
+  `origin/release-candidate` remains present and points to the validated candidate.
 - Honor the Developer-Owned Apple Access Boundary above for every release, regardless of release
   mode or whether the developer explicitly asks for a hosted verification step.
 - Keep release preparation proportional to the selected mode. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. In Xcode manual mode, run the narrowest requested local build/archive validation when Xcode is available; do not upload or access App Store Connect. In Xcode Cloud mode, run only fast repository and metadata contract checks before pushing and let Xcode Cloud perform the normal release validation.
 - In Xcode manual mode, the final manual step before handoff is archiving every supported distribution platform. In the Ecelyo project, run `scripts/xcode/archive_distribution_apps.sh`; do not substitute ad hoc archive commands. Obtain immediate private-key approval before running it.
 
-## 0. Commit Release Notes on Main Before Starting the Release
+## 0. Prepare Release Notes on `release-candidate`
 
-Perform this phase on the primary default-branch checkout before creating or refreshing the persistent release worktree or `release-candidate` branch.
+Skip this phase for a build-only request. Build-only work starts from the current marketing
+version and does not modify release-note content or release-note version metadata.
 
-1. Require a clean, up-to-date default branch and fetch tags. Save the current `release_notes` tag (or the documented first-release fallback) as the comparison start before changing it.
+Perform this phase in the persistent `release-candidate` worktree after recreating that branch
+from the latest `origin/main`. The primary `main` checkout is read-only during release
+preparation; release-only changes return to `main` through the pull request in Phase 4.
+
+1. Require a clean, up-to-date `release-candidate` worktree and fetch tags. Save the current
+   `release_notes` tag (or the documented first-release fallback) as the comparison start before
+   changing release metadata.
 2. Read only the commits in that range that describe user-visible work. Filter out technical-only changes, group the remaining changes, and rewrite them as clear customer-facing release notes.
 3. Remove stale release-note entries from the repository's existing release-note destination and `Localizable.xcstrings` or equivalent catalog when present. Create the new internal release-note list in the repository-defined destination. If the destination cannot be inferred safely, stop before editing.
 4. Select the semantic version for this release using the release contract and carry it into the candidate phase. Bump the Xcode marketing version to this selected version in the *same commit* as the release notes, together with any version references in locale-specific release-metadata files and any internal release-notes spec used to validate version parity — never leave `RELEASE_NOTES.md` and the marketing version disagreeing on the default branch, even briefly, since a repository's CI may gate all test phases on that parity. Do not update the build number or perform any App Store Connect-only metadata change on main; those remain Phase 2 work on `release-candidate`.
-5. Commit the release-note changes together with the marketing-version bump and any synced metadata as one commit on the default branch, using `Prepare <version> release notes` unless repository instructions require another style. Move the single `release_notes` tag to this commit and push both the default branch and that marker tag. Run the repository's fast release-metadata validator (when present) before committing to confirm nothing was missed.
-6. Treat this note-and-version commit as the committed release baseline. Create or refresh the persistent release worktree and `release-candidate` from the updated default branch. Do not regenerate the same notes from the moved marker; only append candidate-specific user-visible changes later on `release-candidate`.
+5. Commit the release-note changes together with the marketing-version bump and any synced metadata as one commit on `release-candidate`, using `Prepare <version> release notes` unless repository instructions require another style. Do not push `main` or create release tags before the required hosted/manual build gate. Run the repository's fast release-metadata validator (when present) before committing to confirm nothing was missed.
+6. Treat this candidate commit as the release-note baseline for the current release. Preserve it on `release-candidate`, create the release-only pull request after the candidate push, and integrate it back into `main` only after the final release gates pass. Do not regenerate the same notes from the candidate range.
 
 ## 1. Establish a Safe Release Range
+
+For a build-only request, use the current marketing version as the release range label and do
+not derive or rewrite customer-facing release notes. Still inspect the candidate diff for the
+build handoff and collect the commits needed for the per-build timestamp tag.
 
 1. Read the repository instructions and any supplied automation memory before editing.
 2. Require a clean understanding of existing changes. Preserve unrelated user work and stop if it cannot be separated safely.
@@ -105,6 +152,17 @@ Perform this phase on the primary default-branch checkout before creating or ref
 8. Read only candidate-specific commits and changed files needed to identify additions after the Phase 0 note commit. Exclude technical-only maintenance from any note additions unless the developer requests it.
 
 ## 2. Select Versions and Write Notes
+
+For a build-only request:
+
+1. Keep `MARKETING_VERSION` and all release-note version references unchanged.
+2. Do not update `RELEASE_NOTES.md`, localized release notes, beta notes, startup release-note
+   payloads, or their localization entries unless the developer separately requests that work.
+3. Apply only the repository-defined build-number workflow and prepare the per-build timestamp
+   tag after the applicable hosted/manual build gate succeeds.
+
+For a versioned release, follow the explicit version decision captured above before performing
+the version-selection steps below.
 
 1. Preserve the Phase 0 release-note list and selected version. If candidate-specific commits add user-visible work, append only those changes in customer language.
 2. Confirm the Xcode marketing version already bumped in Phase 0 still matches the selected version. Recalculate and re-bump only when candidate-specific changes materially change the release scope; cross-check semantic-version tags and stop on unexplained version drift. If the version does change here, update `RELEASE_NOTES.md` and the Phase 0 metadata to match before continuing, so the eventual merge back to the default branch keeps everything in sync.
@@ -176,43 +234,52 @@ For Xcode manual mode only:
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the version update and `RELEASE_NOTES.md` are present.
 2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
 3. Replace `origin/release-candidate` with the local branch using `--force-with-lease`. In Xcode Cloud mode (default), this push triggers hosted validation; do not push release tags yet. Build configuration validation (section 2.5) must have passed before this push. When the repository configures Xcode Cloud to start on pushes to `release-candidate`, treat this push as the hosted-release trigger: complete every local gate first, never trigger the hosted workflow separately, and expect every follow-up push to start another build. In Xcode manual mode, this push is the developer's Xcode handoff; do not push release tags yet.
-4. Do not call `gh pr create`, `gh pr edit`, `gh pr ready`, `gh pr merge`, or an equivalent API with `release-candidate` as the head branch. The absence of a pull request is an intentional branch-lifecycle requirement, not a blocker.
+4. Create or update the release-only pull request from `release-candidate` to `main`. Keep the
+   PR limited to release notes, version/build metadata, hotfixes, and required screenshot
+   references. Do not merge it until the exact candidate SHA passes the required hosted/manual
+   gate. If release notes were created or refreshed, always create/update this PR even when the
+   marketing version is unchanged, and merge it after the gate succeeds.
 5. For Xcode Cloud mode (default):
    - The `release-candidate` push triggers the run when that is the repository contract; never trigger it separately.
    - Follow the Xcode Cloud Handoff protocol for the permitted status lookup, handoff report, exact-SHA success gate, and non-blocking behavior.
    - If a hosted failure is reported or observed, fix it on the same candidate branch and push follow-up commits normally; the new head requires its own successful run before tagging or integration. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
-6. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head. Refuse to move an existing semantic-version tag.
-7. Maintain exactly one movable `release_notes` tag by deleting its local reference when present and recreating it on the same validated commit.
-8. Push the immutable semantic-version tag. Force-update only the intentionally movable remote `release_notes` tag; never force-update a semantic-version tag.
-9. After the required gates and tags succeed, integrate the release without GitHub's merge operation when integration is requested:
+6. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head for a versioned release. Refuse to move an existing semantic-version tag.
+7. Create an annotated per-build tag named `<marketing-version>-<UTC timestamp>` on every validated build, including build-only requests. Refuse to reuse an existing immutable tag.
+8. Maintain exactly one movable `release_notes` tag for versioned releases by deleting its local reference when present and recreating it on the same validated commit.
+9. Push the immutable semantic-version tag (versioned releases only), the immutable per-build tag, and the intentionally movable `release_notes` tag when applicable. Never force-update an immutable tag.
+10. After the required gates and tags succeed, merge the release-only pull request into `main`.
+   This merge is mandatory whenever the candidate contains refreshed release notes, regardless of
+   whether the marketing version changed:
    - Require clean persistent release and primary worktrees, then fetch `origin`.
    - Verify `origin/release-candidate` still points to the validated and tagged candidate.
-   - Fast-forward the local default branch from `origin`, then merge `release-candidate` into it with local Git using a non-squash merge that preserves the tagged candidate commit.
-   - Push the merged default branch normally. Do not use `gh pr merge`, the GitHub merge API, or the GitHub merge button. If branch protection rejects the push, report that exact blocker and do not silently fall back to a GitHub merge.
-   - Verify `refs/heads/release-candidate` still exists remotely after the default-branch push and still points to the intended candidate. If hosting automation deleted it, immediately recreate it by pushing the local branch normally, then verify the remote ref again.
+   - Merge the PR with the repository-approved GitHub PR workflow; do not push directly to `main`.
+   - Verify the merged `main` contains only the intended release-only changes.
+   - Verify `refs/heads/release-candidate` still exists remotely after the merge and still points to the intended candidate. If hosting automation deleted it, immediately recreate it by pushing the local branch normally, then verify the remote ref again.
    - Leave `origin/release-candidate` present. Do not delete it locally or remotely.
-10. Leave the persistent release worktree on `release-candidate` after completion so the next release reuses it. Keep the primary worktree on the merged default branch.
+11. Leave the persistent release worktree on `release-candidate` after completion so the next release reuses it. Keep the primary worktree on the merged default branch.
 
 ## Failure Handling
 
 - Keep edits scoped to release work; do not fix unrelated issues.
-- Never merge a GitHub pull request whose head is `release-candidate`.
+- Never merge a pull request containing unrelated product work; the release PR must contain only
+  release notes, version/build metadata, hotfixes, and required release references.
 - Never reuse an existing version tag for different content.
 - If remote publication fails, preserve the coherent local commit and report the exact failed operation.
-- Treat “no pull request” as the successful expected state for `release-candidate`.
+- Treat the release-only pull request and its eventual merge into `main` as required completion
+  gates; do not claim completion while it remains open.
 
 ## Final Output
 
 Report:
 
 - target platform
-- release-note comparison range and the main-branch note commit
+- release-note comparison range and the `origin/main` baseline commit
 - marketing version, committed build-number convention, and confirmed Xcode build configuration
 - App Store and internal release-note destinations
 - release commit hash
 - semantic-version, iCloud impact, and `release_notes` tag actions; explicitly mark candidate-specific tags as deferred when the hosted gate is pending
 - pushed branch and tags
-- confirmation that no pull request was created for `release-candidate`
+- release-only pull request URL and merge state
 - selected release mode:
   - **Xcode Cloud (default):** report that build configuration validation passed, the candidate SHA, that `release-candidate` was pushed, the run URL when available, and the last observed status with its UTC observation time. If pending, in progress, or unavailable, say this was only a candidate handoff, the release is not finalized, and candidate-specific tags/integration are deferred; state the next action. Do not wait or imply success. Report artifact build numbers, destinations, and distribution only when actually observed.
   - **Xcode manual (opt-out only):** report that release-candidate was pushed for developer handoff to Xcode for signed archive and TestFlight submission
