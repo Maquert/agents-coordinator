@@ -45,9 +45,10 @@ For any explicit backlog-intake request:
    - `## Validation` — the validation plan and test coverage expected.
    Do not write descriptions as unstructured prose or plain-text labels. Keep all formatting valid Markdown.
 7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
-8. Use `Trivial` when no priority is supplied and no stronger project rule applies.
-9. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
-10. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
+8. For every QA task that validates a behavior change, require QA to review the existing tests and identify the necessary coverage before validation. When coverage is missing or incomplete, require QA to add or update the necessary automated tests and record that work as a numbered requirement with a matching acceptance criterion. For bug-fixing tasks, require a regression test that reproduces the fixed defect and prevents its recurrence, unless that is technically infeasible and the reason is documented. QA must not be scoped to running existing tests only when the changed behavior lacks coverage.
+9. Use `Trivial` when no priority is supplied and no stronger project rule applies.
+10. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
+11. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
 
 ### Product Manager and Product Designer ambiguity gate
 
