@@ -45,6 +45,13 @@ Use `GET /tasks/priority` when the user asks for the next task. Follow Ecelyo's 
 completion-first tactic selection. A `wip` task belongs to another agent unless the user explicitly
 reassigns it. Keep one task in progress per agent.
 
+## Project and task-state gates
+
+- Never claim or start a task belonging to a project whose name contains the word `IceBox` (case-insensitive). Exclude those tasks from selection and do not set them to `wip`.
+- Use `blocked` only when the agent genuinely cannot proceed because of a concrete execution blocker, such as an inconvenient external constraint, a source-code conflict, an impossible or contradictory requirement, an unavailable dependency or access requirement, or another condition that requires resolution outside the agent's current control.
+- When a task is genuinely blocked, update its Ecelyo description with a clear Markdown `## Blocker` section before or together with the state update. Record the concrete reason, relevant evidence, and the smallest required resolution; do not only write the reason in a progress message.
+- Human review is not a blocker. When the work is ready for a person to inspect, approve, or decide, use the Ecelyo state `in review` and describe the requested review or decision. Do not use `blocked` merely because human review is required.
+
 ## Stale tactics and tasks
 
 A tactic or task is **stale** when:
@@ -139,14 +146,18 @@ all review comments, address actionable feedback, and merge according to priorit
 Do not mark a task finished merely because code or a pull request exists.
 
 After merge, remove the dedicated worktree and associated branches when permitted, verify cleanup,
-then update Ecelyo with `PATCH /tasks/{id} {"state":"finished"}`. If blocked, preserve the accurate
-active state and record the blocker in Ecelyo; do not claim completion.
+then update Ecelyo with `PATCH /tasks/{id} {"state":"finished"}`. If a genuine execution blocker
+prevents completion, update the task description with the blocker reason and set its state to
+`blocked`; do not claim completion. If only human inspection, approval, or a decision remains, set
+the state to `in review` instead of `blocked`.
 
 The final response must include task title and ID, project, tactic, branch, validation, pull request
-URL and state, cleanup result, acceptance-criteria result, and an unambiguous task status.
+URL and state, cleanup result, acceptance-criteria result, and an unambiguous task status. Report
+`**BLOCKED**` only for a genuine execution blocker, including its owner and required next action;
+when human review is the only remaining gate, report `**IN REVIEW**` and use Ecelyo state `in review`.
 Use `task-manager-assistant` to make that closeout human-readable: include direct links to relevant
 files or review artifacts, show useful renders or screenshots inline when possible, and mark an
-unresolved gate as `**BLOCKED**` with its owner and required next action.
+unresolved execution blocker as `**BLOCKED**` with its owner and required next action.
 
 When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
 completion summary. Agents mark a completed tactic as `finished` using
