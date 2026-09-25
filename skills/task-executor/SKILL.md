@@ -45,6 +45,19 @@ Use `GET /tasks/priority` when the user asks for the next task. Follow Ecelyo's 
 completion-first tactic selection. A `wip` task belongs to another agent unless the user explicitly
 reassigns it. Keep one task in progress per agent.
 
+## Stale tactics and tasks
+
+A tactic or task is **stale** when:
+1. It is not finished or closed (i.e. not in `finished`, `accomplished`, `archived`, or `closed` status/state); and
+2. Its last update timestamp (`updatedAt`, or `createdAt` if never updated) was **2 days ago or more** relative to current time.
+
+### Handling stale items
+
+- **Stale tactics**: Unfinished tactics with no updates for 2 days or more indicate stalled initiatives, stranded worktrees, or obsolete goals. When auditing or selecting tactics, inspect stale tactics to verify whether they should be resumed, rescoped, marked `finished`, or archived by the human owner.
+- **Stale tasks**: Unfinished tasks with no activity for 2 days or more (e.g. abandoned `wip` or `pending` tasks without active agent sessions) should be reviewed for stale premises before execution.
+- **Verification before resumption**: Before claiming, resuming, or building upon a stale tactic or task, verify that its prerequisites, acceptance criteria, and target code remain valid against the latest `main` branch.
+
+
 ## Thread naming
 
 Rename the live agent thread as soon as the execution unit is resolved and before beginning any
