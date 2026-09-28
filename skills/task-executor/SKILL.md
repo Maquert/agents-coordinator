@@ -145,6 +145,22 @@ Default delivery is one focused commit and one pull request per task. Push the t
 all review comments, address actionable feedback, and merge according to priority and project policy.
 Do not mark a task finished merely because code or a pull request exists.
 
+Immediately after the pull request is opened and its canonical URL is available, register it on the
+same Ecelyo task before inspecting review comments, requesting human review, or doing other
+follow-up work. Use the live server's task update route with the task ID and this payload shape:
+
+```json
+{
+  "pullRequestUrl": "<canonical-pull-request-url>",
+  "pullRequestState": "open"
+}
+```
+
+Then read `GET /tasks/{id}` and verify that both pull-request fields were persisted. If registration
+fails, do not continue as though the task were synchronized: retry the supported task update, and if
+the server still rejects or cannot persist the PR, record that exact synchronization blocker in the
+task description and use the appropriate task state.
+
 After merge, remove the dedicated worktree and associated branches when permitted, verify cleanup,
 then update Ecelyo with `PATCH /tasks/{id} {"state":"finished"}`. If a genuine execution blocker
 prevents completion, update the task description with the blocker reason and set its state to
