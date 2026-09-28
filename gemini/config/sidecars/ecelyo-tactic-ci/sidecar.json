@@ -2,10 +2,11 @@
   "builtin": "schedule",
   "restart_policy": "always",
   "args": [
-    "0 */4 * * *",
+    "0 */8 * * *",
     "agentapi",
     "new-conversation",
-    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks."
+    "--",
+    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks.\nFocus on tactics from project 7052D534-0D70-45D1-BFB5-4A6C5B77E08D."
   ],
-  "display_name": "Ecelyo Tactic CI"
+  "display_name": "Ecelyo Tactic Maintenance"
 }

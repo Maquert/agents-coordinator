@@ -5,7 +5,8 @@
     "0 9 * * *",
     "agentapi",
     "new-conversation",
-    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete tasks from the Ecelyo project."
+    "--",
+    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete tasks from the Ecelyo project.\nPick only tasks from tactic C458BAAA-650F-4C96-8A95-4045762E0002"
   ],
-  "display_name": "Ecelyo - Complete tactic"
+  "display_name": "Ecelyo - Performance tactic"
 }
