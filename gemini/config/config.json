@@ -1,15 +1,15 @@
 {
   "sidecars": {
     "batch-tasks": {
-      "enabled": true,
+      "enabled": false,
       "projectId": "b2b2b353-a9b6-42c5-ac4d-32ae72da79f8"
     },
     "ecelyo-tactic-ci": {
-      "enabled": true,
+      "enabled": false,
       "projectId": "b2b2b353-a9b6-42c5-ac4d-32ae72da79f8"
     },
     "papiplan-complete-tactic": {
-      "enabled": true,
+      "enabled": false,
       "projectId": "964e8a66-5d0e-41cc-af46-f7de52cb4fd5"
     }
   },
