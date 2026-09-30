@@ -60,7 +60,7 @@ A tactic or task is **stale** when:
 
 ### Handling stale items
 
-- **Stale tactics**: Unfinished tactics with no updates for 2 days or more indicate stalled initiatives, stranded worktrees, or obsolete goals. When auditing or selecting tactics, inspect stale tactics to verify whether they should be resumed, rescoped, marked `finished`, or archived by the human owner.
+- **Stale tactics**: Unfinished tactics with no updates for 2 days or more indicate stalled initiatives, stranded worktrees, or obsolete goals. When auditing or selecting tactics, inspect stale tactics to verify whether they should be resumed, rescoped, or marked `finished`; if archival appears appropriate, record that as a human-owner follow-up and never archive the tactic yourself.
 - **Stale tasks**: Unfinished tasks with no activity for 2 days or more (e.g. abandoned `wip` or `pending` tasks without active agent sessions) should be reviewed for stale premises before execution.
 - **Verification before resumption**: Before claiming, resuming, or building upon a stale tactic or task, verify that its prerequisites, acceptance criteria, and target code remain valid against the latest `main` branch.
 
@@ -176,9 +176,11 @@ files or review artifacts, show useful renders or screenshots inline when possib
 unresolved execution blocker as `**BLOCKED**` with its owner and required next action.
 
 When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
-completion summary. Agents mark a completed tactic as `finished` using
-`PATCH /tactics/{id} {"status":"finished"}`; agents are explicitly forbidden from accomplishing,
-closing, or archiving tactics, which remain human-owned lifecycle actions. A finished current-week
+completion summary. Agents may mark a completed tactic as `finished` using
+`PATCH /tactics/{id} {"status":"finished"}` or use `accomplished` when the active workflow
+explicitly requires that completed state and all tasks are resolved. Agents are explicitly forbidden
+from archiving, closing, deleting, or otherwise hiding tactics. Accomplishing a tactic and archiving
+it are distinct operations; archival remains a human-owned lifecycle action. A finished current-week
 Maintenance tactic may be reopened or reused when additional work arrives during the same week.
 The summary must contain a Markdown table with the tactic name and every task the agent worked on
 whose final state is `finished` or `blocked`, plus each task's state and its pull-request URL/state
