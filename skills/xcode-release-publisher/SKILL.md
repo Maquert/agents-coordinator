@@ -1,6 +1,6 @@
 ---
 name: xcode-release-publisher
-description: Prepare and publish versioned releases or internal builds for Xcode projects by honoring the repository-defined version/build system, updating release metadata only for versioned releases, preparing either an Xcode manual or explicitly requested Xcode Cloud release, pushing the persistent release-candidate branch, tagging every validated build, and integrating release-only changes back into main through a pull request. Use when Codex needs to generate, cut, prepare, validate, or publish a release or build for an Xcode app or Apple-platform project.
+description: Prepare and publish Alpha internal builds or Beta/public releases for Xcode projects by honoring the repository-defined version/build system, selecting the approved branch and BUILD_TYPE lane, handing pushes to Xcode Cloud without invoking it, and integrating release-only changes back into main through a pull request. Use when Codex needs to prepare, validate, or publish a release or build for an Xcode app or Apple-platform project.
 ---
 
 # Xcode Release Publisher
@@ -9,27 +9,72 @@ Prepare the complete release candidate, not only its notes. Load and follow `xco
 
 ## Release Intent and Version Decision
 
-Classify the developer's request before changing release metadata:
+Classify the developer's release intent before selecting a branch, checking tags, changing
+metadata, or pushing anything. The approved project contract is maintained in
+[`specifications/v1/release-process-contract.md`](https://github.com/Maquert/Ecelyo_app/blob/main/specifications/v1/release-process-contract.md).
 
-- **"Nueva build" / "new build"** means an internal build only. Keep the current
-  `MARKETING_VERSION` unchanged, do not create or rewrite release notes unless explicitly
-  requested, and only advance/publish the repository-defined build as well as the required
-  per-build timestamp tag.
-- For every other release request, ask explicitly whether the developer wants to bump the
-  marketing version before editing `MARKETING_VERSION`. Do not infer a patch, minor, or major
-  bump from the word “release” alone. If the answer is no, use the build-only path above.
-- If the developer confirms a version bump, record the chosen target version and continue with
-  the normal release-note and version-parity workflow. If they do not specify the bump level,
-  propose the repository's normal default and wait for confirmation before changing it.
+| Intent | Source branch | Schedule or trigger | Required build type | Result |
+| --- | --- | --- | --- |
+| Internal testing / Alpha | `main` | Xcode Cloud's daily scheduled release, at an unspecified time between 02:00 and 06:00 Europe/Madrid; any tag pushed to `main` also triggers an internal-testing build | `BUILD_TYPE=ALPHA` | Internal testing build; Alpha enables functionality by default |
+| External testers / public candidate / Beta | `release-candidate` | Every commit pushed to `release-candidate` triggers a new Xcode Cloud release build | `BUILD_TYPE=BETA` | External-tester/public candidate; Beta disables functionality by default |
 
-Every validated build receives an annotated timestamp tag in the form
-`<marketing-version>-<UTC timestamp>` even when the marketing version is unchanged. A semantic
-version tag is created only for a confirmed versioned release and only after the hosted/manual
-build gate succeeds.
+The human-approved conflict resolution is **automatic Beta-on-push**, not on-demand
+`release-candidate` releases. An on-demand request is therefore a request to prepare a deliberate
+candidate commit and obtain human confirmation of its scope before pushing; it is never a reason to
+invoke Xcode Cloud manually or to bypass the branch trigger.
 
-The version decision must be visible in the handoff table. A build-only request must explicitly
-show `Marketing version: unchanged (<current version>)` and must never silently become a new
-semantic release.
+Xcode Cloud owns version/build generation after it captures the push. The agent prepares the
+repository, commits, tags where the lane requires them, and pushes the selected branch or tag; the
+agent does not invoke Xcode Cloud, manufacture a hosted version/build, or access Apple-hosted
+services. A push to `release-candidate` is itself a new Beta release trigger, and every follow-up
+push creates another hosted release build.
+
+For a versioned release, ask explicitly whether the developer wants to bump `MARKETING_VERSION`
+before editing it. Do not infer a patch, minor, or major bump from the word “release” alone. If the
+developer confirms a bump, record the chosen target version in the handoff table and continue with
+the normal release-note and version-parity workflow. If the request is build-only, keep the current
+marketing version and do not rewrite release notes unless explicitly requested.
+
+Before any version metadata change, re-upload, or repeated build activity, check whether the exact
+semantic-version tag already exists. If it exists, stop and ask the human to confirm the repeat;
+never move or reuse an immutable version tag silently. A confirmed versioned release may create the
+semantic tag only after the required hosted/manual gate, while a build-only request may create only
+the repository-defined per-build tag after that gate.
+
+The version decision and selected lane must be visible in the handoff table. A build-only request
+must explicitly show `Marketing version: unchanged (<current version>)`.
+
+## Approved Dual-Lane Operating Rules
+
+- **Alpha:** work from `main`; use `BUILD_TYPE=ALPHA`. The scheduled Alpha release runs daily in
+  the 02:00–06:00 Europe/Madrid window, but no exact start hour is promised. A tag pushed to
+  `main` starts the Xcode Cloud internal-testing build and separates that build from the next
+  version. Do not describe the scheduled window as a fixed-hour cron job.
+- **Beta:** recreate `release-candidate` directly from the latest `origin/main` before adding
+  release-only changes; use `BUILD_TYPE=BETA`. Every commit pushed to that branch starts a new
+  Xcode Cloud public-release build. Do not add an on-demand trigger, invoke Xcode Cloud, or route
+  public promotion through `main`.
+- **Feature flags:** `BUILD_TYPE=ALPHA` enables functionality by default and `BUILD_TYPE=BETA`
+  disables functionality by default. Each feature flag must record whether it follows that default
+  or intentionally overrides it, including the override reason and owner/review decision. Agents
+  must consult the project's feature-flag registry rather than infer an exception from source code.
+- **Apple ownership:** Xcode Cloud, App Store Connect, TestFlight, Apple Developer, and CloudKit
+  Console remain developer-owned. A hosted build is a handoff until an authorized status source or
+  developer confirms its result.
+
+### Lane examples
+
+| Scenario | Required selection | Confirmation or stop condition |
+| --- | --- | --- |
+| Daily overnight internal build | `main` + `BUILD_TYPE=ALPHA` | Proceed with repository-side preparation; do not wait for an exact hour |
+| New internal version tag | `main` + `BUILD_TYPE=ALPHA` | Confirm the semantic-version tag is absent before changing version metadata or pushing the tag |
+| Existing internal version tag | `main` + `BUILD_TYPE=ALPHA` | Stop and ask the human before any re-upload or repeated version build |
+| Internal manual request | `main` + `BUILD_TYPE=ALPHA` | Treat as an internal lane request; never route it to `release-candidate` or invoke Xcode Cloud |
+| Release-candidate commit | `release-candidate` + `BUILD_TYPE=BETA` | Push only after local checks and deliberate scope review; the push automatically starts Xcode Cloud |
+| On-demand Beta request | `release-candidate` + `BUILD_TYPE=BETA` | Explain that on-demand is not an approved trigger; obtain scope confirmation, then use a deliberate candidate commit |
+| External tester build / public candidate | `release-candidate` + `BUILD_TYPE=BETA` | External distribution may proceed after hosted validation; App Store promotion remains owner-controlled |
+| Failed candidate | Same exact candidate branch and `BUILD_TYPE=BETA` | Fix on the same branch, push the follow-up, and wait for that new hosted result; do not tag or promote the failed SHA |
+| Public promotion | `release-candidate` + `BUILD_TYPE=BETA` | Require the validated exact candidate and developer-owned Apple action; `main` cannot bypass this gate |
 
 ## Release Modes
 
@@ -62,27 +107,30 @@ not merely a missing-credential workaround.
 
 ## Xcode Cloud Handoff
 
-Apply this protocol whenever Xcode Cloud is the selected release mode:
+Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Cloud:
 
-- After pushing `release-candidate`, do not wait synchronously, repeatedly poll, or keep the task
-  open solely for the hosted run. Make at most one immediate status lookup using a repository-
-  authorized, non-Apple status surface (for example, GitHub checks/status when the repository
-  exposes the run). Never open Xcode Cloud's web console. If no permitted source exposes a result
-  and the developer has not supplied one, report the status as unavailable; do not infer success
-  or failure.
-- Record the exact candidate commit SHA, the run URL when available, the last observed status and
-  its UTC observation time, and the next action required. Report build numbers, archive results,
-  destinations, or distribution only when that source explicitly confirms them.
+- Xcode Cloud starts the build after its scheduled Alpha event, an Alpha tag push to `main`, or a
+  Beta commit push to `release-candidate`. The agent does not invoke Xcode Cloud, click a workflow,
+  generate a hosted version/build, or wait for a fixed scheduled minute. A push is the handoff.
+- After an Alpha tag push or Beta `release-candidate` push, do not wait synchronously, repeatedly
+  poll, or keep the task open solely for the hosted run. Make at most one immediate status lookup
+  using a repository-authorized, non-Apple status surface (for example, GitHub checks/status when
+  the repository exposes the run). Never open Xcode Cloud's web console. If no permitted source
+  exposes a result and the developer has not supplied one, report the status as unavailable; do not
+  infer success or failure.
+- Record the exact pushed commit SHA, lane, `BUILD_TYPE`, run URL when available, last observed
+  status, and UTC observation time. Report build numbers, archive results, destinations, or
+  distribution only when that source explicitly confirms them.
 - If the run is pending, in progress, or unavailable, finish this execution as a candidate handoff,
-  not as a completed release. Do not publish the candidate's semantic-version or iCloud impact tag,
-  or integrate the candidate. State that those gates remain pending and can be resumed in a later
-  request after a result is available.
+  not as a completed release. Do not publish a semantic-version, per-build, or iCloud impact tag,
+  or integrate the candidate until the required gate is confirmed. State that those gates remain
+  pending and can be resumed in a later request after a result is available.
 - Before a later requested tag or integration action, make one fresh permitted status lookup (or
   use a newly supplied developer result) and verify that the successful hosted run corresponds to
-  the exact current `release-candidate` SHA. Any follow-up commit creates a new candidate that must
-  pass its own hosted run; an earlier commit's success is not sufficient. If status is still
-  pending or unavailable, hand off without waiting. If a failure is available, report it and fix it
-  on the same candidate branch before handing off to the newly triggered run.
+  the exact current pushed SHA. Any follow-up commit creates a new Beta candidate and its own hosted
+  run; an earlier commit's success is not sufficient. If status is still pending or unavailable,
+  hand off without waiting. If a failure is available, fix it on the same candidate branch before
+  handing off to the newly triggered run.
 
 ## Release Contract
 
@@ -92,10 +140,10 @@ Apply this protocol whenever Xcode Cloud is the selected release mode:
 - Before any release work, require `release-candidate` to be recreated directly from the latest `origin/main`; it must be up-to-date with `origin/main`, never based on a rebase of an older candidate. Verify the two refs match before adding release changes.
 - Follow the repository's build-number convention. In the absence of one, increment the highest numeric build number among the released app targets by one. When the repository commits a fake sentinel and generates timestamp-based build numbers during compilation, preserve the sentinel, never commit a generated build number, and validate the embedded artifact value instead. If a Unix epoch-minute value exceeds Apple's `CFBundleVersion` component limits, preserve the exact minute in an ordered 4.2.2-digit encoding such as `NNNN.NN.NN` rather than embedding an invalid oversized integer.
 - Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Describe features users can experience when they start using the app and relevant fixes users would notice. Do not mention renames, legacy product identities, agent process, repository mechanics, or technical cleanup unless the developer explicitly asks for them. Do not claim changes unsupported by the release range.
-- Require version-controlled store metadata on `release-candidate`: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
+- Require version-controlled store metadata on the selected release lane: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - For apps that display in-app release notes on startup (e.g., Ecelyo): update both the `ReleaseNotesPayload.current` struct and the localized strings each release so users see fresh notes. The app automatically triggers display when `generatedAt` is newer than the last-seen timestamp stored in user defaults; updating the timestamp is the mechanism for re-triggering display on each new version.
-- Keep every source-controlled release change, including `RELEASE_NOTES.md` and any required build-number update, on the branch named exactly `release-candidate`.
+- Keep Beta source-controlled release changes, including `RELEASE_NOTES.md` and any required build-number update, on `release-candidate`; keep Alpha changes and internal release metadata on `main` when the Alpha contract requires them there.
 - Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `~/Developer/Projects/ecelyo_app-release`.
 - Create a GitHub pull request from `release-candidate` back to `main` for release-only changes
   (release notes, version metadata, startup-panel notes, build fixes, hotfixes, and required
@@ -118,14 +166,16 @@ Apply this protocol whenever Xcode Cloud is the selected release mode:
 - Keep release preparation proportional to the selected mode. Do not run local unit tests, screenshot tests, or other test suites unless the developer explicitly requests them for that release. In Xcode manual mode, run the narrowest requested local build/archive validation when Xcode is available; do not upload or access App Store Connect. In Xcode Cloud mode, run only fast repository and metadata contract checks before pushing and let Xcode Cloud perform the normal release validation.
 - In Xcode manual mode, the final manual step before handoff is archiving every supported distribution platform. In the Ecelyo project, run `scripts/xcode/archive_distribution_apps.sh`; do not substitute ad hoc archive commands. Obtain immediate private-key approval before running it.
 
-## 0. Prepare Release Notes on `release-candidate`
+## 0. Prepare Release Notes for the Selected Lane
 
 Skip this phase for a build-only request. Build-only work starts from the current marketing
 version and does not modify release-note content or release-note version metadata.
 
-Perform this phase in the persistent `release-candidate` worktree after recreating that branch
-from the latest `origin/main`. The primary `main` checkout is read-only during release
-preparation; release-only changes return to `main` through the pull request in Phase 4.
+For Beta, perform this phase in the persistent `release-candidate` worktree after recreating that
+branch from the latest `origin/main`. For Alpha, perform only the explicitly requested internal
+release-note work on `main` and do not create a Beta candidate. The primary `main` checkout is
+read-only when a task is preparing a Beta candidate; release-only changes return to `main` through
+the pull request in Phase 4.
 
 1. Require a clean, up-to-date `release-candidate` worktree and fetch tags. Save the current
    `release_notes` tag (or the documented first-release fallback) as the comparison start before
@@ -188,7 +238,8 @@ the version-selection steps below.
 
 ## 2.5 Validate Build Configuration (Xcode Cloud Mode Only)
 
-Before pushing release-candidate to trigger Xcode Cloud builds, perform fast structural checks on the release build configuration:
+Before the selected lane's trigger—an Alpha tag push to `main` or a Beta push to
+`release-candidate`—perform fast structural checks on the release build configuration:
 
 1. Verify the Xcode project and workspace are discoverable and buildable.
 2. Verify all required distribution schemes exist and are accessible.
@@ -198,10 +249,10 @@ Before pushing release-candidate to trigger Xcode Cloud builds, perform fast str
 4. Verify `MARKETING_VERSION` matches the selected release version.
 5. Verify all entitlements, provisioning profiles, signing identities, and deployment targets are valid.
 6. If any validation fails:
-   - Preserve all coherent release work on `release-candidate` without pushing.
+   - Preserve all coherent release work on the selected lane without pushing its trigger.
    - Create an Ecelyo task in the "App Store" project under the "Release" tactic describing the specific validation failure (e.g., "invalid build configuration", "missing provisioning profile", "scheme not discoverable").
    - Stop and report the validation blocker to the developer.
-7. If all validation passes, push `release-candidate` and follow the Xcode Cloud Handoff protocol. Do not describe the hosted build as successful unless a permitted status source confirms it for this candidate commit.
+7. If all validation passes, push only the selected lane trigger and follow the Xcode Cloud Handoff protocol. Do not describe the hosted build as successful unless a permitted status source confirms it for this exact pushed SHA.
 
 ## 2.6 iCloud Impact Gate
 
@@ -230,6 +281,23 @@ For Xcode manual mode only:
 6. If a fast release-contract check fails, diagnose the failure, keep coherent release work safely on `release-candidate`, and do not tag or push release tags as though validation passed.
 
 ## 4. Commit, Publish the Candidate, Tag, and Integrate Locally
+
+### Alpha publication
+
+Use this path for internal testing. Alpha source and internal release metadata remain on `main`;
+do not create a `release-candidate` branch or Beta PR for an Alpha build.
+
+1. Review the intended `main` diff and confirm the selected `BUILD_TYPE=ALPHA` policy and feature-flag
+   decisions. Keep unrelated work out of the release commit.
+2. Check the exact semantic-version tag before changing version metadata. If it already exists, stop
+   and ask the human whether a repeated internal build is authorized; never move the immutable tag.
+3. After the local structural gate passes, push the approved annotated version tag (or the approved
+   per-build tag) to `main`. That tag push is the Xcode Cloud internal-testing trigger and delimits
+   the build from the next version. The agent does not invoke Xcode Cloud or generate the build.
+4. Make at most one permitted status lookup, record the pushed SHA, `BUILD_TYPE=ALPHA`, UTC
+   observation time, and any available status, then hand off if the result is pending or unavailable.
+
+### Beta publication
 
 1. Review the release diff and verify it contains no unrelated changes. Ensure both the version update and `RELEASE_NOTES.md` are present.
 2. Create the initial release commit on `release-candidate`, using `Prepare <version> release` unless repository instructions require another style. Hosted-only fixes may add candidate commits before the final tag; do not pretend an unvalidated commit is immutable.
