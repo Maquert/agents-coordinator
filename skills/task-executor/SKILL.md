@@ -182,6 +182,11 @@ Use `task-manager-assistant` to make that closeout human-readable: include direc
 files or review artifacts, show useful renders or screenshots inline when possible, and mark an
 unresolved execution blocker as `**BLOCKED**` with its owner and required next action.
 
+Every summary of work done, including the final task closeout and any tactic completion summary,
+must include the date on which the summary was created in CET. Start the summary with exactly:
+`Summary created: YYYY-MM-DD (CET, UTC+01:00)`. Use the current date at the moment the summary is
+written, not a task, commit, or status-update date and not the agent's local timezone.
+
 When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
 completion summary. Agents may mark a completed tactic as `finished` using
 `PATCH /tactics/{id} {"status":"finished"}` or use `accomplished` when the active workflow
