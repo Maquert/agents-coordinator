@@ -45,6 +45,22 @@ Use `GET /tasks/priority` when the user asks for the next task. Follow Ecelyo's 
 completion-first tactic selection. A `wip` task belongs to another agent unless the user explicitly
 reassigns it. Keep one task in progress per agent.
 
+## Tactic and task-series prioritization
+
+When a tactic or series of tasks is presented, first identify its explicit chain order, parent
+relationships, and human-review gates. The order of an explicit chain takes precedence over every
+other selection heuristic: do not skip a prerequisite or reorder chained tasks merely because a
+later task looks easier.
+
+Among tasks that are eligible at the current position in the chain, prefer completing tasks that
+are likely to resolve without human intervention. Whenever possible, leave challenging tasks or
+tasks likely to require clarification, approval, or human review until the independently resolvable
+work has been completed. Keep those tasks accurately pending or `in review`, and use the `? ` thread
+prefix when requesting input or review, rather than claiming them or forcing progress without the
+required human input. If the chain makes the
+challenging task the next required task, follow the chain and apply its appropriate review or
+information gate.
+
 ## Project and task-state gates
 
 - Never claim or start a task belonging to a project whose name contains the word `IceBox` (case-insensitive). Exclude those tasks from selection and do not set them to `wip`.
@@ -202,6 +218,8 @@ what remains; explicitly say when nothing remains.
 
 ## Batch mode
 
-For an explicitly requested batch, execute tasks sequentially. Refresh Ecelyo after each completion,
-never pre-claim the batch, and stop when a task is unavailable, blocked, fails validation, or cannot
-complete its delivery and cleanup gates.
+For an explicitly requested batch, execute tasks sequentially. Preserve the presented chain order;
+within the currently eligible tasks, resolve the tasks least likely to require human intervention
+first and leave likely review or decision tasks for later whenever the chain permits it. Refresh
+Ecelyo after each completion, never pre-claim the batch, and stop when a task is unavailable,
+blocked, fails validation, or cannot complete its delivery and cleanup gates.
