@@ -22,7 +22,7 @@
 ## Ecelyo Task System
 
 - Ecelyo is the sole source of truth for task, project, tactic, ownership, acceptance-criteria, and completion state.
-- Use the live Ecelyo server for intake, selection, progress updates, blockers, and completion.
+- Use the live Ecelyo Satellite for intake, selection, progress updates, blockers, and completion.
 - Do not create local task records, checklists, lock files, or mirrored state.
 - Keep tactics coherent, with one persisted goal and a clear completion point.
 - A request to create an Ecelyo tactic means creating the complete package: non-empty Markdown

@@ -1,5 +1,5 @@
 ---
-name: lylat---task-intake
+name: ecelyo---task-intake
 model: claude-haiku-4-5-20251001
 description: Takes roughly defined tasks and creates proper task items
 ---

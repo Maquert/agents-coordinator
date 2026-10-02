@@ -7,7 +7,7 @@ Ecelyo connectivity (using cached `ECELYO_SERVER_IP` or Bonjour discovery when n
 Select exactly one active tactic before starting work:
 
 1. Use the cached `ECELYO_SERVER_IP` environment variable if available and reachable. If unset or
-   unreachable, discover the Ecelyo server through Bonjour under `_ecelyo._tcp.local.` (deduplicating
+   unreachable, discover Ecelyo Satellite through Bonjour under `_ecelyo._tcp.local.` (deduplicating
    repeated interface announcements by advertised instance name; stopping if there is no instance or
    more than one distinct instance; never silently choosing a server or falling back to `localhost`),
    and cache the resolved IP in `ECELYO_SERVER_IP`.

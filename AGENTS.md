@@ -6,11 +6,14 @@
 
 ## Default Task System
 - The default task system for all agents is the Ecelyo system; task, project, and tactic records live there.
+- The live Ecelyo HTTP service is called **Ecelyo Satellite** at the functional level. Keep
+  `local server` only for technical identifiers such as `ecelyo-local-server` and the API
+  environment variables.
 - A prompt whose first non-whitespace text is `New task:` (case-insensitive) must load and use the `task-processor` skill for task intake.
 - For a `New task:` prompt, capture the remainder as a task and do not implement it in the same turn unless the user explicitly asks for both intake and implementation.
 - The `New task:` prefix authorizes task intake. Keep Ecelyo as the task store.
 - The default methodology for all agents working for you is `ecelyo-methodology`.
-- Ecelyo local-server mutations authenticate with the `ECELYO_SERVER_TOKEN` environment variable. Agents must source it from the shell environment, pass it as an `Authorization: Bearer` header, and never print, commit, or include its value in task descriptions, logs, or responses.
+- Ecelyo Satellite mutations authenticate with the `ECELYO_SERVER_TOKEN` environment variable. Agents must source it from the shell environment, pass it as an `Authorization: Bearer` header, and never print, commit, or include its value in task descriptions, logs, or responses.
 - By default, agents must load and use the `ecelyo-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Ecelyo local HTTP server as the primary workflow state for task progress updates.
 - Treat Ecelyo as a task-system philosophy, not only as an app or HTTP server.
@@ -30,10 +33,10 @@
   operations; archival is always a human-owned lifecycle action.
 - Agents must never claim or start tasks belonging to a project whose name contains the word `IceBox` (case-insensitive). Exclude those tasks from selection and do not reassign them to yourself; choose another eligible task instead.
 - Do not create local task-record files as a parallel or fallback workflow; synchronize task state through Ecelyo.
-- No task may proceed without a working Ecelyo server connection.
-- If an agent cannot connect to the Ecelyo local server when task synchronization is expected, it must stop and explicitly ask the user to start the server before continuing.
+- No task may proceed without a working Ecelyo Satellite connection.
+- If an agent cannot connect to Ecelyo Satellite when task synchronization is expected, it must stop and explicitly ask the user to start it before continuing.
 - Treat missing Ecelyo connectivity as a blocking error, not as a degraded mode.
-- If the Ecelyo local server is unreachable, mention the likely cause when known, such as disabled server or wrong port.
+- If Ecelyo Satellite is unreachable, mention the likely cause when known, such as the service being disabled or the wrong port.
 - Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable to reduce unnecessary discovery steps. Perform automatic Bonjour/mDNS discovery of the `_ecelyo._tcp.local.` service only when needed (such as when `ECELYO_SERVER_IP` is unset, empty, or unreachable). When discovering via Bonjour, resolve the single advertised service to its current host and port, cache the resolved IP in `ECELYO_SERVER_IP` for subsequent connections, and authenticate with `ECELYO_SERVER_TOKEN` using `Authorization: Bearer`.
 - If Bonjour discovery is unavailable, finds zero servers, or finds multiple servers (and no valid cached `ECELYO_SERVER_IP` responds), report that condition and ask the user to select or provide the intended server. A manually copied URL or `ECELYO_SERVER_IP` is a fallback only; do not silently guess `localhost`.
 - Write Ecelyo task, tactic, and related descriptions in Markdown by default so they stay readable for both agents and humans.
@@ -46,7 +49,7 @@
   - `Localization Team`: updates wording, semantics, and internationalization-related behavior; can make code changes when needed.
   - `Product Designer`: focuses on visual descriptions, images, assets, icons, and aesthetic refinement; may make minimal code changes when needed.
 - Create custom agent roles when the provided roles do not fit the task well, but do not leave `agentRole` empty.
-- If the Ecelyo server cannot persist a required tactic priority or another part of the complete tactic package, treat that as a missing server capability, record the required follow-up under Ecelyo's `local server improvements` tactic, and do not silently omit the field or create an incomplete tactic.
+- If Ecelyo Satellite cannot persist a required tactic priority or another part of the complete tactic package, treat that as a missing service capability, record the required follow-up under Ecelyo's `local server improvements` tactic, and do not silently omit the field or create an incomplete tactic.
 
 ## Weekly Maintenance Tactics
 
@@ -73,7 +76,7 @@
   execution level: task state for task-level threads, tactic state for tactic-level threads. Do not
   infer state from a conversation merely being open or from an unrelated child task.
 - When the `ecelyo-methodology` skill is in use and the Ecelyo API is missing an operation needed to preserve the methodology, record that as follow-up work for the Ecelyo project under the `local server improvements` tactic.
-- When an agent needs to perform a task-related API action that the Ecelyo server does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/ecelyo_app`.
+- When an agent needs to perform a task-related API action that Ecelyo Satellite does not support, the agent must add that need as work for the Ecelyo project at `/Users/mhjaso/Developer/Projects/ecelyo_app`.
 - File that follow-up under the project issues and the tactic `local server improvements`.
 - If the needed project issue or tactic does not exist, create it.
 - If an agent updates an existing task's description (rescoping, clarifying, correcting a stale premise), it must add a follow-up child task capturing that update and start working on it immediately, so the change is not lost to a later edit, a concurrent agent, or a dropped session.
@@ -156,7 +159,7 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - Read-only certificate or provisioning-profile inspection and unsigned or ad-hoc validation that cannot access a private key may proceed without this approval.
 - Whenever planning to execute code or commands that are likely to require approval, anticipate the permission need and request it early so the user can step away while work continues.
 - For automation prompts that require Git writes, include “request escalation for branch/merge/push if sandbox blocks Git metadata” so the automation can ask for approval early when needed.
-- For task workflows, verify Ecelyo local server connectivity early when the run depends on task state or task updates.
+- For task workflows, verify Ecelyo Satellite connectivity early when the run depends on task state or task updates.
 - Do not create local task-record files as a fallback, convenience step, or side effect when Ecelyo-backed work is requested.
 - For task creation and reassignment in Ecelyo, evaluate tactic fit explicitly before adding work.
 - Whenever creating an Ecelyo task, assign an explicit `agentRole` at creation time.
@@ -167,7 +170,7 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - When creating a new tactic, include or plan for a clear starting task and a clear final task so tactic completion is legible.
 - If Ecelyo connectivity fails during a task-dependent workflow, stop immediately and ask the user to start the server.
 - Surface failed Ecelyo synchronization as a blocking error, not as a quiet note or optional warning.
-- Make clear that no task work can proceed until the Ecelyo server responds.
+- Make clear that no task work can proceed until Ecelyo Satellite responds.
 - When the Ecelyo API is missing a needed operation, do not silently work around it and stop there; create or update the corresponding Ecelyo project issue under `/Users/mhjaso/Developer/Projects/ecelyo_app`, using the project issues area and the `local server improvements` tactic.
 - When the Ecelyo task record or repository map already narrows the relevant files, use that narrower scope first instead of widening the read set by default.
 - For UI work, start with the narrowest dedicated screenshot or snapshot contract that covers the changed surface; only widen to broader screenshot suites after the focused path is missing or proves insufficient.

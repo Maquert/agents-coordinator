@@ -1,5 +1,5 @@
 ---
-name: lylat---nightly
+name: ecelyo---nightly
 description: Nighlty builds
 ---
 

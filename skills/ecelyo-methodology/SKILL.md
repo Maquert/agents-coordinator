@@ -5,7 +5,7 @@ description: Apply the Ecelyo way of work as a task-system philosophy. Use when 
 
 # Ecelyo Methodology
 
-Use this skill when the task is not only about calling the Ecelyo server, but about following the Ecelyo way of work.
+Use this skill when the task is not only about calling Ecelyo Satellite, but about following the Ecelyo way of work.
 
 This skill defines the working philosophy.
 The companion skill `ecelyo-local-server` defines how to connect to the server and update live task state.
@@ -41,7 +41,7 @@ Execution should emerge from the workflow rather than repeated decisions during 
 ## Mandatory Rules
 
 1. Ecelyo, meaning the Ecelyo system and its board wherever it is surfaced, is the **sole** source of truth for tracked work. Do not create local task-record files as a parallel or backup record. If repository instructions describe another task store, treat them as stale and flag the conflict to the user rather than following them.
-2. No task work may proceed without a working Ecelyo server connection. If the server is down, stop and ask the user to start it — do not use local files as a substitute.
+2. No task work may proceed without a working Ecelyo Satellite connection. If the service is down, stop and ask the user to start it — do not use local files as a substitute.
 3. Every tactic must have one explicit, non-empty goal persisted as a tactic property. All tasks assigned to the tactic must align with that goal and contribute to the tactic's coherent end task; if that alignment cannot be explained, create or refine a different tactic instead of assigning the task.
 4. Tactics are not buckets. When work does not share that goal or end task, create a new tactic instead of adding clutter.
 5. Scoped tactics are better than massive tactics. When in doubt, create a new tactic.
@@ -64,7 +64,7 @@ When a user refers to the Ecelyo app, server, or methodology and asks to create 
 - one final QA task; and
 - only the necessary middle tasks, each with an explicit `agentRole`, acceptance criteria, and relationships/order that support the tactic goal.
 
-The initial parent task establishes the tactic's scope and the final QA task verifies the delivered outcome and closes the tactical arc. Do not report the tactic as created until its required tasks exist. If the server cannot persist tactic priority or another required part of this package, treat that as a missing server capability and record the follow-up under Ecelyo's `local server improvements` tactic rather than silently omitting it.
+The initial parent task establishes the tactic's scope and the final QA task verifies the delivered outcome and closes the tactical arc. Do not report the tactic as created until its required tasks exist. If Ecelyo Satellite cannot persist tactic priority or another required part of this package, treat that as a missing service capability and record the follow-up under Ecelyo's `local server improvements` tactic rather than silently omitting it.
 
 When all required work and final QA are complete, mark the tactic with Ecelyo's canonical completed status, `accomplished`. Never archive the tactic after completion; archiving is reserved for the human owner.
 

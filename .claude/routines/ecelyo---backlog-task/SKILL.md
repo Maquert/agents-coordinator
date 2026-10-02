@@ -1,5 +1,5 @@
 ---
-name: lylat---backlog-task
+name: ecelyo---backlog-task
 description: Picks a backlog task, implements it and pushes the result to a Pull Request
 model: claude-sonnet-4-6
 ---

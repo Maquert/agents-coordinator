@@ -1,19 +1,19 @@
 ---
 name: ecelyo-local-server
 models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Ecelyo's macOS-only local HTTP server to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state.
+description: Connect to Ecelyo Satellite, Ecelyo's macOS-only local HTTP service, to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state.
 ---
 
-# Ecelyo Local Server
+# Ecelyo Satellite
 
-Use this skill when Codex needs to communicate with Ecelyo's local HTTP server over HTTP.
+Use this skill when Codex needs to communicate with Ecelyo Satellite over its local HTTP API.
 
 **Ecelyo is the sole system of record for task state.** Do not create local task-record files as a
 parallel mirror, progress note, or fallback. If repository instructions disagree with Ecelyo, treat
 those instructions as stale and flag the conflict to the user instead of following them silently.
 
 Use this skill as the required task-system bridge when Ecelyo-backed task work is in scope.
-No task may proceed when the Ecelyo server is unreachable.
+No task may proceed when Ecelyo Satellite is unreachable.
 
 Prefer TOON when handing repeated Ecelyo records to another agent or skill.
 Use plain JSON when the payload is irregular, deeply nested, or needs to stay close to the raw API response.
@@ -25,13 +25,13 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 - Update app-side task state, such as `pending` → `wip` → `finished`, during execution.
 - Reassign existing tasks to another project or tactic without recreating them.
 - Create app-side projects, tactics, or tasks when the workflow explicitly needs them.
-- Verify that the local server is reachable before an automation depends on it.
+- Verify that Ecelyo Satellite is reachable before an automation depends on it.
 - Ensure every created Ecelyo task has an explicit `agentRole`.
 - Load and follow `ecelyo-methodology` before registering any task, including task intake and reassignment.
 
 ## macOS Constraint
 
-Ecelyo's local server is **macOS-only** and lives on the LAN, not `localhost`. When `ECELYO_SERVER_IP`
+Ecelyo Satellite is **macOS-only** and lives on the LAN, not `localhost`. When `ECELYO_SERVER_IP`
 is already set in the environment and reachable, reuse it directly to avoid unnecessary discovery steps.
 Run Bonjour discovery only when `ECELYO_SERVER_IP` is unset, empty, or unreachable, and cache the
 resolved IP in `ECELYO_SERVER_IP` for subsequent requests. Authenticated endpoints require
@@ -45,7 +45,7 @@ the token.
 
 ## Network Discovery (mDNS / Bonjour)
 
-Ecelyo local server instances advertise their presence on the local network via Multicast DNS (mDNS) / Bonjour under service type `_ecelyo._tcp.local.` (port 8080).
+Ecelyo Satellite instances advertise their presence on the local network via Multicast DNS (mDNS) / Bonjour under service type `_ecelyo._tcp.local.` (port 8080).
 
 - **On-demand discovery**: Run discovery only when `ECELYO_SERVER_IP` is not yet cached or fails connectivity check.
 - **Resolution flow**: browse `_ecelyo._tcp.local.`, resolve exactly one service with `dns-sd -L`,
@@ -53,7 +53,7 @@ Ecelyo local server instances advertise their presence on the local network via 
 - **Repository client**: `swift run --package-path tools/mock-agent mock-agent discover` performs
   the same Bonjour resolution and prints the current base URL.
 - Discovery must fail clearly when zero or multiple servers are advertised; never choose an arbitrary server.
-- **Specification Contract**: See [Local Server Network Discovery Specification v1](file:///Users/mhjaso/Developer/Projects/ecelyo_app/specifications/v1/local-server-discovery.md).
+- **Specification Contract**: See [Ecelyo Satellite Network Discovery Specification v1](file:///Users/mhjaso/Developer/Projects/ecelyo_app/specifications/v1/local-server-discovery.md).
 
 ## Shared Rules
 
@@ -63,7 +63,7 @@ Ecelyo local server instances advertise their presence on the local network via 
 4. Treat Ecelyo as a workflow philosophy, not only a transport. Tactics should stay coherent rather than becoming buckets of unrelated tasks.
 5. Reuse an existing tactic when the new task clearly belongs to the same tactical arc. If it does not, prefer creating a new tactic.
 6. A request to create a tactic is a request for the complete tactic package: persist a non-empty Markdown objective/description, an explicit priority, one initial parent task, one final QA task, and any necessary middle tasks. Do not report success after creating only the tactic record.
-7. If the server cannot persist tactic priority or another required package field, treat it as a missing server capability and record the follow-up under Ecelyo's `local server improvements` tactic instead of silently omitting it.
+7. If Ecelyo Satellite cannot persist tactic priority or another required package field, treat it as a missing service capability and record the follow-up under Ecelyo's `local server improvements` tactic instead of silently omitting it.
 8. When all tactic work and final QA are complete, mark the tactic `accomplished` (Ecelyo's canonical completed status). Never archive it; archiving is reserved for the human owner.
 9. When a tactic reaches `accomplished`, the agent's closeout must include a table of the tactic name, every agent-worked `finished` or `blocked` task, and each task's pull-request URL/state, followed by any remaining work and a brief done/left summary.
 10. When updating task state through the server, use the API's canonical values:
@@ -152,7 +152,7 @@ swift run --package-path tools/mock-agent mock-agent update-task <task-id> --sta
 ### With `task-processor`
 
 Use `task-processor` for Ecelyo backlog intake when the user requests task capture. It creates and
-updates records through the live Ecelyo server.
+updates records through the live Ecelyo Satellite.
 
 Use this skill when intake should be informed by the currently open app state.
 

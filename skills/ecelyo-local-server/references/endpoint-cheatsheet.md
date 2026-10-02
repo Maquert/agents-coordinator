@@ -359,7 +359,7 @@ Creating a tactic is a complete workflow contract, not only this container `POST
 non-empty Markdown objective/description and explicit priority, then create one initial parent
 task, one final QA task, and any necessary middle tasks. The current endpoint example exposes only
 `title` and `objective`; if the server cannot persist the required tactic priority, treat that as a
-missing server capability and record it under Ecelyo's `local server improvements` tactic instead
+missing Ecelyo Satellite capability and record it under Ecelyo's `local server improvements` tactic instead
 of silently omitting it.
 
 ### Task
