@@ -80,7 +80,13 @@ Ecelyo state changes:
 
 - `> ` — the thread is active and the task is being executed (`wip`);
 - `X ` — the task is blocked (`blocked`); and
+- `? ` — the task is waiting for information, clarification, approval, or review while it is neither
+  active (`wip`) nor blocked; and
 - `= ` — the task is finished (`finished`).
+
+Apply `? ` immediately when the agent asks the human for information or requests review, even if
+the Ecelyo state has not changed yet. Remove it as soon as the request is resolved by applying the
+next accurate state prefix (`> `, `X `, or `= `).
 
 At the start of work, once the task is claimed, use the active form:
 
@@ -115,6 +121,7 @@ Examples:
 ```text
 > [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
 X [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
+? [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
 = [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
 ```
 
