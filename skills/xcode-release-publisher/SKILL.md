@@ -7,6 +7,12 @@ description: Prepare and publish Alpha internal builds or Beta/public releases f
 
 Prepare the complete release candidate, not only its notes. Load and follow `xcode-terminal-operator` and `xcode-output-parser` for Xcode discovery and builds, and `github-cli-operator` for GitHub authentication, branch pushes, and tags.
 
+Before drafting or reviewing customer-facing release notes for Ecelyo, read the repository's
+[user-facing vocabulary](https://github.com/Maquert/Ecelyo_app/blob/main/specifications/v1/app-user-facing-vocabulary.md).
+Use its canonical names for app areas and views, including their platform-neutral forms. Treat
+those names as the product vocabulary: never replace them with source-file, type, target, or other
+implementation terminology in release notes, store metadata, beta notes, or in-app copy.
+
 ## Release Intent and Version Decision
 
 Classify the developer's release intent before selecting a branch, checking tags, changing
@@ -139,7 +145,12 @@ Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Clou
 - Before selecting the app release version, load `icloud-persistence` when available and run its iCloud impact preflight. Compare the candidate with the latest immutable `icloud/vMAJOR.MINOR.PATCH` tag, or report `no iCloud baseline tag` when none exists. Include the affected commits, exact build, candidate commit, impact level, and whether CloudKit Console deployment is required. A build number never replaces a commit or schema baseline.
 - Before any release work, require `release-candidate` to be recreated directly from the latest `origin/main`; it must be up-to-date with `origin/main`, never based on a rebase of an older candidate. Verify the two refs match before adding release changes.
 - Follow the repository's build-number convention. In the absence of one, increment the highest numeric build number among the released app targets by one. When the repository commits a fake sentinel and generates timestamp-based build numbers during compilation, preserve the sentinel, never commit a generated build number, and validate the embedded artifact value instead. If a Unix epoch-minute value exceeds Apple's `CFBundleVersion` component limits, preserve the exact minute in an ordered 4.2.2-digit encoding such as `NNNN.NN.NN` rather than embedding an invalid oversized integer.
-- Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Keep them witty, amusing, informal, and nearly funny. Describe features users can experience when they start using the app and relevant fixes users would notice. Do not mention renames, legacy product identities, agent process, repository mechanics, or technical cleanup unless the developer explicitly asks for them. Do not claim changes unsupported by the release range.
+- Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Read the
+  Ecelyo user-facing vocabulary first and use its canonical area and view names. Keep the notes
+  witty, amusing, informal, and nearly funny. Describe features users can experience when they
+  start using the app and relevant fixes users would notice. Do not mention renames, legacy
+  product identities, agent process, repository mechanics, or technical cleanup unless the
+  developer explicitly asks for them. Do not claim changes unsupported by the release range.
 - Require version-controlled store metadata on the selected release lane: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
 - For apps that display in-app release notes on startup (e.g., Ecelyo): update both the `ReleaseNotesPayload.current` struct and the localized strings each release so users see fresh notes. The app automatically triggers display when `generatedAt` is newer than the last-seen timestamp stored in user defaults; updating the timestamp is the mechanism for re-triggering display on each new version.
