@@ -185,7 +185,6 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
   - `Medium`: agents should open and merge the PR by default unless the PR is large or complex enough that human review is warranted; the agent decides.
   - `High`: agents should prefer human review, but may merge the PR themselves when the implementation is clearly trivial and low-risk.
   - `Blocker` or critical work: agents must not merge the PR themselves; human review is required before merge.
-- If there have been changes to code in a repository, propose a brief git commit message at the end. Otherwise ignore this instruction. Commit messages must start with a verb and stay under 100 characters. Use this pattern: `<verb><object complement><optional extra content>`. Example: `Add configuration for a deploy pipeline`.
 
 ## Review
 - When reviewing, perform a git diff against the `main` branch to learn which files changed.
