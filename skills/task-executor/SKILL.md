@@ -156,7 +156,14 @@ Use the actual agent identity and conversation URL. Never substitute an app-navi
 ## Execution
 
 1. Confirm the destination project and tactic are active and that the task fits the tactic goal.
-2. Resolve the assigned canonical branch slug and use a dedicated non-main worktree.
+2. Resolve the assigned canonical branch slug and use a dedicated non-main worktree. As soon as
+   execution starts, rename that newly created or assigned worktree to
+   `<system>_<project>_<tactic>`: lowercase each Ecelyo name, replace every run of non-alphanumeric
+   characters with a single underscore, trim leading and trailing underscores, and join the three
+   normalized names with underscores. Inspect existing worktrees before renaming. If the resulting
+   name already exists, append `_2`, then `_3`, and so on until it is unique; rename only the new
+   or current worktree and do not move, rename, or otherwise modify the pre-existing colliding
+   worktree. Verify the final worktree path before continuing.
 3. Read only the named source, tests, scripts, and specifications needed for the task.
 4. Implement within scope and preserve unrelated user changes.
 5. Run the narrowest sufficient validation first, then the required project gate.
