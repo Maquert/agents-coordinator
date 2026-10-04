@@ -82,6 +82,20 @@ must explicitly show `Marketing version: unchanged (<current version>)`.
 | Failed candidate | Same exact candidate branch and `BUILD_TYPE=BETA` | Fix on the same branch, push the follow-up, and wait for that new hosted result; do not tag or promote the failed SHA |
 | Public promotion | `release-candidate` + `BUILD_TYPE=BETA` | Require the validated exact candidate and developer-owned Apple action; `main` cannot bypass this gate |
 
+## Tag branch guard
+
+Tags are branch-lane operations even though Git stores a tag on a commit. Before creating or
+publishing any release tag, inspect `git branch --show-current` and verify that the current branch
+is one of the two approved release branches:
+
+- **Alpha/internal tags:** create and push only from `main` with `BUILD_TYPE=ALPHA`.
+- **Beta/public-candidate tags:** create and push only from `release-candidate` with
+  `BUILD_TYPE=BETA`.
+
+Never create or push release tags from a feature branch, any other branch, or a detached `HEAD`.
+If the current branch does not match the selected lane, stop before running `git tag` or pushing a
+tag. A tag command or tag push must not be treated as permission to bypass this branch guard.
+
 ## Release Modes
 
 There are two supported release modes. Select one explicitly at the start of every release and state it in the handoff:
@@ -168,7 +182,8 @@ Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Clou
   changes still needs no PR when `release-candidate` has no release-only diff.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
 - Push the candidate branch directly, then use the pull request for review and integration. Push
-  only validated immutable semantic-version tags and per-build timestamp tags.
+  only validated immutable semantic-version tags and per-build timestamp tags, and only while the
+  current branch satisfies the Tag branch guard above.
 - After the required release gates pass, merge the release-only pull request into `main`. Verify
   that the merged `main` contains only the intended release changes and that
   `origin/release-candidate` remains present and points to the validated candidate.
@@ -322,7 +337,10 @@ do not create a `release-candidate` branch or Beta PR for an Alpha build.
    - The `release-candidate` push triggers the run when that is the repository contract; never trigger it separately.
    - Follow the Xcode Cloud Handoff protocol for the permitted status lookup, handoff report, exact-SHA success gate, and non-blocking behavior.
    - If a hosted failure is reported or observed, fix it on the same candidate branch and push follow-up commits normally; the new head requires its own successful run before tagging or integration. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
-6. After the final required local or hosted gate passes, create an annotated tag named exactly `<version>` on the validated candidate head for a versioned release. Refuse to move an existing semantic-version tag.
+6. After the final required local or hosted gate passes, verify that the current branch is
+   `release-candidate` under the Tag branch guard, then create an annotated tag named exactly
+   `<version>` on the validated candidate head for a versioned release. Refuse to move an existing
+   semantic-version tag.
 7. Create an annotated per-build tag named `<marketing-version>-<UTC timestamp>` on every validated build, including build-only requests. Refuse to reuse an existing immutable tag.
 8. Maintain exactly one movable `release_notes` tag for versioned releases by deleting its local reference when present and recreating it on the same validated commit.
 9. Push the immutable semantic-version tag (versioned releases only), the immutable per-build tag, and the intentionally movable `release_notes` tag when applicable. Never force-update an immutable tag.
