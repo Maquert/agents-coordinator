@@ -26,7 +26,8 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 4. Resolve an active project and tactic. Infer them only when the context makes the assignment reliable; otherwise ask the user.
 5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, an explicit `agentRole`, and a due date.
 6. Add every acceptance criterion through Ecelyo's acceptance-criteria endpoint.
-7. Stop after intake; do not begin execution.
+7. Apply the attached-image rules below to any images included with the source request.
+8. Stop after intake; do not begin execution.
 
 ## Direct intake
 
@@ -48,7 +49,13 @@ For any explicit backlog-intake request:
 8. For every QA task that validates a behavior change, require QA to review the existing tests and identify the necessary coverage before validation. When coverage is missing or incomplete, require QA to add or update the necessary automated tests and record that work as a numbered requirement with a matching acceptance criterion. For bug-fixing tasks, require a regression test that reproduces the fixed defect and prevents its recurrence, unless that is technically infeasible and the reason is documented. QA must not be scoped to running existing tests only when the changed behavior lacks coverage.
 9. Use `Trivial` when no priority is supplied and no stronger project rule applies.
 10. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
-11. Report the created project, tactic, task, priority, role, branch slug, due date, and acceptance-criteria count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
+11. Report the created project, tactic, task, priority, role, branch slug, due date, acceptance-criteria count, and attached-image count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
+
+### Attached images
+
+- Whenever the source request includes attached images or explicitly identifies image assets as task context, attach each applicable image to every created task it supports, including tasks created as part of a complete tactic package.
+- Create the task first, then persist each image as a task-owned render attachment through Ecelyo's supported attachment route (`POST /render-attachments`) with `ownerKind: "task"` and the new task ID. Preserve the image data and any available image description or metadata, and verify that the task's attachment list includes each created attachment.
+- Do not create an attachment when no image applies to the task. If an applicable image cannot be persisted because the attachment capability is unavailable or fails, record the exact blocker in the task and report it; never silently discard the image.
 
 ### Product Manager and Product Designer ambiguity gate
 
@@ -101,6 +108,7 @@ Report:
 - Created project and tactic, including their Ecelyo IDs
 - Created task title and Ecelyo ID
 - Priority, role, branch slug, and acceptance-criteria count
+- Attached-image count, when applicable
 - Any skipped duplicate or blocker
 
 Do not modify product code during intake.
