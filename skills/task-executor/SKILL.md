@@ -155,6 +155,13 @@ Use the actual agent identity and conversation URL. Never substitute an app-navi
 
 ## Execution
 
+## Product version-change gate
+
+- Never change a product marketing or release version, including `MARKETING_VERSION`, `CFBundleShortVersionString`, semantic release metadata, or copied user-facing version references, without explicit written authorization from the product owner in the current task or conversation. The existence of an implementation task, or a request to build, release, fix, or prepare, is not authorization to change the product version.
+- Every authorized version change must be isolated in a dedicated pull request whose purpose is the version bump and its directly coupled release metadata. Do not combine a version bump with feature implementation, bug fixes, refactors, or unrelated repository changes. Release notes may accompany the bump only when they belong to that dedicated versioned-release PR.
+- Before editing a version, record the exact target version and the product owner's authorization in the PR description. If either the authorization or the dedicated PR is missing, leave the version unchanged and stop before committing or pushing version changes.
+- Build-number changes are separate from product-version changes and must never be treated as implicit authorization for a version bump.
+
 1. Confirm the destination project is not archived, the tactic is neither archived nor `accomplished`, and the task fits the tactic goal. A derived `finished` tactic is eligible for aligned new work and does not need manual reopening.
 2. Resolve the assigned canonical branch slug and use a dedicated non-main worktree. As soon as
    execution starts, rename that newly created or assigned worktree to
