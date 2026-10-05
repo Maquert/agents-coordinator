@@ -62,11 +62,12 @@ Ecelyo Satellite instances advertise their presence on the local network via Mul
 3. Treat Ecelyo as the source of truth for task state and task selection when this workflow is active.
 4. Treat Ecelyo as a workflow philosophy, not only a transport. Tactics should stay coherent rather than becoming buckets of unrelated tasks.
 5. Reuse an existing tactic when the new task clearly belongs to the same tactical arc. If it does not, prefer creating a new tactic.
-6. A request to create a tactic is a request for the complete tactic package: persist a non-empty Markdown objective/description, an explicit priority, one initial parent task, one final QA task, and any necessary middle tasks. Do not report success after creating only the tactic record.
-7. If Ecelyo Satellite cannot persist tactic priority or another required package field, treat it as a missing service capability and record the follow-up under Ecelyo's `local server improvements` tactic instead of silently omitting it.
-8. When all tactic work and final QA are complete, mark the tactic `accomplished` (Ecelyo's canonical completed status). Never archive it; archiving is reserved for the human owner.
-9. When a tactic reaches `accomplished`, the agent's closeout must include a table of the tactic name, every agent-worked `finished` or `blocked` task, and each task's pull-request URL/state, followed by any remaining work and a brief done/left summary.
-10. When updating task state through the server, use the API's canonical values:
+6. A tactic with derived status `finished` is still eligible to receive new tasks when the work fits its persisted goal. Do not treat `finished` as `accomplished`, do not manually reopen it, and do not reject it solely because its task graph previously converged. A tactic marked `accomplished` is an explicit terminal record and must be left as-is unless the user explicitly requests restoration.
+7. A request to create a tactic is a request for the complete tactic package: persist a non-empty Markdown objective/description, an explicit priority, one initial parent task, one final QA task, and any necessary middle tasks. Do not report success after creating only the tactic record.
+8. If Ecelyo Satellite cannot persist tactic priority or another required package field, treat it as a missing service capability and record the follow-up under Ecelyo's `local server improvements` tactic instead of silently omitting it.
+9. When all tactic work and final QA are complete, mark the tactic `accomplished` (Ecelyo's canonical completed status). Never archive it; archiving is reserved for the human owner.
+10. When a tactic reaches `accomplished`, the agent's closeout must include a table of the tactic name, every agent-worked `finished` or `blocked` task, and each task's pull-request URL/state, followed by any remaining work and a brief done/left summary.
+11. When updating task state through the server, use the API's canonical values:
    - `pending`
    - `wip`
    - `blocked`
@@ -78,7 +79,7 @@ Ecelyo Satellite instances advertise their presence on the local network via Mul
 15. Keep raw JSON when exact response fidelity matters more than token efficiency, such as debugging a server issue or checking unknown fields.
 16. **Whenever you move a task to `wip`, set `deeplinkUrl` and `agentTechnology` in the same `PATCH` call**. `deeplinkUrl` must be a link that reopens the live conversation/thread doing the work — `codex://threads/<thread-id>` in Codex, `claude://agents/<session-id>` in Claude, or the equivalent URL scheme for another agent technology. `agentTechnology` must be the name of the active AI agent (e.g., "Codex", "Claude", "Antigravity"). These fields are required, not optional. The deeplink is distinct from the app's own `ecelyo://open/...` navigation links, which must never be used as the value here.
 17. Whenever you create a task, set `agentRole` explicitly. Do not leave it empty.
-18. Before registering a task, verify that its tactic has a non-empty, scoped Markdown description stating the tactic's bounded goal and coherent end task. Do not create, reuse, or leave a tactic with an empty or generic description.
+18. Before registering a task, verify that its project is not archived and its tactic is neither archived nor `accomplished`. A derived `finished` tactic remains eligible when the task fits its non-empty, scoped Markdown goal and coherent end task. Do not create, reuse, or leave a tactic with an empty or generic description.
 
 ## Quick Start
 

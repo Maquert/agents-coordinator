@@ -23,7 +23,7 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 1. Remove only the prefix and treat the remainder as the raw task.
 2. Normalize the request into a concise title.
 3. Check Ecelyo for an equivalent existing task before creating a duplicate.
-4. Resolve an active project and tactic. Infer them only when the context makes the assignment reliable; otherwise ask the user.
+4. Resolve an eligible project and tactic. A project is eligible when it is not archived. A tactic is eligible when it is neither archived nor `accomplished`; `finished` is a derived, reusable tactic state and may receive new tasks when the new work still fits its persisted goal. Infer them only when the context makes the assignment reliable; otherwise ask the user.
 5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, an explicit `agentRole`, and a due date.
 6. Add every acceptance criterion through Ecelyo's acceptance-criteria endpoint.
 7. Apply the attached-image rules below to any images included with the source request.
@@ -35,7 +35,7 @@ For any explicit backlog-intake request:
 
 1. Verify Ecelyo connectivity with `GET /`.
 2. Read systems, projects, tactics, and the relevant task queue before assigning work.
-3. Check the destination project and tactic are active and that the task fits the tactic's persisted goal.
+3. Check the destination project is not archived, the destination tactic is neither archived nor `accomplished`, and the task fits the tactic's persisted goal. Do not reject a tactic merely because its derived status is `finished`; adding pending work may make it `ready` again.
 4. If the user requests a new project or tactic, create it in Ecelyo under the active system with a clear title and objective.
 5. Assign every created task a due date based on the intake batch size: use the current calendar date plus 2 calendar days when the batch contains fewer than 5 tasks; for batches of 5 or more, use plus 3 calendar days by default and plus 4 calendar days when the batch is exceptionally large or needs additional coordination. Store the resulting date explicitly as an ISO-8601 `dueDate` value when creating the task.
 6. Write the task description as Markdown only, using these headings in this order:
@@ -91,7 +91,7 @@ For a UI tactic, report the Design task, the merged renders/specification, the h
 
 ## Required task contract
 
-Every task must have an active project and tactic, a non-empty goal, an explicit role, a canonical
+Every task must have an eligible project and tactic, a non-empty goal, an explicit role, a canonical
 lowercase underscore branch slug without an agent prefix, an explicit due date, and testable
 acceptance criteria. Use
 `Unknown` or `TBD` only when the source genuinely does not provide the information. If a missing

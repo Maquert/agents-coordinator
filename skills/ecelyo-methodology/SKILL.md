@@ -1,6 +1,6 @@
 ---
 name: ecelyo-methodology
-description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record. Use together with `ecelyo-local-server` when actual task state must be read or updated.
+description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and accomplished tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record. Use together with `ecelyo-local-server` when actual task state must be read or updated.
 ---
 
 # Ecelyo Methodology
@@ -51,7 +51,7 @@ Execution should emerge from the workflow rather than repeated decisions during 
 9. When choosing between several valid next steps, prefer the one that reduces WIP and increases clarity.
 10. Task state must be updated promptly when reality changes so the system stays trustworthy.
 11. Every Ecelyo task must have an explicit `agentRole`; do not leave task ownership semantics implicit.
-12. Archived projects and archived tactics must never receive new tasks. Before creating or reassigning a task, verify that both destination containers are not archived. Do not silently reactivate an archived project or tactic to make an assignment fit.
+12. Archived projects and `accomplished` tactics must never receive new tasks. A tactic with derived status `finished` is not closed: it remains eligible for new work when the task fits its persisted goal, and the new pending task may make the tactic `ready` again. Before creating or reassigning a task, verify that the project is not archived and the tactic is neither archived nor accomplished. Never silently restore an accomplished tactic.
 13. Right before beginning execution, worktree creation, or coding for any task, the agent MUST explicitly present a Markdown table identifying the task (ID, Name/Title, Project Name/ID, Tactic Name/ID) to the user.
 
 ## Complete Tactic Creation
@@ -123,20 +123,21 @@ Create a new tactic when:
 ### Task Alignment
 
 Before a task is created or assigned, state how it contributes to the tactic's persisted goal and
-coherent end task. A task that serves a different goal must be assigned to another active tactic,
+coherent end task. A task that serves a different goal must be assigned to another eligible tactic,
 or a new tactic must be created when no suitable active tactic exists. Do not rely on proximity,
 convenience, or a shared project as evidence of alignment.
 
-### Archived Project And Tactic Guard
+### Closed Project And Tactic Guard
 
-Treat archived projects and tactics as closed historical records.
+Treat archived projects and `accomplished` tactics as closed historical records. A derived `finished`
+tactic is not a closed record and may receive new tasks when its goal still fits.
 
-- Never create a task in an archived project or archived tactic.
-- Never reassign an existing task into an archived project or archived tactic.
+- Never create a task in an archived project or an archived or `accomplished` tactic.
+- Never reassign an existing task into an archived project or an archived or `accomplished` tactic.
 - Verify both destination statuses immediately before task creation or reassignment; do not rely on stale context.
-- If the intended destination is archived, select another active destination only when it shares the same goal and tactical arc.
-- Otherwise create a new appropriately scoped active project or tactic when authorized, or ask the user where the task belongs.
-- Do not unarchive a project or tactic unless the user explicitly requests reactivation as a separate action.
+- If the intended destination is archived or accomplished, select another eligible destination only when it shares the same goal and tactical arc.
+- A `finished` tactic does not need to be reopened before receiving aligned work; let its derived status update from the new task graph.
+- Do not restore an accomplished tactic unless the user explicitly requests restoration as a separate action.
 
 ## Agent Behavior
 
@@ -186,4 +187,4 @@ Use this draft as the starting point for refining the Ecelyo methodology with th
 8. Task state must be updated immediately when reality changes.
 9. Scoped tactics are better than massive tactics.
 10. Every task needs an explicit `agentRole`.
-11. Archived projects and tactics are closed records: never create or reassign tasks into them, and never reactivate them implicitly.
+11. Archived projects and accomplished tactics are closed records: never create or reassign tasks into them, while finished tactics remain reusable for aligned work without manual reopening.

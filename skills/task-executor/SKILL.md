@@ -155,7 +155,7 @@ Use the actual agent identity and conversation URL. Never substitute an app-navi
 
 ## Execution
 
-1. Confirm the destination project and tactic are active and that the task fits the tactic goal.
+1. Confirm the destination project is not archived, the tactic is neither archived nor `accomplished`, and the task fits the tactic goal. A derived `finished` tactic is eligible for aligned new work and does not need manual reopening.
 2. Resolve the assigned canonical branch slug and use a dedicated non-main worktree. As soon as
    execution starts, rename that newly created or assigned worktree to
    `<system>_<project>_<tactic>`: lowercase each Ecelyo name, replace every run of non-alphanumeric
