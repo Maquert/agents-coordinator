@@ -176,6 +176,32 @@ Use the actual agent identity and conversation URL. Never substitute an app-navi
 5. Run the narrowest sufficient validation first, then the required project gate.
 6. Verify every acceptance criterion with concrete evidence.
 
+## Timing and effort tracking
+
+Track timing and effort at the task level so completed work can be compared with similar tasks:
+
+- Immediately after the task passes its readiness gates and is moved to `wip`, record the
+  implementation start as `Implementation started: YYYY-MM-DD HH:MM (CET, UTC+01:00)`, before
+  editing, worktree operations, or code execution. Do not use the task creation time or a later
+  status-update time as the implementation start.
+- At closeout, record `Implementation ended: YYYY-MM-DD HH:MM (CET, UTC+01:00)` and calculate
+  `Elapsed implementation time: <human-readable duration>` from the recorded start and end. The
+  end timestamp includes the end date and must be captured when the final summary is written.
+- Preserve the original start time when work is paused and resumed. If the duration includes time
+  waiting for human input or review, label it as wall-clock elapsed time; do not reset the start
+  time or imply that waiting was active implementation time.
+- Classify effort independently from elapsed time using one stable scale: `Trivial`, `Low`,
+  `Medium`, `High`, or `Complex`:
+  - `Trivial`: isolated documentation or configuration, or a tiny change with minimal validation.
+  - `Low`: a small, well-bounded change in one surface with straightforward validation.
+  - `Medium`: several files or surfaces, moderate integration, or non-trivial tests.
+  - `High`: cross-cutting work, multiple validation gates, significant coordination or risk, or
+    external review.
+  - `Complex`: substantial uncertainty, difficult dependencies, multiple systems, or a broad or
+    fragile change.
+- Choose the effort level from scope, uncertainty, coordination, and validation needs rather than
+  duration alone. Include a brief rationale after the effort level in every final task summary.
+
 ## Pull request and closeout
 
 Default delivery is one focused commit and one pull request per task. Push the task branch, inspect
@@ -216,6 +242,9 @@ Every summary of work done, including the final task closeout and any tactic com
 must include the date on which the summary was created in CET. Start the summary with exactly:
 `Summary created: YYYY-MM-DD (CET, UTC+01:00)`. Use the current date at the moment the summary is
 written, not a task, commit, or status-update date and not the agent's local timezone.
+The final task summary and any tactic completion summary must also include the implementation
+start timestamp, implementation end timestamp, elapsed implementation time, and effort with its
+brief rationale, using the formats defined in `Timing and effort tracking`.
 
 When a tactic reaches its completed (`finished`) state, also include a clearly labeled tactic
 completion summary. Agents may mark a completed tactic as `finished` using
