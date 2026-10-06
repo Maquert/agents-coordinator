@@ -26,7 +26,8 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 4. Resolve an eligible project and tactic. A project is eligible when it is not archived. A tactic is eligible when it is neither archived nor `accomplished`; `finished` is a derived, reusable tactic state and may receive new tasks when the new work still fits its persisted goal. Infer them only when the context makes the assignment reliable; otherwise ask the user.
 5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, an explicit `agentRole`, and a due date.
 6. Add every acceptance criterion through Ecelyo's acceptance-criteria endpoint.
-7. Apply the attached-image rules below to any images included with the source request.
+7. Inventory any images attached to the source request, map each image to every created task it
+   supports, and apply the attached-image rules below before reporting intake complete.
 8. Stop after intake; do not begin execution.
 
 ## Direct intake
@@ -53,9 +54,22 @@ For any explicit backlog-intake request:
 
 ### Attached images
 
-- Whenever the source request includes attached images or explicitly identifies image assets as task context, attach each applicable image to every created task it supports, including tasks created as part of a complete tactic package.
-- Create the task first, then persist each image as a task-owned render attachment through Ecelyo's supported attachment route (`POST /render-attachments`) with `ownerKind: "task"` and the new task ID. Preserve the image data and any available image description or metadata, and verify that the task's attachment list includes each created attachment.
-- Do not create an attachment when no image applies to the task. If an applicable image cannot be persisted because the attachment capability is unavailable or fails, record the exact blocker in the task and report it; never silently discard the image.
+- Treat an image attached to the source request, or explicitly identified as task context, as a
+  task artifact rather than as disposable conversation context. Attach every applicable image to
+  every created task it supports, including each relevant task in a complete tactic package.
+- Before creating tasks, inventory the available images and determine which task or tasks each one
+  supports. Use the image's purpose and any provided caption, annotation, filename, or description;
+  do not attach unrelated images merely because they were present in the conversation.
+- Create each task first, then persist each mapped image as a task-owned render attachment through
+  Ecelyo's supported attachment route (`POST /render-attachments`) with `ownerKind: "task"` and the
+  new task ID. Preserve the original image data and all available image description or metadata so
+  agents can inspect the same screenshot or drawing while executing the task.
+- After every attachment mutation, read the task or its attachment list and verify that the image
+  is present under the intended task. Do not report intake complete until all applicable mappings
+  have been verified.
+- Do not create an attachment when no image applies to the task. If an applicable image cannot be
+  persisted because the attachment capability is unavailable or fails, record the exact blocker in
+  the task and report it with the affected image and task; never silently discard the image.
 
 ### Product Manager and Product Designer ambiguity gate
 
@@ -109,6 +123,7 @@ Report:
 - Created task title and Ecelyo ID
 - Priority, role, branch slug, and acceptance-criteria count
 - Attached-image count, when applicable
+- Image-to-task attachment mapping and verification result, when images are supplied
 - Any skipped duplicate or blocker
 
 Do not modify product code during intake.
