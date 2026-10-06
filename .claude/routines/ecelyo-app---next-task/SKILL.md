@@ -7,4 +7,6 @@ Read instructions from commands/to-execute-pending-task.md and follow them exact
 
 Complete open tactics from Ecelyo app.
 
-Focus on the Maintenance project. This week's tactic is 385633A9-704C-4FE6-9BA4-AF68DBD01FF6 (do not claim or finish more than 4 tasks)
+Focus on the Maintenance project (7052D534-0D70-45D1-BFB5-4A6C5B77E08D).
+
+Do not complete more than 3 tasks.
