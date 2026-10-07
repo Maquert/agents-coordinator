@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "git-minimal-reviewer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "tu_token_aqui"
+      },
+      "disabledTools": ["search_code_universally"]
+    },
+    "database-schema-only": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://usuario:pass@localhost:5432/db"
+      },
+      "disabledTools": ["execute_unsafe_raw_sql"]
+    }
+  }
+}
