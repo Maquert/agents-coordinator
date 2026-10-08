@@ -1,0 +1,10 @@
+{
+  "name": "sidecar_sdk",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./preload.js": "./preload.js"
+  }
+}

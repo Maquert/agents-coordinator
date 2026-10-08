@@ -1,12 +1,10 @@
 {
   "sidecars": {
-    "batch-tasks": {
-      "enabled": false,
-      "projectId": "b2b2b353-a9b6-42c5-ac4d-32ae72da79f8"
-    },
     "ecelyo-tactic-ci": {
-      "enabled": false,
-      "projectId": "b2b2b353-a9b6-42c5-ac4d-32ae72da79f8"
+      "enabled": true,
+      "projectId": "e5e62007-3272-40a2-b61c-c9e278cadd58",
+      "resolvedPermissions": null,
+      "schemaVersion": 1
     },
     "papiplan-complete-tactic": {
       "enabled": false,
@@ -14,7 +12,6 @@
     }
   },
   "userSettings": {
-    "artifactReviewMode": "always-proceed",
     "autoExecutionPolicy": "CASCADE_COMMANDS_AUTO_EXECUTION_EAGER",
     "enableTerminalSandbox": false,
     "globalPermissionGrants": {
@@ -56,14 +53,11 @@
         "command(curl -s \"http://macbook-pro-16-de-miguel-local-deep-nova.local:8080/tasks/priority\")"
       ]
     },
-    "internetAccessPolicy": "allow",
-    "nonWorkspaceFileAccess": "allow",
     "nonWorkspaceFileAccessPolicy": "AGENT_SETTING_POLICY_ALLOW",
     "permissionGrantsV2Migrated": true,
     "remoteControlEnabled": true,
     "remoteControlHostname": "macbook-pro-16-de-miguel-local-deep-nova",
     "sandboxEnabledAtV2Migration": false,
-    "toolExecutionPolicy": "always-proceed",
     "verboseAgentChat": false
   }
 }

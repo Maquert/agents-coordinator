@@ -1,12 +1,12 @@
 {
-  "builtin": "schedule",
-  "restart_policy": "always",
-  "args": [
-    "0 */8 * * *",
+  "builtin":  "schedule",
+  "restart_policy":  "always",
+  "args":  [
+    "0 */6 * * *",
     "agentapi",
     "new-conversation",
     "--",
-    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks.\nFocus on tactics from project 7052D534-0D70-45D1-BFB5-4A6C5B77E08D."
+    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete its tasks.\nFocus on tactics from project 7052D534-0D70-45D1-BFB5-4A6C5B77E08D.\n\nDo not complete more than 2 tasks. Create one thread for each task if they are not related (do not reuse the same thread for unrelated tasks)."
   ],
-  "display_name": "Ecelyo Tactic Maintenance"
+  "display_name":  "Ecelyo Tactic Maintenance"
 }
