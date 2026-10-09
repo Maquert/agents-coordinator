@@ -43,9 +43,13 @@ marketing version and do not rewrite release notes unless explicitly requested.
 
 Before any version metadata change, re-upload, or repeated build activity, check whether the exact
 semantic-version tag already exists. If it exists, stop and ask the human to confirm the repeat;
-never move or reuse an immutable version tag silently. A confirmed versioned release may create the
-semantic tag only after the required hosted/manual gate, while a build-only request may create only
-the repository-defined per-build tag after that gate.
+never move or reuse an immutable version tag silently. Every change to `MARKETING_VERSION` must be
+paired with the exact annotated semantic-version tag, and the tag must point to the commit that
+introduced that version. For a dedicated, owner-authorized version-bump PR, create and push that
+tag on the PR head immediately before merging, then merge with a non-squashing merge that preserves
+the tagged commit. Do not merge a version-bump PR while its version tag is missing. A normal
+release-candidate still follows the hosted/manual gate before tagging; this explicit version-bump
+sequence is the only exception and does not grant Apple-hosted access.
 
 The version decision and selected lane must be visible in the handoff table. A build-only request
 must explicitly show `Marketing version: unchanged (<current version>)`.
@@ -181,6 +185,10 @@ Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Clou
   open merely because the marketing version did not change. A build-only request with no notes
   changes still needs no PR when `release-candidate` has no release-only diff.
 - Create the release commit on `release-candidate`. Do not publish the immutable semantic-version tag until every required local and hosted release gate passes.
+- A dedicated, owner-authorized version-bump PR is an exception to the preceding candidate rule:
+  verify its exact semantic tag is absent, tag the exact PR head before merging, push the tag, and
+  merge without squash so the tagged commit remains in `main`. The matching tag is mandatory even
+  when no hosted build is being prepared in the same change.
 - Push the candidate branch directly, then use the pull request for review and integration. Push
   only validated immutable semantic-version tags and per-build timestamp tags, and only while the
   current branch satisfies the Tag branch guard above.
@@ -337,10 +345,12 @@ do not create a `release-candidate` branch or Beta PR for an Alpha build.
    - The `release-candidate` push triggers the run when that is the repository contract; never trigger it separately.
    - Follow the Xcode Cloud Handoff protocol for the permitted status lookup, handoff report, exact-SHA success gate, and non-blocking behavior.
    - If a hosted failure is reported or observed, fix it on the same candidate branch and push follow-up commits normally; the new head requires its own successful run before tagging or integration. Use `--force-with-lease` only after an intentional history rewrite or branch recreation.
-6. After the final required local or hosted gate passes, verify that the current branch is
-   `release-candidate` under the Tag branch guard, then create an annotated tag named exactly
-   `<version>` on the validated candidate head for a versioned release. Refuse to move an existing
-   semantic-version tag.
+6. For a normal release candidate, after the final required local or hosted gate passes, verify
+   that the current branch is `release-candidate` under the Tag branch guard, then create an
+   annotated tag named exactly `<version>` on the validated candidate head. For a dedicated,
+   owner-authorized version-bump PR, verify the PR is version-only, create the annotated tag named
+   exactly `<version>` on the exact PR head immediately before merge, and require a non-squashing
+   merge. Refuse to move an existing semantic-version tag.
 7. Create an annotated per-build tag named `<marketing-version>-<UTC timestamp>` on every validated build, including build-only requests. Refuse to reuse an existing immutable tag.
 8. Maintain exactly one movable `release_notes` tag for versioned releases by deleting its local reference when present and recreating it on the same validated commit.
 9. Push the immutable semantic-version tag (versioned releases only), the immutable per-build tag, and the intentionally movable `release_notes` tag when applicable. Never force-update an immutable tag.
