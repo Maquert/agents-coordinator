@@ -38,8 +38,10 @@ push creates another hosted release build.
 For a versioned release, ask explicitly whether the developer wants to bump `MARKETING_VERSION`
 before editing it. Do not infer a patch, minor, or major bump from the word “release” alone. If the
 developer confirms a bump, record the chosen target version in the handoff table and continue with
-the normal release-note and version-parity workflow. If the request is build-only, keep the current
-marketing version and do not rewrite release notes unless explicitly requested.
+the normal release-note and version-parity workflow. A version change always requires refreshing
+the root `RELEASE_NOTES.md` in the same release change; never create a version-bump change that
+updates only `MARKETING_VERSION`. If the request is build-only, keep the current marketing version
+and do not rewrite release notes unless explicitly requested.
 
 Before any version metadata change, re-upload, or repeated build activity, check whether the exact
 semantic-version tag already exists. If it exists, stop and ask the human to confirm the repeat;
@@ -166,7 +168,8 @@ Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Clou
 - Before selecting the app release version, load `icloud-persistence` when available and run its iCloud impact preflight. Compare the candidate with the latest immutable `icloud/vMAJOR.MINOR.PATCH` tag, or report `no iCloud baseline tag` when none exists. Include the affected commits, exact build, candidate commit, impact level, and whether CloudKit Console deployment is required. A build number never replaces a commit or schema baseline.
 - Before any release work, require `release-candidate` to be recreated directly from the latest `origin/main`; it must be up-to-date with `origin/main`, never based on a rebase of an older candidate. Verify the two refs match before adding release changes.
 - Follow the repository's build-number convention. In the absence of one, increment the highest numeric build number among the released app targets by one. When the repository commits a fake sentinel and generates timestamp-based build numbers during compilation, preserve the sentinel, never commit a generated build number, and validate the embedded artifact value instead. If a Unix epoch-minute value exceeds Apple's `CFBundleVersion` component limits, preserve the exact minute in an ordered 4.2.2-digit encoding such as `NNNN.NN.NN` rather than embedding an invalid oversized integer.
-- Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes. Read the
+- Create or replace `RELEASE_NOTES.md` at the project root with App Store-facing notes for every
+  version change; a version bump without refreshed `RELEASE_NOTES.md` is incomplete. Read the
   Ecelyo user-facing vocabulary first and use its canonical area and view names. Keep the notes
   witty, amusing, informal, and nearly funny. Describe features users can experience when they
   start using the app and relevant fixes users would notice. Do not mention renames, legacy
@@ -220,7 +223,7 @@ the pull request in Phase 4.
    changing release metadata.
 2. Read only the commits in that range that describe user-visible work. Filter out technical-only changes, group the remaining changes, and rewrite them as clear customer-facing release notes.
 3. Remove stale release-note entries from the repository's existing release-note destination and `Localizable.xcstrings` or equivalent catalog when present. Create the new internal release-note list in the repository-defined destination. If the destination cannot be inferred safely, stop before editing.
-4. Select the semantic version for this release using the release contract and carry it into the candidate phase. Bump the Xcode marketing version to this selected version in the *same commit* as the release notes, together with any version references in locale-specific release-metadata files and any internal release-notes spec used to validate version parity — never leave `RELEASE_NOTES.md` and the marketing version disagreeing on the default branch, even briefly, since a repository's CI may gate all test phases on that parity. Do not update the build number or perform any App Store Connect-only metadata change on main; those remain Phase 2 work on `release-candidate`.
+4. Select the semantic version for this release using the release contract and carry it into the candidate phase. Refresh `RELEASE_NOTES.md` from the release range and bump the Xcode marketing version to this selected version in the *same commit* as the release notes, together with any version references in locale-specific release-metadata files and any internal release-notes spec used to validate version parity — never leave `RELEASE_NOTES.md` and the marketing version disagreeing on the default branch, even briefly, since a repository's CI may gate all test phases on that parity. Do not update the build number or perform any App Store Connect-only metadata change on main; those remain Phase 2 work on `release-candidate`.
 5. Commit the release-note changes together with the marketing-version bump and any synced metadata as one commit on `release-candidate`, using `Prepare <version> release notes` unless repository instructions require another style. Do not push `main` or create release tags before the required hosted/manual build gate. Run the repository's fast release-metadata validator (when present) before committing to confirm nothing was missed.
 6. Treat this candidate commit as the release-note baseline for the current release. Preserve it on `release-candidate`, create the release-only pull request after the candidate push, and integrate it back into `main` only after the final release gates pass. Do not regenerate the same notes from the candidate range.
 
@@ -352,9 +355,10 @@ do not create a `release-candidate` branch or Beta PR for an Alpha build.
 6. For a normal release candidate, after the final required local or hosted gate passes, verify
    that the current branch is `release-candidate` under the Tag branch guard, then create an
    annotated tag named exactly `<version>` on the validated candidate head. For a dedicated,
-   owner-authorized version-bump PR, verify the PR is version-only, create the annotated tag named
-   exactly `<version>` on the exact PR head immediately before merge, and use the repository's
-   allowed merge method. Refuse to move an existing semantic-version tag.
+   owner-authorized version-bump PR, verify the PR contains the version change and refreshed
+   `RELEASE_NOTES.md` only, create the annotated tag named exactly `<version>` on the exact PR head
+   immediately before merge, and use the repository's allowed merge method. Refuse to move an
+   existing semantic-version tag.
 7. Create an annotated per-build tag named `<marketing-version>-<UTC timestamp>` on every validated build, including build-only requests. Refuse to reuse an existing immutable tag.
 8. Maintain exactly one movable `release_notes` tag for versioned releases by deleting its local reference when present and recreating it on the same validated commit.
 9. Push the immutable semantic-version tag (versioned releases only), the immutable per-build tag, and the intentionally movable `release_notes` tag when applicable. Never force-update an immutable tag.
