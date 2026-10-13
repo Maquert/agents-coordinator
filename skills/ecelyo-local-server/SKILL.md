@@ -70,6 +70,7 @@ Ecelyo Satellite instances advertise their presence on the local network via Mul
 11. When updating task state through the server, use the API's canonical values:
    - `pending`
    - `wip`
+   - `in_review`
    - `blocked`
    - `finished`
 11. Never create local task-record files as part of normal task tracking. If the server is down, stop and ask the user to start it (see Failure Handling); do not use a local file fallback.
