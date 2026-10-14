@@ -205,7 +205,8 @@ Track timing and effort at the task level so completed work can be compared with
 ## Pull request and closeout
 
 Default delivery is one focused commit and one pull request per task. Push the task branch, inspect
-all review comments, address actionable feedback, and merge according to priority and project policy.
+all review comments, address actionable feedback, and merge according to the task's Ecelyo
+`needsHumanReview` field and project policy, never priority alone.
 Do not mark a task finished merely because code or a pull request exists.
 
 Immediately after the pull request is opened and its canonical URL is available, register it on the

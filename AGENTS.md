@@ -180,11 +180,16 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - If a pull request is updated after its related task was already marked finished, the agent must move that task back to `in progress`.
 - Do not ask the user to review a draft pull request. When user review is needed, the agent must mark the pull request ready for review first or create it as a non-draft pull request.
 - Every pull request created or updated by an agent must carry a label matching that agent's own name (e.g. `Codex`, `Claude`) — never another agent's label. Apply the label matching whichever agent technology is actually handling the PR to all handled pull requests, including PRs originally opened by a different agent or by the user once this agent starts working on them; if the label does not exist, create it when permitted or report the permission blocker.
-- Pull request merge policy by task priority:
-  - `Low` (formerly `Trivial`): agents should open and merge the PR by default.
-  - `Medium`: agents should open and merge the PR by default unless the PR is large or complex enough that human review is warranted; the agent decides.
-  - `High`: agents should prefer human review, but may merge the PR themselves when the implementation is clearly trivial and low-risk.
-  - `Critical` (formerly `Blocker`) work: agents must not merge the PR themselves; human review is required before merge.
+- Pull request completion and merge policy is controlled by the Ecelyo task's `needsHumanReview`
+  field (shown as “needs review”), not by task priority:
+  - When `needsHumanReview: true`, the agent must request human review and keep the task in
+    `in review` until the review gate is resolved. Do not merge or mark the task finished before
+    the required approval or decision.
+  - When `needsHumanReview: false`, the agent may complete and merge the task after all ordinary
+    validation, pull-request, and cleanup gates pass, including when its priority is `High` or
+    `Critical` (formerly `Blocker`).
+  - If the field is missing or ambiguous, do not infer a review requirement from priority. Ask for
+    clarification or resolve the task's `needsHumanReview` value before merging or closing it.
 
 ## Review
 - When reviewing, perform a git diff against the `main` branch to learn which files changed.

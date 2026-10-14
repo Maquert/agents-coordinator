@@ -25,9 +25,11 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 3. Check Ecelyo for an equivalent existing task before creating a duplicate.
 4. Resolve an eligible project and tactic. A project is eligible when it is not archived. A tactic is eligible when it is neither archived nor `accomplished`; `finished` is a derived, reusable tactic state and may receive new tasks when the new work still fits its persisted goal. Infer them only when the context makes the assignment reliable; otherwise ask the user.
 5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, and
-   an explicit `agentRole`. Set a due date only when the source or project policy requires one; for
-   a bug or `Critical` task without an explicit due date, use the current calendar date plus 2
-   calendar days.
+   an explicit `agentRole`, and an explicit boolean `needsHumanReview` value (shown as “needs
+   review” in Ecelyo). Determine this value from the actual review or decision gate required by the
+   task, independently of its priority; if the requirement is ambiguous, ask before creating it.
+   Set a due date only when the source or project policy requires one; for a bug or `Critical` task
+   without an explicit due date, use the current calendar date plus 2 calendar days.
 6. Add every acceptance criterion through Ecelyo's acceptance-criteria endpoint.
 7. Inventory any images attached to the source request, map each image to every created task it
    supports, and apply the attached-image rules below before reporting intake complete.
@@ -44,7 +46,9 @@ For any explicit backlog-intake request:
 5. Preserve an explicit due date supplied by the source or required by project policy. For a bug or
    `Critical` task without an explicit due date, use the current calendar date plus 2 calendar days
    and store the result explicitly as an ISO-8601 `dueDate` value. Do not invent a due date for
-   other tasks solely from their intake batch size.
+   other tasks solely from their intake batch size. Determine and persist `needsHumanReview` from
+   the task's actual human review or decision gate, independently of priority; do not infer it from
+   `High` or `Critical` priority.
 6. Write the task description as Markdown only, using these headings in this order:
    - `## Summary` — the goal, current behavior, desired behavior, and non-goals.
    - `## Requirements` — numbered, testable requirements; use the same numbered criteria stored in Ecelyo.
@@ -56,7 +60,7 @@ For any explicit backlog-intake request:
 8. For every QA task that validates a behavior change, require QA to review the existing tests and identify the necessary coverage before validation. When coverage is missing or incomplete, require QA to add or update the necessary automated tests and record that work as a numbered requirement with a matching acceptance criterion. For bug-fixing tasks, require a regression test that reproduces the fixed defect and prevents its recurrence, unless that is technically infeasible and the reason is documented. QA must not be scoped to running existing tests only when the changed behavior lacks coverage.
 9. Use `Trivial` when no priority is supplied and no stronger project rule applies.
 10. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
-11. Report the created project, tactic, task, priority, role, branch slug, due date, acceptance-criteria count, and attached-image count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
+11. Report the created project, tactic, task, priority, role, `needsHumanReview` value, branch slug, due date, acceptance-criteria count, and attached-image count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.
 
 ### Attached images
 
@@ -111,10 +115,11 @@ For a UI tactic, report the Design task, the merged renders/specification, the h
 
 ## Required task contract
 
-Every task must have an eligible project and tactic, a non-empty goal, an explicit role, a canonical
-lowercase underscore branch slug without an agent prefix, and testable acceptance criteria. A due
-date is required only when supplied by the source, required by project policy, or automatically
-applicable to a bug or `Critical` task under the intake rule above. Use
+Every task must have an eligible project and tactic, a non-empty goal, an explicit role, an explicit
+`needsHumanReview` value, a canonical lowercase underscore branch slug without an agent prefix,
+and testable acceptance criteria. The review value is independent of priority. A due date is
+required only when supplied by the source, required by project policy, or automatically applicable
+to a bug or `Critical` task under the intake rule above. Use
 `Unknown` or `TBD` only when the source genuinely does not provide the information. If a missing
 detail would materially change implementation or validation, ask instead of guessing.
 
