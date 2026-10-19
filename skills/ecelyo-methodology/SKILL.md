@@ -1,6 +1,6 @@
 ---
 name: ecelyo-methodology
-description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and accomplished tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record. Use together with `ecelyo-local-server` when actual task state must be read or updated.
+description: Apply the Ecelyo way of work as a task-system philosophy. Use when agents or humans need guidance on how to select work, structure tactics, prioritize completion, limit work in progress, keep archived projects and accomplished tactics closed to new work, and coordinate execution through Ecelyo. Ecelyo is the sole system of record. Use together with `ecelyo-satellite` when actual task state must be read or updated.
 ---
 
 # Ecelyo Methodology
@@ -8,9 +8,9 @@ description: Apply the Ecelyo way of work as a task-system philosophy. Use when 
 Use this skill when the task is not only about calling Ecelyo Satellite, but about following the Ecelyo way of work.
 
 This skill defines the working philosophy.
-The companion skill `ecelyo-local-server` defines how to connect to the server and update live task state.
+The companion skill `ecelyo-satellite` defines how to connect to Ecelyo Satellite and update live task state.
 
-If the workflow requires reading or mutating task state, load `ecelyo-local-server` as well.
+If the workflow requires reading or mutating task state, load `ecelyo-satellite` as well.
 
 ## Core Idea
 
@@ -156,7 +156,7 @@ Agents should not:
 - hide blockers by leaving stale `wip` tasks behind
 - continue task work after Ecelyo synchronization fails
 
-## Relationship To `ecelyo-local-server`
+## Relationship To `ecelyo-satellite`
 
 Use `ecelyo-methodology` to decide:
 
@@ -166,7 +166,7 @@ Use `ecelyo-methodology` to decide:
 - how to prioritize completion
 - whether the destination project and tactic are active and eligible to receive work
 
-Use `ecelyo-local-server` to:
+Use `ecelyo-satellite` to:
 
 - verify connectivity
 - read systems, projects, tactics, and tasks

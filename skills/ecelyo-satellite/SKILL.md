@@ -1,12 +1,14 @@
 ---
-name: ecelyo-local-server
-models: gpt-5.4-mini, claude-sonnet-4-6
-description: Connect to Ecelyo Satellite, Ecelyo's macOS-only local HTTP service, to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state.
+name: ecelyo-satellite
+description: Connect to Ecelyo Satellite, Ecelyo's macOS-only HTTP service, to list systems, projects, tactics, tasks, and prioritized active task queues, and to update task state during agent workflows. Ecelyo is the sole system of record for task state.
 ---
 
 # Ecelyo Satellite
 
 Use this skill when Codex needs to communicate with Ecelyo Satellite over its local HTTP API.
+
+For backwards compatibility and skill discovery, the legacy name `ecelyo-local-server` refers to
+this Ecelyo Satellite skill.
 
 **Ecelyo is the sole system of record for task state.** Do not create local task-record files as a
 parallel mirror, progress note, or fallback. If repository instructions disagree with Ecelyo, treat

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ecelyo Satellite"
+  short_description: "Read and update Ecelyo Satellite state over its HTTP API"
+  default_prompt: "Use $ecelyo-satellite to inspect Ecelyo systems/projects/tactics/tasks and mirror app-side task state during task processing or execution."

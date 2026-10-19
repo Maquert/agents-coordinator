@@ -7,17 +7,16 @@
 ## Default Task System
 - The default task system for all agents is the Ecelyo system; task, project, and tactic records live there.
 - The live Ecelyo HTTP service is called **Ecelyo Satellite** at the functional level. Keep
-  `local server` only for technical identifiers such as `ecelyo-local-server` and the API
-  environment variables.
+  `local server` only for technical identifiers such as API environment variables.
 - A prompt whose first non-whitespace text is `New task:` (case-insensitive) must load and use the `task-processor` skill for task intake.
 - For a `New task:` prompt, capture the remainder as a task and do not implement it in the same turn unless the user explicitly asks for both intake and implementation.
 - The `New task:` prefix authorizes task intake. Keep Ecelyo as the task store.
 - The default methodology for all agents working for you is `ecelyo-methodology`.
 - Ecelyo Satellite mutations authenticate with the `ECELYO_SERVER_TOKEN` environment variable. Agents must source it from the shell environment, pass it as an `Authorization: Bearer` header, and never print, commit, or include its value in task descriptions, logs, or responses.
-- By default, agents must load and use the `ecelyo-local-server` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
+- By default, agents must load and use the `ecelyo-satellite` skill before performing task selection, task status reads, or task status updates unless a stronger local instruction explicitly overrides it.
 - Treat the Ecelyo local HTTP server as the primary workflow state for task progress updates.
 - Treat Ecelyo as a task-system philosophy, not only as an app or HTTP server.
-- The `ecelyo-methodology` skill is mandatory and is the shared philosophy reference for how work should be structured in Ecelyo. Read it alongside `ecelyo-local-server` when the workflow depends on Ecelyo.
+- The `ecelyo-methodology` skill is mandatory and is the shared philosophy reference for how work should be structured in Ecelyo. Read it alongside `ecelyo-satellite` when the workflow depends on Ecelyo.
 - Tactics must share one common goal and move toward one common end task.
 - Scoped tactics are better than massive tactics. When in doubt, create a new tactic instead of adding clutter to an existing one.
 - Before creating or attaching a task, search Ecelyo for a suitable eligible tactic and verify its project/tactic state. An explicit project or tactic named by the user takes precedence over inferred matching; preserve that assignment unless the destination is ineligible. For context-free one-off bug reports, use the current active Weekly Maintenance tactic by default.
@@ -141,7 +140,7 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - Unless stronger local instructions override it, load and use `ecelyo-methodology` as the default methodology skill for work done for this user.
 - When the first non-whitespace text in a user prompt is `New task:` (case-insensitive), always load and use `task-processor`, capture the remainder as task-intake content, and do not execute the captured work unless explicitly asked to do both.
 - When the user asks about the Ecelyo way of work, tactic structure, completion-first planning, WIP discipline, or the general Ecelyo philosophy, load and use the `ecelyo-methodology` skill.
-- When task state must be read, updated, synchronized, or created through the Ecelyo system, load and use the `ecelyo-local-server` skill.
+- When task state must be read, updated, synchronized, or created through the Ecelyo system, load and use the `ecelyo-satellite` skill.
 - When an agent needs to communicate task-manager status, ask for or document clarification, challenge scope, request human review, share artifacts or visuals, or report a blocker, load and use the `task-manager-assistant` skill.
 - When a task-manager workflow enters or may enter a blocked state, automatically activate `task-manager-assistant` before reporting or asking about the blocker; include the exact gate, owner, evidence, and smallest unblocking action.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.

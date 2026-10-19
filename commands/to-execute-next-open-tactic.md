@@ -1,5 +1,5 @@
 Use the `task-executor` skill in `batch-task-execution` mode to execute one complete Ecelyo tactic.
-Use `ecelyo-methodology` for tactic selection and sequencing, and `ecelyo-local-server` for
+Use `ecelyo-methodology` for tactic selection and sequencing, and `ecelyo-satellite` for
 Ecelyo connectivity (using cached `ECELYO_SERVER_IP` or Bonjour discovery when needed), live reads, and task-state updates.
 
 ## Selection contract
