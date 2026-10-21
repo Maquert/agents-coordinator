@@ -155,6 +155,23 @@ Use the actual agent identity and conversation URL. Never substitute an app-navi
 
 ## Execution
 
+### UI and device verification
+
+- Never inspect, launch, click, or otherwise interact with the app that is already running on the
+  user's Mac. In the Ecelyo environment, `/Applications/Ecelyo.app` is the user's TestFlight
+  installation; treat any pre-existing Ecelyo window or process as that installation. It is never
+  a task-verification target, even when its visible version appears relevant.
+- Verify UI changes using a build produced from the task's own worktree. Keep that build isolated
+  from TestFlight by using a distinct task-specific bundle identifier and an isolated app data
+  container. Do not share or migrate the TestFlight app's container, preferences, documents, or
+  synced data into the verification build. Prefer simulator-based verification where the task's
+  platform and interaction allow it.
+- Do not use verification to write to live external services or the user's real/synced data. Use
+  isolated fixtures or a test account/environment when interaction requires persistence.
+- If the host is locked, or a distinct build and isolated data environment cannot be established,
+  stop before interacting with the running app. Record the concrete blocker and required next step
+  in Ecelyo; resume only when safe isolated verification is available.
+
 ## Product version-change gate
 
 - Never change a product marketing or release version, including `MARKETING_VERSION`, `CFBundleShortVersionString`, semantic release metadata, or copied user-facing version references, without explicit written authorization from the product owner in the current task or conversation. The existence of an implementation task, or a request to build, release, fix, or prepare, is not authorization to change the product version.
