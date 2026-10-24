@@ -58,6 +58,7 @@
     "remoteControlEnabled": true,
     "remoteControlHostname": "macbook-pro-16-de-miguel-local-deep-nova",
     "sandboxEnabledAtV2Migration": false,
+    "themeMode": "THEME_MODE_INHERIT",
     "verboseAgentChat": false
   }
 }
