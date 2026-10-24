@@ -243,10 +243,25 @@ the server still rejects or cannot persist the PR, record that exact synchroniza
 task description and use the appropriate task state.
 
 After merge, remove the dedicated worktree and associated branches when permitted, verify cleanup,
-then update Ecelyo with `PATCH /tasks/{id} {"state":"finished"}`. If a genuine execution blocker
-prevents completion, update the task description with the blocker reason and set its state to
-`blocked`; do not claim completion. If only human inspection, approval, or a decision remains, set
-the state to `in review` instead of `blocked`.
+then update Ecelyo with `PATCH /tasks/{id} {"state":"finished"}`. Before removing an Xcode
+worktree, apply the Xcode Derived Data cleanup rule below. If a genuine execution blocker prevents
+completion, update the task description with the blocker reason and set its state to `blocked`; do
+not claim completion. If only human inspection, approval, or a decision remains, set the state to
+`in review` instead of `blocked`.
+
+### Xcode worktree cleanup
+
+- If the dedicated worktree contains an Xcode project or workspace (`.xcodeproj` or `.xcworkspace`),
+  identify the exact Derived Data directory used by that worktree and delete it at closeout, before
+  removing the worktree or marking the task `finished`. Prefer running Xcode commands with an
+  explicit worktree-specific `-derivedDataPath` so the path is unambiguous and safe to remove.
+- Delete only the verified Derived Data directory associated with the current worktree. Never delete
+  the global `~/Library/Developer/Xcode/DerivedData` directory wholesale, and never remove data
+  belonging to another worktree or task.
+- Verify that the exact path no longer exists and report the cleanup evidence in the closeout. If no
+  Derived Data was produced, verify that it is absent and report the cleanup as clean. If the path
+  cannot be identified safely, preserve the data, record the exact cleanup blocker, and do not mark
+  the task `finished`.
 
 The final response must include task title and ID, project, tactic, branch, validation, pull request
 URL and state, cleanup result, acceptance-criteria result, and an unambiguous task status. Report

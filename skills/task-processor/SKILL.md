@@ -113,6 +113,18 @@ For any tactic involving UI, visual design, layout, interaction design, screensh
 
 For a UI tactic, report the Design task, the merged renders/specification, the human approval or explicit waiver, and each implementation task's `needsHumanReview` setting as part of intake.
 
+### Xcode worktree cleanup contract
+
+When a task targets an Xcode project or workspace and execution is expected to use a dedicated
+worktree, include the cleanup requirement in the task's `## Technical details` or `## Validation`:
+
+- The executing agent must use or identify a worktree-specific Xcode Derived Data directory and
+  delete that exact directory after validation and delivery, before removing the worktree or
+  marking the task `finished`.
+- The task must never instruct an agent to delete the global Xcode Derived Data directory or build
+  data belonging to another worktree. If the exact path cannot be identified safely, the agent must
+  report the cleanup blocker instead of claiming completion.
+
 ## Required task contract
 
 Every task must have an eligible project and tactic, a non-empty goal, an explicit role, an explicit

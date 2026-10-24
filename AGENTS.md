@@ -108,7 +108,8 @@ Right before an agent starts execution, worktree creation, or coding for any tas
 When an agent selects, executes, advances, or batch-processes a task, it must close the task
 explicitly before ending the response. “Implemented” or “PR opened” is not a finished task. The
 agent must continue through validation, pull-request creation, merge, worktree and branch cleanup,
-and Ecelyo state synchronization as required by the active task skill.
+Xcode Derived Data cleanup when applicable, and Ecelyo state synchronization as required by the
+active task skill.
 
 If the task cannot be completed safely, the agent must update Ecelyo to `blocked` (or preserve the
 accurate active state when the blocker is outside the API's control), explain the exact blocking
@@ -126,6 +127,12 @@ not applicable. Use `N/A — <reason>` instead of omitting a field:
 | Branch | Concrete task branch, or `N/A` with reason |
 | Worktree | Removed/clean, or the exact cleanup blocker |
 | Task status | `**FINISHED**` only after all completion gates; `**BLOCKED**` when blocked |
+
+When the task used a worktree containing an Xcode project or workspace, worktree cleanup must also
+delete and verify the exact Derived Data directory associated with that worktree before the
+worktree is removed or the task is marked `finished`. Never delete the global Xcode Derived Data
+directory or another task's build data. If the exact path cannot be identified safely, report the
+cleanup blocker and do not mark the task finished.
 
 For a batch, include one closeout row per task and a final batch status. The final status must be
 unambiguous: use `Task Status: **FINISHED**` only when the task is fully resolved, or
