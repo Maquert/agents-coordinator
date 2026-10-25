@@ -66,7 +66,8 @@ information gate.
 - Never claim or start a task belonging to a project whose name contains the word `IceBox` (case-insensitive). Exclude those tasks from selection and do not set them to `wip`.
 - Use `blocked` only when the agent genuinely cannot proceed because of a concrete execution blocker, such as an inconvenient external constraint, a source-code conflict, an impossible or contradictory requirement, an unavailable dependency or access requirement, or another condition that requires resolution outside the agent's current control.
 - When a task is genuinely blocked, update its Ecelyo description with a clear Markdown `## Blocker` section before or together with the state update. Record the concrete reason, relevant evidence, and the smallest required resolution; do not only write the reason in a progress message.
-- Human review is not a blocker. When the work is ready for a person to inspect, approve, or decide, use the Ecelyo state `in review` and describe the requested review or decision. Do not use `blocked` merely because human review is required.
+- Questions and permission requests are review gates, not blockers. Whenever progress is waiting for the human to answer a question, clarify scope, grant permission, or review/approve work, set the Ecelyo task state to `in review` and describe the exact question or requested decision. Do not set the task to `blocked` for any of these reasons.
+- Reserve `blocked` for a concrete external impediment that prevents the task from moving forward and requires resolution outside the agent's control. Record the reason, evidence, and smallest required resolution in the task's `## Blocker` section.
 
 ## Stale tactics and tasks
 
@@ -120,6 +121,15 @@ and keep it for the whole tactic run while processing child tasks sequentially:
 
 Do not append `Complete tactic`, a child-task name, an ID, or another suffix to a tactic-level title.
 Task-level threads continue to use the current task name after the tactic name.
+
+When the tactic reaches its completed state, rename the tactic-level thread immediately to the same
+compact title with the finished prefix, for example `= [Project name] (Tactic name)`. Do this as part
+of tactic closeout, before the final response; the tactic thread must not retain its active (`> `)
+title after the tactic is finished.
+
+When requesting information, clarification, permission, approval, or review from the human, use the
+`? ` thread prefix and set the task state to `in review` while waiting. A request for a human decision
+does not make the task `blocked`; reserve `X ` and `blocked` for a genuine external impediment.
 
 Do not add agent prefixes, IDs, or additional status labels. Use the active agent platform's
 thread-title operation:
