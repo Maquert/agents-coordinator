@@ -11,7 +11,7 @@ Before drafting or reviewing customer-facing release notes for Ecelyo, read the 
 [user-facing vocabulary](https://github.com/Maquert/Ecelyo_app/blob/main/specifications/v1/app-user-facing-vocabulary.md).
 Use its canonical names for app areas and views, including their platform-neutral forms. Treat
 those names as the product vocabulary: never replace them with source-file, type, target, or other
-implementation terminology in release notes, store metadata, beta notes, or in-app copy.
+implementation terminology in release notes, store metadata, or TestFlight notes.
 
 ## Release Intent and Version Decision
 
@@ -175,13 +175,13 @@ Apply this protocol whenever the selected Alpha or Beta lane is using Xcode Clou
   start using the app and relevant fixes users would notice. Do not mention renames, legacy
   product identities, agent process, repository mechanics, or technical cleanup unless the
   developer explicitly asks for them. Do not claim changes unsupported by the release range.
-- Require version-controlled store metadata on the selected release lane: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes for every repository-supported locale. Prefer `release-metadata/<locale>/app-description.md`, `release-notes.md`, and `beta-build-notes.md` unless the repository defines another location. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
+- Require version-controlled store metadata on the selected release lane: the evergreen app description, version-specific App Store release notes, and beta tester “What to Test” notes. For Ecelyo, use `TestFlight/WhatToTest.en-US.txt` as the sole tester-notes source; legacy `release-metadata/*/beta-build-notes.md` files are not updated. These files are a reviewable handoff and do not authorize App Store Connect access or upload.
 - Keep internal release notes separate. They may share content with `RELEASE_NOTES.md`, but one does not replace the other.
-- For apps that display in-app release notes on startup (e.g., Ecelyo): update both the `ReleaseNotesPayload.current` struct and the localized strings each release so users see fresh notes. The app automatically triggers display when `generatedAt` is newer than the last-seen timestamp stored in user defaults; updating the timestamp is the mechanism for re-triggering display on each new version.
+- Ecelyo no longer uses in-app release notes. Do not update `ReleaseNotesPayload`, release-note catalog entries, or the in-app release-note specification for future releases; write tester guidance to `TestFlight/WhatToTest.en-US.txt` so it appears in TestFlight’s native What to Test screen.
 - Keep Beta source-controlled release changes, including `RELEASE_NOTES.md` and any required build-number update, on `release-candidate`; keep Alpha changes and internal release metadata on `main` when the Alpha contract requires them there.
 - Use one persistent linked worktree for all releases, located beside the primary repository as `<repository-directory>-release`. Reuse it for every release; never create version-specific release worktrees. For Ecelyo, the required path is `~/Developer/Projects/ecelyo_app-release`.
 - Create a GitHub pull request from `release-candidate` back to `main` for release-only changes
-  (release notes, version metadata, startup-panel notes, build fixes, hotfixes, and required
+  (release notes, version metadata, TestFlight notes, build fixes, hotfixes, and required
   screenshot references). Do not include unrelated product work. Merge it only after the exact
   candidate has passed the required hosted/manual gate, and recreate the persistent remote branch
   if hosting automation deletes it after the merge.
@@ -222,7 +222,7 @@ the pull request in Phase 4.
    `release_notes` tag (or the documented first-release fallback) as the comparison start before
    changing release metadata.
 2. Read only the commits in that range that describe user-visible work. Filter out technical-only changes, group the remaining changes, and rewrite them as clear customer-facing release notes.
-3. Remove stale release-note entries from the repository's existing release-note destination and `Localizable.xcstrings` or equivalent catalog when present. Create the new internal release-note list in the repository-defined destination. If the destination cannot be inferred safely, stop before editing.
+3. Remove stale entries from the repository's existing release-note destination when present. For Ecelyo, create the new English tester list in `TestFlight/WhatToTest.en-US.txt`; do not update the legacy in-app payload or catalog. If the destination cannot be inferred safely, stop before editing.
 4. Select the semantic version for this release using the release contract and carry it into the candidate phase. Refresh `RELEASE_NOTES.md` from the release range and bump the Xcode marketing version to this selected version in the *same commit* as the release notes, together with any version references in locale-specific release-metadata files and any internal release-notes spec used to validate version parity — never leave `RELEASE_NOTES.md` and the marketing version disagreeing on the default branch, even briefly, since a repository's CI may gate all test phases on that parity. Do not update the build number or perform any App Store Connect-only metadata change on main; those remain Phase 2 work on `release-candidate`.
 5. Commit the release-note changes together with the marketing-version bump and any synced metadata as one commit on `release-candidate`, using `Prepare <version> release notes` unless repository instructions require another style. Do not push `main` or create release tags before the required hosted/manual build gate. Run the repository's fast release-metadata validator (when present) before committing to confirm nothing was missed.
 6. Treat this candidate commit as the release-note baseline for the current release. Preserve it on `release-candidate`, create the release-only pull request after the candidate push, and integrate it back into `main` only after the final release gates pass. Do not regenerate the same notes from the candidate range.
@@ -247,8 +247,9 @@ build handoff and collect the commits needed for the per-build timestamp tag.
 For a build-only request:
 
 1. Keep `MARKETING_VERSION` and all release-note version references unchanged.
-2. Do not update `RELEASE_NOTES.md`, localized release notes, beta notes, startup release-note
-   payloads, or their localization entries unless the developer separately requests that work.
+2. Do not update `RELEASE_NOTES.md`, localized store notes, or in-app release-note payloads for a
+   build-only request unless the developer separately requests public store-note work. Refresh
+   `TestFlight/WhatToTest.en-US.txt` when tester guidance is requested.
 3. Apply only the repository-defined build-number workflow and prepare the per-build timestamp
    tag after the applicable hosted/manual build gate succeeds.
 
@@ -263,19 +264,8 @@ the version-selection steps below.
    - Inspect documented build hooks and release specifications for the selected mode. In Xcode manual mode, preserve and validate the local date/timestamp generator. In Xcode Cloud mode, do not replace, disable, or duplicate Xcode Cloud's build-number ownership.
 4. The marketing version was already applied in Phase 0 (step 2 above); only touch the authoritative Xcode setting again here if this phase's recalculation changed the selected version.
 5. `RELEASE_NOTES.md` was already created in Phase 0; only append candidate-specific user-visible changes here, following the same App Store-notes tone, rather than recreating it from scratch.
-6. Create or update the localized app description, App Store release notes, and beta tester build notes in the repository metadata directory. These carry the version bumped in Phase 0 forward; keep beta notes practical and test-oriented, and include the platform, version, build-number check, and the most important changed flows.
-7. Update the in-app release notes display:
-   - **For Ecelyo:** Update `Shared/Domain/Models/ReleaseNotesPayload.swift`:
-     - Bump `version` to match the selected release version
-     - Update `generatedAt` to the current date/time (use today's date at a reasonable time like 10:00 AM)
-     - Update the `id` field to match today's date (format: YYYY-MM-DD)
-     - Ensure the `itemKeys` array references keys that exist in `Localizable.xcstrings`
-   - In `Ecelyo/Localizable.xcstrings`, update the localized strings for:
-     - `release_notes.title` (e.g., "What's New")
-     - `release_notes.item.*` entries (one for each bullet point in `RELEASE_NOTES.md`)
-   - Ensure the number and content of items match the `RELEASE_NOTES.md` notes from Phase 0
-   - This allows the app to display release notes to users on first launch after upgrading, with fresh content for each version
-8. Confirm that the marketing version, effective build-number plan, internal notes, App Store notes, app description, and beta tester notes describe the same release.
+6. Create or update the localized app description, App Store release notes, and `TestFlight/WhatToTest.en-US.txt`. Keep the TestFlight notes practical and test-oriented, and include the platform, version, build-number check, and the most important changed flows.
+7. Do not update Ecelyo's in-app release-note payload, catalog, or specification. Confirm that the marketing version, effective build-number plan, internal notes, App Store notes, app description, and TestFlight notes describe the same release.
 
 ## 2.5 Validate Build Configuration (Xcode Cloud Mode Only)
 
