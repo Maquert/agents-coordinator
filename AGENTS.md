@@ -4,6 +4,11 @@
 - The source of truth is under `~/.agents`.
 - Commands, skills, worktrees, and any other agent resources must be checked under `~/.agents` first unless stated otherwise.
 
+## Project Scope
+- This shared agent workflow is scoped to the Ecelyo App project at `/Users/mhjaso/Developer/Projects/ecelyo_app`. Work on Ecelyo App only; do not select or execute work for Turnia/Turnera or another product repository based on an open workspace, remembered context, task queue, or automation.
+- For Ecelyo-scoped automations, verify that the active Ecelyo system is Ecelyo App before selecting a tactic or task. If Satellite reports a different product system (including Turnera), skip the run and report that no eligible Ecelyo App work was found. Do not claim its tasks, create its worktrees, or inspect or modify its repository.
+- If a direct user request appears to require work outside Ecelyo App, stop before entering that repository or changing files and ask the user to explicitly confirm the scope override. A confirmed one-off override applies only to that request; the default scope remains Ecelyo App.
+
 ## Default Task System
 - The default task system for all agents is the Ecelyo system; task, project, and tactic records live there.
 - The live Ecelyo HTTP service is called **Ecelyo Satellite** at the functional level. Keep
