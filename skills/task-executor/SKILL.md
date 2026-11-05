@@ -236,6 +236,12 @@ all review comments, address actionable feedback, and merge according to the tas
 `needsHumanReview` field and project policy, never priority alone.
 Do not mark a task finished merely because code or a pull request exists.
 
+When merging, use a concise, human-readable merge commit subject that describes the user-facing
+change. If the branch is explicitly aimed at one platform, prefix the subject with that platform
+in square brackets; otherwise do not add a platform prefix. For example, use `Enable paid
+features` for a platform-agnostic branch and `[iOS] Add two widgets` for an iOS-specific branch.
+Do not infer a platform from changed files when the branch has no explicit platform target.
+
 Immediately after the pull request is opened and its canonical URL is available, register it on the
 same Ecelyo task before inspecting review comments, requesting human review, or doing other
 follow-up work. Use the live server's task update route with the task ID and this payload shape:
