@@ -1,0 +1,13 @@
+{
+  "builtin": "schedule",
+  "restart_policy": "always",
+  "args": [
+    "CRON_TZ=Europe/Madrid 0 5 * * *",
+    "agentapi",
+    "new-conversation",
+    "--model=flash",
+    "--",
+    "Read /Users/mhjaso/.agents/commands/to-execute-next-open-tactic.md and follow it exactly.\n\nFilter all  tactics, sort them by target version, and pick the lowest version. Prefer tactics that have not been already started by another afent. If two tactics target the same version sort them by priority: higher priority wins. If still in draw, pick a random one. If the tactic has no version, then it's allowed to pick it. \n\nThe goal is to either finish wip tactics or complete ready ones."
+  ],
+  "display_name": "Turnia - Complete tactic"
+}

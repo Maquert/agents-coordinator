@@ -1,4 +1,6 @@
-Use the `task-executor` skill in `batch-task-execution` mode to execute one complete Ecelyo tactic.
+Use the [task-executor skill](/Users/mhjaso/.agents/skills/task-executor/SKILL.md) in
+`batch-task-execution` mode and follow its execution and closeout instructions. This command is
+intended for scheduled tasks and routines.
 Use `ecelyo-methodology` for tactic selection and sequencing, and `ecelyo-satellite` for
 Ecelyo connectivity (using cached `ECELYO_SERVER_IP` or Bonjour discovery when needed), live reads, and task-state updates.
 
@@ -26,10 +28,17 @@ Select exactly one active tactic before starting work:
    - its persisted `objective` is non-empty;
    - it has at least one `pending` task; and
    - none of its tasks has state `wip`.
-6. Rank eligible tactics using the server's priority ordering. Within that ordering, prefer
-   `Blocker`, then `High`, then `Medium`, then `Trivial`; preserve the server order for ties.
+6. Sort eligible tactics by version, then keep only tactics matching the current system's
+   `systemversion`. If the current `systemversion` is unavailable or no tactic matches it, skip
+   this selection run without claiming work.
+7. From the matching tactics, defer tactics in the Maintenance project whenever an eligible
+   matching tactic exists in another project. Sort candidates by priority from highest to lowest
+   and select the highest-priority tactic that has not been accomplished. For priority ordering,
+   prefer `Blocker`, then `High`, then `Medium`, then `Trivial`; preserve server order for ties.
    Do not select a tactic merely because it has no `wip` tasks if it has no executable pending task.
-7. Immediately refresh `/tasks/priority` and re-check the selected tactic's zero-`wip` condition
+8. If the selected tactic belongs to the Maintenance project, execute no more than three tasks
+   from it in this run, then stop even if it still has unfinished tasks.
+9. Immediately refresh `/tasks/priority` and re-check the selected tactic's zero-`wip` condition
    before claiming any task. If another agent has started a task, discard the candidate and choose
    the next eligible tactic from a fresh response.
 
@@ -38,8 +47,9 @@ changing Ecelyo state or creating local task records.
 
 ## Tactic execution
 
-After selection, stay within that tactic until it is resolved. Do not hop to another tactic because
-one task is inconvenient.
+After selection, stay within that tactic until it is resolved, or until the three-task limit for a
+Maintenance tactic is reached. Do not hop to another tactic because one task is inconvenient. When
+the Maintenance limit is reached, stop without marking an unfinished tactic accomplished.
 
 1. Read the full selected task with `GET /tasks/{id}` before editing. Check its goal, non-goals,
    affected surfaces, dependencies, validation plan, branch, and acceptance criteria. If the task

@@ -9,6 +9,11 @@
     "papiplan-complete-tactic": {
       "enabled": false,
       "projectId": "964e8a66-5d0e-41cc-af46-f7de52cb4fd5"
+    },
+    "turnia-complete-tactic": {
+      "enabled": true,
+      "projectId": "0a637a88-c4d7-4bbf-9b5e-189f5829efa7",
+      "schemaVersion": 1
     }
   },
   "userSettings": {
