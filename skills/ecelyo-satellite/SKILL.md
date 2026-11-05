@@ -57,6 +57,31 @@ Ecelyo Satellite instances advertise their presence on the local network via Mul
 - Discovery must fail clearly when zero or multiple servers are advertised; never choose an arbitrary server.
 - **Specification Contract**: See [Ecelyo Satellite Network Discovery Specification v1](file:///Users/mhjaso/Developer/Projects/ecelyo_app/specifications/v1/local-server-discovery.md).
 
+## Connectivity Troubleshooting
+
+When the agent cannot connect, treat the cached `ECELYO_SERVER_IP` as a hint, never as proof that
+the server is still at that address. Probe it once with `GET /`; if it fails, stop retrying the stale
+address and run Bonjour discovery. After resolving a new service host and port, replace the cached
+IP for the current shell and any supported persistent cache, then verify `GET /` against the new
+address before continuing. Do not discover a new address and then leave the old cached IP in place.
+
+- If a connection or discovery command fails with a sandbox, network-policy, DNS, or permission
+  error, retry the same read-only command outside the restrictive sandbox or request the required
+  network escalation. Do not conclude that Satellite is stopped until the host-level check has
+  been attempted.
+- Use the complete Bonjour sequence: browse `_ecelyo._tcp.local.`, require exactly one advertised
+  service, resolve it with `dns-sd -L`, and resolve its hostname with `dns-sd -G v4`. Use the
+  advertised port rather than assuming `8080` when the record reports another one.
+- Never silently fall back to `localhost`, invent an IP, or choose one service from multiple
+  advertisements. Zero or multiple services is an unresolved server-selection condition: report
+  it and ask the user to select or provide the intended server.
+- Distinguish reachability from authentication. A reachable `GET /` followed by an authorization
+  failure means the token or endpoint request needs attention; it is not evidence that the IP is
+  stale. Never print the token while diagnosing either case.
+- After updating the IP, perform one fresh authenticated request using the new value and only then
+  resume task work. If the refreshed address also fails, stop and report the exact address source,
+  host/port result, and failure class.
+
 ## Shared Rules
 
 1. Prefer the narrowest endpoint that answers the question.
