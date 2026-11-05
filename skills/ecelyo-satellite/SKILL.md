@@ -78,6 +78,12 @@ address before continuing. Do not discover a new address and then leave the old 
 - Distinguish reachability from authentication. A reachable `GET /` followed by an authorization
   failure means the token or endpoint request needs attention; it is not evidence that the IP is
   stale. Never print the token while diagnosing either case.
+- If `GET /` succeeds but an authenticated request returns `401`, `Unauthorized`, or an
+  expired-token error, treat it as an expired or missing `ECELYO_SERVER_TOKEN`, not an IP problem.
+  Ask the user to refresh or re-enter the token through the approved Ecelyo setup, then retry the
+  authenticated request. Never ask the user to paste the token into chat, print it, persist it, or
+  include it in task descriptions, logs, or responses; do not resume task work until authentication
+  succeeds.
 - If Satellite is reachable but `GET /systems` does not show the intended Ecelyo system as active,
   do not keep troubleshooting the network. The system may not have been loaded from iCloud or may
   not be active in Ecelyo. Ask the user to open Ecelyo, sign in if needed, load the Ecelyo system
