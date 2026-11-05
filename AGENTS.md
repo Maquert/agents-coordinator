@@ -9,6 +9,11 @@
 - For Ecelyo-scoped automations, verify that the active Ecelyo system is Ecelyo App before selecting a tactic or task. If Satellite reports a different product system (including Turnera), skip the run and report that no eligible Ecelyo App work was found. Do not claim its tasks, create its worktrees, or inspect or modify its repository.
 - If a direct user request appears to require work outside Ecelyo App, stop before entering that repository or changing files and ask the user to explicitly confirm the scope override. A confirmed one-off override applies only to that request; the default scope remains Ecelyo App.
 
+## Local Xcode and Simulator Defaults
+- Use Xcode 27.2 for all local projects.
+- The approved simulator devices are iPhone 17 and iPad Pro 13-inch (M5).
+- Ask the user before adding or using any additional simulator device.
+
 ## Default Task System
 - The default task system for all agents is the Ecelyo system; task, project, and tactic records live there.
 - The live Ecelyo HTTP service is called **Ecelyo Satellite** at the functional level. Keep
