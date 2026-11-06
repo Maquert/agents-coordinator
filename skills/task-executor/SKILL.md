@@ -104,6 +104,7 @@ thread's real status changes:
 | `@ ` | Investigation: the agent is analysing and planning, not executing implementation work. |
 | `@= ` | Investigation completed: the investigation produced a new set of tasks or tactics. |
 | `? ` | In review: the thread is waiting for a human question, permission, clarification, approval, or review. |
+| `# ` | Waiting to start: the agent is ready but is waiting for the user to start or authorize the task; it is neither blocked nor requesting information or review. |
 | `__ ` | Nothing to do: the agent was asked to complete a task, but there was no actionable work. |
 
 These are the complete supported prefixes. `@=` is the only defined composite prefix; do not invent
