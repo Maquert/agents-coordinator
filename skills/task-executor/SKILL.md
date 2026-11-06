@@ -95,11 +95,15 @@ stored in Ecelyo. The base title format is:
 Prefix the base title with the execution state. Apply the corresponding title immediately when the
 Ecelyo state changes:
 
-- `> ` — the thread is active and the task is being executed (`wip`);
-- `X ` — the task is blocked (`blocked`); and
-- `? ` — the task is waiting for information, clarification, approval, or review while it is neither
-  active (`wip`) nor blocked; and
-- `= ` — the task is finished (`finished`).
+| Prefix | Ecelyo state | Meaning |
+| --- | --- | --- |
+| `> ` | `wip` | The thread is active and the task is being executed. |
+| `X ` | `blocked` | A genuine external blocker prevents progress. |
+| `? ` | `in_review` | The thread is waiting for information, clarification, permission, approval, or human review; it is neither active nor blocked. |
+| `= ` | `finished` | The task or tactic is finished. |
+| *(none)* | Neutral / not started | The thread does not currently represent an active task state; do not use this instead of an applicable state prefix. |
+
+These are the complete supported prefixes. Do not invent additional prefixes or combine prefixes.
 
 Apply `? ` immediately when the agent asks the human for information or requests review, even if
 the Ecelyo state has not changed yet. Remove it as soon as the request is resolved by applying the
