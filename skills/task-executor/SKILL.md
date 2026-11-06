@@ -93,21 +93,26 @@ stored in Ecelyo. The base title format is:
 ```
 
 Prefix the base title with the execution state. Apply the corresponding title immediately when the
-Ecelyo state changes:
+thread's real status changes:
 
-| Prefix | Ecelyo state | Meaning |
-| --- | --- | --- |
-| `> ` | `wip` | The thread is active and the task is being executed. |
-| `X ` | `blocked` | A genuine external blocker prevents progress. |
-| `? ` | `in_review` | The thread is waiting for information, clarification, permission, approval, or human review; it is neither active nor blocked. |
-| `= ` | `finished` | The task or tactic is finished. |
-| *(none)* | Neutral / not started | The thread does not currently represent an active task state; do not use this instead of an applicable state prefix. |
+| Prefix | Meaning |
+| --- | --- |
+| `> ` | Work in progress: coding, thinking, running tests, or otherwise actively executing the task. |
+| `= ` | Finished: the task or tactic is complete and there are no pending pull requests to be merged. |
+| `~= ` | Almost finished: an exceptional tactic-level state where the work is complete enough to close but additional improvement tasks may still be added. |
+| `X ` | Blocked: the agent cannot continue the task on its own because of a genuine external blocker. |
+| `@ ` | Investigation: the agent is analysing and planning, not executing implementation work. |
+| `@= ` | Investigation completed: the investigation produced a new set of tasks or tactics. |
+| `? ` | In review: the thread is waiting for a human question, permission, clarification, approval, or review. |
+| `__ ` | Nothing to do: the agent was asked to complete a task, but there was no actionable work. |
 
-These are the complete supported prefixes. Do not invent additional prefixes or combine prefixes.
+These are the complete supported prefixes. `@=` is the only defined composite prefix; do not invent
+other prefixes or combine them. Update the prefix as soon as the thread's real status changes.
 
 Apply `? ` immediately when the agent asks the human for information or requests review, even if
 the Ecelyo state has not changed yet. Remove it as soon as the request is resolved by applying the
-next accurate state prefix (`> `, `X `, or `= `).
+next accurate prefix. Use `@ ` or `@= ` for investigation work rather than `> ` when no
+implementation is being executed.
 
 At the start of work, once the task is claimed, use the active form:
 
