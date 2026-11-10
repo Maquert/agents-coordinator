@@ -24,6 +24,8 @@ Select exactly one active tactic before starting work:
    response lacks a required field; do not invent an endpoint.
 5. A tactic is eligible only when all of these are true:
    - its system and project are in scope and not archived;
+   - its project name does not contain the word `Release` or `Icebox` (case-insensitive); never
+     pick a tactic from such a project, and never claim its tasks;
    - the tactic is not `accomplished` or archived;
    - its persisted `objective` is non-empty;
    - it has at least one `pending` task; and
@@ -32,10 +34,13 @@ Select exactly one active tactic before starting work:
    `systemversion`. If the current `systemversion` is unavailable or no tactic matches it, skip
    this selection run without claiming work.
 7. From the matching tactics, defer tactics in the Maintenance project whenever an eligible
-   matching tactic exists in another project. Sort candidates by priority from highest to lowest
-   and select the highest-priority tactic that has not been accomplished. For priority ordering,
-   prefer `Blocker`, then `High`, then `Medium`, then `Trivial`; preserve server order for ties.
-   Do not select a tactic merely because it has no `wip` tasks if it has no executable pending task.
+   matching tactic exists in another project; claim a Maintenance tactic only when nothing else
+   is eligible. Sort candidates by priority from highest to lowest and select the
+   highest-priority tactic that has not been accomplished, including unfinished tactics that were
+   already started but have no `wip` task. For priority ordering, prefer `Blocker`/`Critical`,
+   then `High`, then `Medium`, then `Low`/`Trivial`; preserve server order for ties.
+   Do not select a tactic merely because it has no `wip` tasks if it has no executable pending task
+   (for example, when every pending task depends on a parent that is not `finished`).
 8. If the selected tactic belongs to the Maintenance project, execute no more than three tasks
    from it in this run, then stop even if it still has unfinished tasks.
 9. Immediately refresh `/tasks/priority` and re-check the selected tactic's zero-`wip` condition
