@@ -10,8 +10,13 @@
       "enabled": false,
       "projectId": "964e8a66-5d0e-41cc-af46-f7de52cb4fd5"
     },
+    "swarm/swarm_board": {
+      "projectId": "5a284807-3f2a-47a6-9acd-0e3a2309fcf3",
+      "resolvedPermissions": {},
+      "schemaVersion": 1
+    },
     "turnia-complete-tactic": {
-      "enabled": true,
+      "enabled": false,
       "projectId": "0a637a88-c4d7-4bbf-9b5e-189f5829efa7",
       "schemaVersion": 1
     }
