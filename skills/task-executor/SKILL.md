@@ -39,6 +39,25 @@ Right before starting work, present:
 | Project | Project name and ID |
 | Tactic | Tactic name and ID |
 
+## Task Deeplink Contract
+
+Every task claimed or moved to `wip` must have a compulsory, real `deeplinkUrl` pointing to the
+live agent conversation that is executing that task. The URL must use the active agent platform's
+conversation scheme and the actual identifier for this conversation, such as
+`codex://threads/<actual-thread-id>` or `claude://agents/<actual-agent-id>`.
+
+- Obtain the conversation identifier from the active agent platform before claiming the task. Do
+  not invent IDs, use placeholders, guess a URL, reuse another conversation's link, or substitute
+  an Ecelyo app-navigation URL, task URL, pull-request URL, or generic home page.
+- Set the real `deeplinkUrl` in the same Ecelyo `PATCH /tasks/{id}` request that moves the task to
+  `wip`, together with `agentTechnology`. Never set `wip` first and attach an unverified link later.
+- Immediately reread `GET /tasks/{id}` and verify that the persisted `deeplinkUrl` exactly matches
+  the current conversation's real URL. If it is missing, malformed, or points elsewhere, stop
+  before editing or executing the task and report the synchronization problem.
+- If the active platform cannot provide or verify a real conversation URL, do not claim the task,
+  move it to `wip`, create its worktree, or begin implementation. Leave it available for a later
+  run with a valid conversation deeplink; never make up a URL to satisfy the field.
+
 ## Selection and ownership
 
 Use `GET /tasks/priority` when the user asks for the next task. Follow Ecelyo's priority order and
@@ -161,17 +180,19 @@ X [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and 
 = [Papiplan] (Test-Host Crash Regression Fix) Fix PapiplanApp compile break and test-host persistence crash
 ```
 
-Before editing, update the selected task in one request:
+Before editing, update the selected task in one request using the real conversation URL:
 
 ```json
 {
   "state": "wip",
-  "deeplinkUrl": "antigravity://conversations/<conversation-id>",
+  "deeplinkUrl": "<actual-live-conversation-url>",
   "agentTechnology": "Antigravity"
 }
 ```
 
-Use the actual agent identity and conversation URL. Never substitute an app-navigation URL.
+`<actual-live-conversation-url>` is documentation notation only and must never be sent literally.
+Use the actual agent identity and conversation URL obtained from the active platform. Never
+substitute an app-navigation URL or another made-up value.
 
 ## Execution
 
