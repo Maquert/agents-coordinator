@@ -81,7 +81,32 @@ For any explicit backlog-intake request:
      detail would materially change implementation or validation, record it as an open question in
      `## Blockers` or `## Technical details` and ask the human instead of guessing.
 7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
-8. For every QA task that validates a behavior change, require QA to review the existing tests and identify the necessary coverage before validation. When coverage is missing or incomplete, require QA to add or update the necessary automated tests and record that work as a numbered requirement with a matching acceptance criterion. For bug-fixing tasks, require a regression test that reproduces the fixed defect and prevents its recurrence, unless that is technically infeasible and the reason is documented. QA must not be scoped to running existing tests only when the changed behavior lacks coverage.
+8. For every QA task, make QA an excellence guardian rather than a test-only role. Include matching
+   numbered requirements and acceptance criteria that require QA to:
+   - read the full dependency chain from the QA task through every parent and ancestor to the root;
+   - review every pull request in that chain, including diffs, descriptions, checks, review decisions,
+     inline comments, and discussion comments; record why a missing pull request is acceptable when
+     a chain task has no code delivery;
+   - identify new issues, leave actionable review comments on the relevant pull request when the
+     review workflow allows it, and create a separate Ecelyo follow-up task for every actionable
+     finding with source links, evidence, a recommended approach, red flags, an explicit role,
+     priority, `needsHumanReview`, technical details, and acceptance criteria;
+   - verify functional behavior and test coverage, adding or updating automated tests when coverage
+     is missing or incomplete. For bug-fixing tasks, require a regression test that reproduces the
+     defect and prevents recurrence unless technical infeasibility is documented;
+   - assess code clarity, maintainability, architecture, project specifications, error handling,
+     persistence, compatibility, security, accessibility, localization, observability, native APIs,
+     and the applicable platform Human Interface Guidelines;
+   - assess performance and responsiveness, including main-thread blocking, UI freezes, bottlenecks,
+     unnecessary repeated work, resource leaks, cancellation, and appropriate use of concurrency;
+   - if a required specification is missing, stale, or contradictory, ask the human to confirm the
+     intended rule, use `in_review` while waiting, and write or update the specification or create
+     a follow-up task after confirmation.
+   Do not mark the QA task complete while actionable findings, unresolved specification decisions,
+   or follow-up tasks remain. Follow-up tasks must preserve an acyclic executable graph: make them
+   prerequisites of QA with the appropriate predecessor rather than children of an unfinished QA
+   task when the parent-task gate would otherwise prevent them from starting. QA must not be scoped
+   to running existing tests only.
 9. Use `Trivial` when no priority is supplied and no stronger project rule applies.
 10. Use an agent role that reflects the captured work, such as `Product Manager`, `Developer`, `QA`, `Localization Team`, or `Product Designer`.
 11. Report the created project, tactic, task, priority, role, `needsHumanReview` value, branch slug, due date, acceptance-criteria count, and attached-image count. Use `task-manager-assistant` to make the report actionable and to call out any human decision still needed.

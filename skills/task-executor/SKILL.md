@@ -80,6 +80,45 @@ required human input. If the chain makes the
 challenging task the next required task, follow the chain and apply its appropriate review or
 information gate.
 
+## QA excellence guardian
+
+When the selected task has `agentRole: QA`, QA is an excellence guardian, not only a functional
+tester. The QA task must be executed only after the following review is complete:
+
+1. Reconstruct the dependency chain from the QA task upward: read the QA task, each direct parent,
+   and every ancestor until the root task. Review their goals, requirements, acceptance criteria,
+   technical details, validation evidence, states, and task relationships. Do not review the QA
+   task in isolation.
+2. For every task in that chain with a pull request, inspect the complete pull request: diff,
+   description, checks, review decisions, inline comments, and discussion comments. Gather all
+   existing concerns and, when new issues are found, leave concise actionable review comments on
+   the relevant pull request with evidence and severity. If a chain task has no expected pull
+   request, record why that is acceptable; never infer that no review is needed from a missing URL.
+3. Evaluate more than whether the code runs. Check the complete behavior and acceptance contract,
+   code clarity and maintainability, project specifications, architecture, error handling,
+   persistence and compatibility, accessibility, localization, security, and observability as
+   applicable. Confirm that the implementation uses the platform's native APIs and follows the
+   platform Human Interface Guidelines (iOS, macOS, Android, web, or the applicable platform).
+4. Review performance and responsiveness explicitly: look for main-thread blocking, UI freezes,
+   unnecessary repeated work, bottlenecks, memory or resource leaks, poor cancellation, and
+   missing concurrency where concurrency is appropriate. Do not add concurrency mechanically when
+   the operation must remain serialized or main-actor isolated.
+5. If a required project specification is missing, stale, or contradictory, identify the gap and
+   ask the human to confirm the intended rule before treating the implementation as excellent. Use
+   `in_review` for that human decision, not `blocked`; after confirmation, write or update the
+   specification or create the required follow-up task and link the evidence.
+6. For every actionable finding, create a separate follow-up task in Ecelyo. Include the source
+   pull request and review comment, evidence, recommended approach, red flags, explicit role,
+   priority, `needsHumanReview`, technical details, and acceptance criteria. Keep follow-ups in
+   the same project and tactic unless the human explicitly approves a different scope.
+7. Preserve an executable dependency graph when adding follow-ups. Do not make a follow-up a child
+   of the active QA task if the parent-task gate would prevent it from starting before QA finishes.
+   Instead, place it as a prerequisite of QA with the appropriate existing predecessor as its
+   parent, keep the graph acyclic, reread the graph, and verify the new ordering through Ecelyo.
+8. Do not mark QA finished while actionable follow-ups, unresolved specification decisions, or
+   review findings remain. If no findings remain, record the chain reviewed, pull requests checked,
+   quality gates assessed, and concrete validation evidence in the QA closeout.
+
 ## Project and task-state gates
 
 - Never claim or start a task belonging to a project whose name contains the word `IceBox` (case-insensitive). Exclude those tasks from selection and do not set them to `wip`.
