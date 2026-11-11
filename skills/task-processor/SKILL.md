@@ -56,6 +56,30 @@ For any explicit backlog-intake request:
    - `## Blockers` — known blockers, or `None identified.` when there are no blockers.
    - `## Validation` — the validation plan and test coverage expected.
    Do not write descriptions as unstructured prose or plain-text labels. Keep all formatting valid Markdown.
+   - Treat `## Technical details` as an implementation contract, not a generic summary. Before
+     finalizing it, use all relevant knowledge available from the request, repository instructions,
+     existing source, specifications, established patterns, and applicable skills. Read the
+     relevant files and load the relevant skills as needed; do not implement product changes during
+     intake.
+   - Make the technical contract actionable by documenting, when applicable:
+     - the recommended and most correct approach, including the intended architecture, data/state
+       flow, implementation order, and the existing abstractions or patterns to reuse;
+     - the exact files, modules, types, APIs, endpoints, commands, platform surfaces, dependencies,
+       and compatibility constraints that are known to be in scope;
+     - allowed implementation choices and explicit boundaries, including what may be changed,
+       added, migrated, mocked, or reused;
+     - red flags and approaches to avoid, such as guessed APIs or endpoints, deprecated APIs,
+       duplicated platform logic, secret exposure, live-data mutation, unsafe migrations, unbounded
+       scope, or validation that cannot prove the requirement;
+     - important edge cases, failure behavior, concurrency or persistence concerns, accessibility
+       and localization requirements, and the evidence the executing agent must produce.
+   - Prefer canonical repository APIs, services, components, scripts, and test helpers over new
+     parallel mechanisms. Name the canonical API or pattern when it is known and explain why it is
+     preferred when the choice is non-obvious.
+   - Clearly distinguish verified facts from recommendations, assumptions, and open questions.
+     Never fabricate a file, type, API, endpoint, capability, or compatibility claim. If a missing
+     detail would materially change implementation or validation, record it as an open question in
+     `## Blockers` or `## Technical details` and ask the human instead of guessing.
 7. Create one Ecelyo acceptance-criteria record per numbered criterion with `POST /tasks/{taskId}/acceptance-criteria` and `{"text":"..."}`.
 8. For every QA task that validates a behavior change, require QA to review the existing tests and identify the necessary coverage before validation. When coverage is missing or incomplete, require QA to add or update the necessary automated tests and record that work as a numbered requirement with a matching acceptance criterion. For bug-fixing tasks, require a regression test that reproduces the fixed defect and prevents its recurrence, unless that is technically infeasible and the reason is documented. QA must not be scoped to running existing tests only when the changed behavior lacks coverage.
 9. Use `Trivial` when no priority is supplied and no stronger project rule applies.
