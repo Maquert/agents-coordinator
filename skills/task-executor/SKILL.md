@@ -335,6 +335,22 @@ completion, update the task description with the blocker reason and set its stat
 not claim completion. If only human inspection, approval, or a decision remains, set the state to
 `in review` instead of `blocked`.
 
+### Stop handoff
+
+Whenever active work stops—because it is finished, blocked, in review, waiting, or has no
+actionable work—include this compact handoff in the next human-facing update:
+
+```text
+Why: <short reason>
+When: <right after or before what>
+What: <minimum needed to continue>; options: <suggested option(s)>
+```
+
+Keep each field to one short sentence. State the exact transition or adjacent action in `When`.
+For a finished task, write `What: Nothing required; options: continue with the next eligible task
+or stop.` For a gate that needs human action, give the smallest useful alternatives, such as
+`approve` or `request changes`, or `provide access` or `change scope`.
+
 ### Xcode worktree cleanup
 
 - If the dedicated worktree contains an Xcode project or workspace (`.xcodeproj` or `.xcworkspace`),
