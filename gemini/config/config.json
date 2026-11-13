@@ -1,7 +1,7 @@
 {
   "sidecars": {
     "ecelyo-tactic-ci": {
-      "enabled": true,
+      "enabled": false,
       "projectId": "e5e62007-3272-40a2-b61c-c9e278cadd58",
       "resolvedPermissions": null,
       "schemaVersion": 1
