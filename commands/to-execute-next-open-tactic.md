@@ -19,33 +19,47 @@ Select exactly one active tactic before starting work:
 3. Verify `GET /` succeeds, then read `GET /systems` and `GET /tasks/priority`. Use the active
    system unless the user explicitly supplied a system or project filter. If there is no unique
    active system, stop and ask for the intended scope.
-4. Cross-reference each project's `tactics` metadata with its grouped `tasks` by `tacticId`.
+4. Read the version-scoped tactic candidates from Ecelyo's `GET /tactics/by-version` endpoint
+   and, when using the MPC integration, from `list_tactics_by_version`. Treat the results from
+   either source as authoritative candidates; do not discard a tactic merely because its status
+   is `wip`.
+5. Cross-reference each project's `tactics` metadata with its grouped `tasks` by `tacticId`.
    Use the narrowest additional `GET /tactics?...` or `GET /tasks?...` query only if the priority
    response lacks a required field; do not invent an endpoint.
-5. A tactic is eligible only when all of these are true:
+6. A tactic is eligible only when all of these are true:
    - its system and project are in scope and not archived;
    - its project name does not contain the word `Release` or `Icebox` (case-insensitive); never
      pick a tactic from such a project, and never claim its tasks;
-   - the tactic is not `accomplished` or archived;
+   - the tactic is not `accomplished` or archived. A `wip` tactic is eligible and resumable;
    - its persisted `objective` is non-empty;
    - it has at least one `pending` task; and
-   - none of its tasks has state `wip`.
-6. Sort eligible tactics by version, then keep only tactics matching the current system's
+   - every candidate task selected for execution has a finished parent chain and is not owned by
+     another agent. Do not claim a second task when the tactic already has a `wip` task owned by
+     another agent. If the `wip` task belongs to this execution thread, continue that task instead.
+7. Prefer eligible tactics whose persisted status is `wip` over every eligible tactic that has not
+   started, regardless of priority or age. In other words, complete a current tactic before
+   starting a new one. This preference applies equally to `wip` tactics returned by
+   `GET /tactics/by-version` and `list_tactics_by_version`; those tactics may be claimed and
+   continued after a fresh ownership and task-graph check. Hard exclusions (scope, archived or
+   accomplished state, `Release`/`Icebox` projects, unfinished parents, and another agent's
+   active task) still apply.
+8. Sort candidates within the `wip` group and the not-started group by version, then keep only
+   tactics matching the current system's
    `systemversion`. If the current `systemversion` is unavailable or no tactic matches it, skip
    this selection run without claiming work.
-7. From the matching tactics, defer tactics in the Maintenance project whenever an eligible
+9. From the matching tactics, defer tactics in the Maintenance project whenever an eligible
    matching tactic exists in another project; claim a Maintenance tactic only when nothing else
-   is eligible. Sort candidates by priority from highest to lowest and select the
-   highest-priority tactic that has not been accomplished, including unfinished tactics that were
-   already started but have no `wip` task. For priority ordering, prefer `Blocker`/`Critical`,
-   then `High`, then `Medium`, then `Low`/`Trivial`; preserve server order for ties.
-   Do not select a tactic merely because it has no `wip` tasks if it has no executable pending task
+   is eligible. Apply this Maintenance preference after the `wip`-versus-not-started preference.
+   Within the selected group, sort candidates by priority from highest to lowest and select the
+   highest-priority tactic; preserve server order for ties.
+   Do not select a tactic merely because it has pending tasks if it has no executable pending task
    (for example, when every pending task depends on a parent that is not `finished`).
-8. If the selected tactic belongs to the Maintenance project, execute no more than three tasks
+10. If the selected tactic belongs to the Maintenance project, execute no more than three tasks
    from it in this run, then stop even if it still has unfinished tasks.
-9. Immediately refresh `/tasks/priority` and re-check the selected tactic's zero-`wip` condition
-   before claiming any task. If another agent has started a task, discard the candidate and choose
-   the next eligible tactic from a fresh response.
+11. Immediately refresh `/tasks/priority` and re-check the selected tactic's status, task ownership,
+   parent chain, and executable pending task before claiming any task. If another agent has started
+   a task, discard the candidate and choose the next eligible tactic from a fresh response. A tactic
+   that is already `wip` remains the preferred candidate when its own work can be safely continued.
 
 If no tactic qualifies, report that no unclaimed tactic with pending work exists and stop without
 changing Ecelyo state or creating local task records.
