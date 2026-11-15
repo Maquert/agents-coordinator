@@ -62,7 +62,11 @@ Select exactly one active tactic before starting work:
    that is already `wip` remains the preferred candidate when its own work can be safely continued.
 
 If no tactic qualifies, report that no unclaimed tactic with pending work exists and stop without
-changing Ecelyo state or creating local task records.
+changing Ecelyo state or creating local task records. Because this is a scheduled no-work run,
+rename the thread with the `__ ` prefix and archive the current thread immediately using the active
+platform's thread-archive operation (in Codex, `set_thread_archived`). Do this only when the run
+had no actionable work at startup; if work became unavailable after execution began, use the normal
+closeout instead.
 
 ## Tactic execution
 
