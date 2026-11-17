@@ -36,9 +36,20 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 Ecelyo Satellite is **macOS-only** and lives on the LAN, not `localhost`. When `ECELYO_SERVER_IP`
 is already set in the environment and reachable, reuse it directly to avoid unnecessary discovery steps.
 Run Bonjour discovery only when `ECELYO_SERVER_IP` is unset, empty, or unreachable, and cache the
-resolved IP in `ECELYO_SERVER_IP` for subsequent requests. Authenticated endpoints require
-`ECELYO_SERVER_TOKEN` in the header `Authorization: Bearer $ECELYO_SERVER_TOKEN`. Never print or persist
-the token.
+resolved IP in `ECELYO_SERVER_IP` for subsequent requests.
+
+Authenticated endpoints use a generic-password item in the macOS Keychain:
+
+- Service: `Ecelyo Satellite`
+- Account: `ECELYO_SERVER_TOKEN`
+
+Read the token from this Keychain item only when an authenticated request needs it. Keep it in
+process memory and pass it directly as the `Authorization: Bearer` header; do not copy it into an
+environment variable, shell history, command output, logs, task descriptions, or responses. Never
+print the token. If the item is missing or inaccessible, stop and ask the user to authorize storing
+it. Before creating or updating the Keychain item, obtain the user's explicit approval immediately
+before the write. Do not ask the user to paste the token into chat; use a secure input path and let
+the user enter the token through a trusted prompt when needed.
 
 - Do not expect the server to be present on iPhone or iPad.
 - If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers (and no
@@ -79,11 +90,13 @@ address before continuing. Do not discover a new address and then leave the old 
   failure means the token or endpoint request needs attention; it is not evidence that the IP is
   stale. Never print the token while diagnosing either case.
 - If `GET /` succeeds but an authenticated request returns `401`, `Unauthorized`, or an
-  expired-token error, treat it as an expired or missing `ECELYO_SERVER_TOKEN`, not an IP problem.
-  Ask the user to refresh or re-enter the token through the approved Ecelyo setup, then retry the
-  authenticated request. Never ask the user to paste the token into chat, print it, persist it, or
-  include it in task descriptions, logs, or responses; do not resume task work until authentication
-  succeeds.
+  expired-token error, treat it as an expired or missing Keychain token, not an IP problem. Ask the
+  user to authorize replacing the Keychain item, then have them enter the replacement through a
+  trusted secure input path. If Satellite provides a documented refresh flow, use it only with the
+  user's authorization to update the Keychain item. Never ask the user to paste the token into chat,
+  print it, put it in an environment variable, or include it in task descriptions, logs, or
+  responses. Verify that the Keychain item is present without displaying its value, then retry the
+  authenticated request; do not resume task work until authentication succeeds.
 - In this skill, an inactive system means only that it is not selected or focused in Ecelyo's UI.
   It does not mean that the system is offline, unregistered, inaccessible, or ineligible for task
   work. An agent using MCP must never be stopped, degraded, or asked to activate the system merely
