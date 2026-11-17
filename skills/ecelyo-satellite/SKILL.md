@@ -84,11 +84,20 @@ address before continuing. Do not discover a new address and then leave the old 
   authenticated request. Never ask the user to paste the token into chat, print it, persist it, or
   include it in task descriptions, logs, or responses; do not resume task work until authentication
   succeeds.
-- If Satellite is reachable but `GET /systems` does not show the intended Ecelyo system as active,
-  do not keep troubleshooting the network. The system may not have been loaded from iCloud or may
-  not be active in Ecelyo. Ask the user to open Ecelyo, sign in if needed, load the Ecelyo system
-  from iCloud, and activate it; after the user confirms, retry `GET /systems` and verify the target
-  system before continuing task work.
+- A system's `isActive` value only identifies which system the user currently has focused in
+  Ecelyo's UI. It is not an access, registration, or task-work eligibility check. Never stop or ask
+  the user to activate a system just because `isActive` is false.
+- Resolve the intended `systemId` from the target project, tactic, or task and always scope MCP
+  requests and Satellite reads or writes to that exact ID. Do not substitute whichever system is
+  active in the UI. When creating a project or tactic, preserve the verified system/project
+  relationship using the owning system ID.
+- When MCP addresses a registered system but its iCloud-backed data has not been downloaded yet,
+  request/fetch the data by the target project's `systemId` and wait asynchronously for a response
+  for no more than 6 seconds total. Return the fetched data if it arrives in time. If the deadline
+  expires, return a retryable temporary-unavailable response that clearly distinguishes the
+  registered system with pending data from an unknown system; do not return 404 for the pending
+  download. Preserve 404 for genuinely unknown system or resource IDs. Never block a server event
+  loop or wait longer than the 6-second cap.
 - After updating the IP, perform one fresh authenticated request using the new value and only then
   resume task work. If the refreshed address also fails, stop and report the exact address source,
   host/port result, and failure class.
