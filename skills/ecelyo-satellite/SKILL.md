@@ -84,9 +84,10 @@ address before continuing. Do not discover a new address and then leave the old 
   authenticated request. Never ask the user to paste the token into chat, print it, persist it, or
   include it in task descriptions, logs, or responses; do not resume task work until authentication
   succeeds.
-- A system's `isActive` value only identifies which system the user currently has focused in
-  Ecelyo's UI. It is not an access, registration, or task-work eligibility check. Never stop or ask
-  the user to activate a system just because `isActive` is false.
+- In this skill, an inactive system means only that it is not selected or focused in Ecelyo's UI.
+  It does not mean that the system is offline, unregistered, inaccessible, or ineligible for task
+  work. An agent using MCP must never be stopped, degraded, or asked to activate the system merely
+  because `isActive` is false; MCP access is independent of UI selection.
 - Resolve the intended `systemId` from the target project, tactic, or task and always scope MCP
   requests and Satellite reads or writes to that exact ID. Do not substitute whichever system is
   active in the UI. When creating a project or tactic, preserve the verified system/project
