@@ -33,23 +33,38 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 
 ## macOS Constraint
 
-Ecelyo Satellite is **macOS-only** and lives on the LAN, not `localhost`. When `ECELYO_SERVER_IP`
+Ecelyo Satellite is **macOS-only** and advertises its address on the LAN. When `ECELYO_SERVER_IP`
 is already set in the environment and reachable, reuse it directly to avoid unnecessary discovery steps.
 Run Bonjour discovery only when `ECELYO_SERVER_IP` is unset, empty, or unreachable, and cache the
 resolved IP in `ECELYO_SERVER_IP` for subsequent requests.
 
 Authenticated endpoints use a generic-password item in the macOS Keychain:
 
-- Service: `Ecelyo Satellite`
-- Account: `ECELYO_SERVER_TOKEN`
+- Service: `com.ecelyo.local-server`
+- Account: `server-token`
 
-Read the token from this Keychain item only when an authenticated request needs it. Keep it in
-process memory and pass it directly as the `Authorization: Bearer` header; do not copy it into an
-environment variable, shell history, command output, logs, task descriptions, or responses. Never
-print the token. If the item is missing or inaccessible, stop and ask the user to authorize storing
-it. Before creating or updating the Keychain item, obtain the user's explicit approval immediately
-before the write. Do not ask the user to paste the token into chat; use a secure input path and let
-the user enter the token through a trusted prompt when needed.
+These identifiers come from `KeychainLocalServerTokenStore` in
+`Shared/Domain/Services/LocalServer/LocalServerSecurity.swift`. Read the token in the macOS login session of the user who stored it. See the
+[authenticated request helper](references/endpoint-cheatsheet.md#authentication) for passing it from
+Keychain to the Bearer header in memory. Verify the intended Satellite host before sending it.
+
+To diagnose a read failure, discard the password output and inspect only the exit status and error:
+
+```sh
+rtk /usr/bin/security find-generic-password -s com.ecelyo.local-server -a server-token -w >/dev/null
+```
+
+- If the sandboxed read fails, repeat the output-discarding probe in the owner's macOS session
+  outside the sandbox using the normal approval flow. A remote runner uses its own Keychains.
+- If lookup still reports item not found, check the user search list with
+  `rtk /usr/bin/security list-keychains -d user`. If the owner knows which Keychain contains the
+  item, append its exact path to the probe. Confirm the service and account before concluding the
+  item is missing.
+- If access is denied or user interaction is unavailable, have the owner unlock the Keychain or
+  approve the trusted reader in their interactive session. Keep the existing item and access controls intact.
+- If the item is missing, obtain explicit approval immediately before creating it and have the
+  owner enter the token through a trusted secure input path. The same approval applies to replacement.
+  Never request the token in chat or put it in an environment variable, command arguments, or logs.
 
 - Do not expect the server to be present on iPhone or iPad.
 - If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers (and no
@@ -80,6 +95,12 @@ address before continuing. Do not discover a new address and then leave the old 
   error, retry the same read-only command outside the restrictive sandbox or request the required
   network escalation. Do not conclude that Satellite is stopped until the host-level check has
   been attempted.
+- If the Bonjour instance belongs to the current Mac and IPv4 fails, check the advertised port
+  with `rtk /usr/sbin/lsof -nP -iTCP:8080 -sTCP:LISTEN` (use the advertised port if different).
+  If it shows a local Ecelyo Satellite listener on IPv6, confirm `GET /` at the matching
+  bracketed loopback URL, for example `http://[::1]:8080/`. Use `--noproxy '*'` for this direct
+  request. If the sandbox blocks the probe, retry outside it. Use the verified URL for
+  `GET /systems` with the Keychain Bearer header. Keep that URL scoped to the current Mac.
 - Use the complete Bonjour sequence: browse `_ecelyo._tcp.local.`, require exactly one advertised
   service, resolve it with `dns-sd -L`, and resolve its hostname with `dns-sd -G v4`. Use the
   advertised port rather than assuming `8080` when the record reports another one.
@@ -89,14 +110,10 @@ address before continuing. Do not discover a new address and then leave the old 
 - Distinguish reachability from authentication. A reachable `GET /` followed by an authorization
   failure means the token or endpoint request needs attention; it is not evidence that the IP is
   stale. Never print the token while diagnosing either case.
-- If `GET /` succeeds but an authenticated request returns `401`, `Unauthorized`, or an
-  expired-token error, treat it as an expired or missing Keychain token, not an IP problem. Ask the
-  user to authorize replacing the Keychain item, then have them enter the replacement through a
-  trusted secure input path. If Satellite provides a documented refresh flow, use it only with the
-  user's authorization to update the Keychain item. Never ask the user to paste the token into chat,
-  print it, put it in an environment variable, or include it in task descriptions, logs, or
-  responses. Verify that the Keychain item is present without displaying its value, then retry the
-  authenticated request; do not resume task work until authentication succeeds.
+- If an authenticated request returns `401`, confirm the Keychain read succeeded and verify the
+  target and header delivery. If Satellite explicitly rejects the verified credential or reports
+  it expired, coordinate replacement using the approval and secure input process above. Confirm
+  recovery with an authenticated read before resuming task work.
 - In this skill, an inactive system means only that it is not selected or focused in Ecelyo's UI.
   It does not mean that the system is offline, unregistered, inaccessible, or ineligible for task
   work. An agent using MCP must never be stopped, degraded, or asked to activate the system merely

@@ -8,13 +8,38 @@ Use this reference only when you need the exact endpoint or payload shape.
 http://$ECELYO_SERVER_IP:8080
 ```
 
-Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable. When `ECELYO_SERVER_IP` is unset or unreachable, discover the current host through Bonjour using `_ecelyo._tcp.local.`, then cache the resolved IP in `ECELYO_SERVER_IP` for subsequent operations. Authenticated endpoints require:
+Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable. When `ECELYO_SERVER_IP` is unset or unreachable, discover the current host through Bonjour using `_ecelyo._tcp.local.`, then cache the resolved IP in `ECELYO_SERVER_IP` for subsequent operations.
 
-```text
-Authorization: Bearer $ECELYO_SERVER_TOKEN
+## Authentication
+
+Define this helper in the shell that will run the examples. Use it only against the verified
+Satellite base URL. Pass curl options before or after the URL as shown below.
+
+```sh
+satellite_request() (
+    set +x
+    unset satellite_token
+    satellite_token="$(rtk /usr/bin/security find-generic-password \
+        -s com.ecelyo.local-server -a server-token -w)" || return
+    if [ -z "$satellite_token" ]; then
+        printf '%s\n' 'Ecelyo Satellite Keychain item is empty.' >&2
+        return 1
+    fi
+    printf 'Authorization: Bearer %s\n' "$satellite_token" |
+        rtk /usr/bin/curl -q --silent --show-error --noproxy '*' --max-time 30 --header @- "$@"
+)
 ```
 
-Never print or persist the token.
+The helper passes the header through stdin and reads a fresh token for each request. Avoid curl
+verbose or trace flags and redirect following. For JSON bodies, pass literal data as shown below
+or use `--data-binary @file` so stdin remains available for the header.
+
+For a verified same-Mac IPv6 listener, use the bracketed base URL. This read-only check discards
+the response body and reports the status:
+
+```sh
+satellite_request --fail -o /dev/null -w 'HTTP %{http_code}\n' 'http://[::1]:8080/systems'
+```
 
 ## Response Format
 
@@ -22,12 +47,12 @@ Responses use JSON by default. Clients may opt into Token-Oriented Object Notati
 
 **TOON query example:**
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks?format=toon"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?format=toon"
 ```
 
 **TOON header example:**
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
 ```
 
 ---
@@ -39,7 +64,7 @@ curl -s "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
 dns-sd -B _ecelyo._tcp local.
 dns-sd -L "<advertised-instance-name>" _ecelyo._tcp local.
 dns-sd -G v4 "<advertised-hostname>.local."
-curl -s -H "Authorization: Bearer $ECELYO_SERVER_TOKEN" "http://<resolved-host>:8080/"
+rtk /usr/bin/curl -q --silent --show-error --max-time 5 "http://<resolved-host>:8080/"
 ```
 
 Expected success body:
@@ -53,7 +78,7 @@ Expected success body:
 ### Systems
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/systems"
+satellite_request "http://$ECELYO_SERVER_IP:8080/systems"
 ```
 
 Fields:
@@ -65,8 +90,8 @@ Fields:
 ### Projects
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/projects"
-curl -s "http://$ECELYO_SERVER_IP:8080/projects?systemId=<system-id>"
+satellite_request "http://$ECELYO_SERVER_IP:8080/projects"
+satellite_request "http://$ECELYO_SERVER_IP:8080/projects?systemId=<system-id>"
 ```
 
 Fields:
@@ -77,9 +102,9 @@ Fields:
 ### Tactics
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/tactics"
-curl -s "http://$ECELYO_SERVER_IP:8080/tactics?systemId=<system-id>"
-curl -s "http://$ECELYO_SERVER_IP:8080/tactics?projectId=<project-id>"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tactics"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tactics?systemId=<system-id>"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tactics?projectId=<project-id>"
 ```
 
 Fields:
@@ -91,11 +116,11 @@ Fields:
 ### Tasks
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks/priority"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks?systemId=<system-id>&state=pending"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks/priority"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?systemId=<system-id>&state=pending"
+satellite_request "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
 ```
 
 Use `GET /tasks/priority` first when selecting the next task to execute. It returns the active queue grouped by project, excludes `finished` work, and preserves the server's priority ordering.
@@ -142,7 +167,7 @@ When taking a task, set `state` and `deeplinkUrl` together in the same
 `PATCH` call:
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
 ```
@@ -158,7 +183,7 @@ without changing state.
 ### Finish work
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"finished"}'
 ```
@@ -166,7 +191,7 @@ curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 ### Block work
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"blocked"}'
 ```
@@ -177,7 +202,7 @@ You may also update `title`, `description`, `branch`, `repositoryTaskId`,
 ### Set the agent conversation deeplink
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"deeplinkUrl":"claude://agents/<session-id>"}'
 ```
@@ -195,7 +220,7 @@ need to be set manually.
 ### Replace task relationships
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"parentIds":["<task-uuid>"],"childIds":["<task-uuid>"]}'
 ```
@@ -211,7 +236,7 @@ partially mutating the graph. Do not combine relationship replacement with
 Move a task to another tactic in its current project:
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"tacticId":"<tactic-id>"}'
 ```
@@ -219,7 +244,7 @@ curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 Move a task to another project and tactic:
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -233,7 +258,7 @@ partial mutation.
 ### Reassign project and/or tactic
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -256,7 +281,7 @@ Error responses:
 ### Rename a tactic or change its objective
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"title":"New name","objective":"Updated objective"}'
 ```
@@ -266,7 +291,7 @@ Send either or both fields. `title` cannot be empty after trimming.
 ### Mark a tactic accomplished
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"status":"accomplished"}'
 ```
@@ -288,7 +313,7 @@ is reserved for the human owner.
 ### Restore an accomplished tactic
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"status":"ready"}'
 ```
@@ -302,7 +327,7 @@ requesting a restore.
 ### Delete a tactic
 
 ```bash
-curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>"
+satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>"
 ```
 
 **Destructive and cascading.** Deleting a tactic deletes every task nested
@@ -329,7 +354,7 @@ Only use these when the workflow explicitly needs app-side object creation.
 ### System
 
 ```bash
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
+satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
   -H 'Content-Type: application/json' \
   -d '{"name":"Public Health System","isActive":false,"isShared":false}'
 ```
@@ -342,7 +367,7 @@ Fields:
 ### Project
 
 ```bash
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
+satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
   -H 'Content-Type: application/json' \
   -d '{"title":"New Project","systemId":"<system-id>"}'
 ```
@@ -350,7 +375,7 @@ curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
 ### Tactic
 
 ```bash
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/projects/<project-id>/tactics" \
+satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/projects/<project-id>/tactics" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Core Development","objective":"Ship the v1 features"}'
 ```
@@ -365,7 +390,7 @@ of silently omitting it.
 ### Task
 
 ```bash
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
+satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
   -H 'Content-Type: application/json' \
   -d '{
     "title":"Fix login button",
@@ -403,7 +428,7 @@ swift run --package-path tools/mock-agent mock-agent delete-task <task-id>
 ### Delete a task
 
 ```bash
-curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
+satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
 ```
 
 Permanently removes the task and returns the deleted task in the response body.
@@ -426,7 +451,7 @@ active queue. The deletion is immediate and cannot be undone through the API.
 ### Create an acceptance criterion
 
 ```bash
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria" \
+satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria" \
   -H 'Content-Type: application/json' \
   -d '{"text": "Task builds correctly", "isCompleted": false}'
 ```
@@ -455,7 +480,7 @@ Accepts `text` or `title` keys and optional `isCompleted`. Also, `PATCH /tasks/<
 ### Update an acceptance criterion
 
 ```bash
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>" \
+satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>" \
   -H 'Content-Type: application/json' \
   -d '{"isCompleted": true, "text": "Updated text"}'
 ```
@@ -481,7 +506,7 @@ Toggles `isCompleted` and/or updates `text` for a single acceptance criterion.
 ### Delete an acceptance criterion
 
 ```bash
-curl -s -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
+satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
 ```
 
 Removes a single acceptance criterion from the task.
