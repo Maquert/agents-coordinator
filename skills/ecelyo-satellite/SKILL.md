@@ -38,7 +38,7 @@ is already set in the environment and reachable, reuse it directly to avoid unne
 Run Bonjour discovery only when `ECELYO_SERVER_IP` is unset, empty, or unreachable, and cache the
 resolved IP in `ECELYO_SERVER_IP` for subsequent requests.
 
-Authenticated endpoints use a generic-password item in the macOS Keychain:
+Authenticated endpoints use one canonical generic-password item in the macOS Keychain:
 
 - Service: `com.ecelyo.local-server`
 - Account: `server-token`
@@ -54,17 +54,20 @@ To diagnose a read failure, discard the password output and inspect only the exi
 rtk /usr/bin/security find-generic-password -s com.ecelyo.local-server -a server-token -w >/dev/null
 ```
 
-- If the sandboxed read fails, repeat the output-discarding probe in the owner's macOS session
-  outside the sandbox using the normal approval flow. A remote runner uses its own Keychains.
-- If lookup still reports item not found, check the user search list with
-  `rtk /usr/bin/security list-keychains -d user`. If the owner knows which Keychain contains the
-  item, append its exact path to the probe. Confirm the service and account before concluding the
-  item is missing.
-- If access is denied or user interaction is unavailable, have the owner unlock the Keychain or
-  approve the trusted reader in their interactive session. Keep the existing item and access controls intact.
-- If the item is missing, obtain explicit approval immediately before creating it and have the
-  owner enter the token through a trusted secure input path. The same approval applies to replacement.
-  Never request the token in chat or put it in an environment variable, command arguments, or logs.
+- If the read fails in a sandbox or background runner, retry the same probe in the owner's macOS
+  login session outside the sandbox using the normal approval flow. A remote runner cannot read
+  the owner's local Keychain.
+- If the host-level probe reports item not found, inspect the user's search list with
+  `rtk /usr/bin/security list-keychains -d user`. To diagnose lookup order, repeat the exact same
+  lookup with the owner's login Keychain path appended. Use only the canonical service and account
+  throughout. Do not ask for alternate items or create an agent-specific copy.
+- If the same item remains inaccessible, report the exact Keychain error after the host-level retry.
+  If macOS requires interaction, have the owner unlock the Keychain or approve the trusted reader
+  in their login session. Keep the existing item and access controls intact.
+- If the canonical item is confirmed missing, coordinate recovery of that same item with the owner.
+  Obtain explicit approval immediately before creating or replacing it through a trusted secure
+  input path. Never request the token in chat or put it in an environment variable, command
+  arguments, or logs.
 
 - Do not expect the server to be present on iPhone or iPad.
 - If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers (and no
