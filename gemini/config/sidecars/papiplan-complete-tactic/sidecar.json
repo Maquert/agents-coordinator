@@ -5,7 +5,7 @@
     "0 9 * * *",
     "agentapi",
     "new-conversation",
-    "Follow instructions in ~/.agents/commands/to-execute-pending-tasks-batch.md to pick a tactic and complete tasks from the Papiplan project."
+    "Follow instructions in ~/.agents/commands/to-execute-next-open-tactic.md to pick a tactic and complete tasks from the Papiplan project."
   ],
   "display_name": "Papiplan - Complete tactic"
 }
