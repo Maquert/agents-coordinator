@@ -30,6 +30,8 @@ Select exactly one active tactic before starting work:
    - its system and project are in scope and not archived;
    - its project name does not contain the word `Release` or `Icebox` (case-insensitive); never
      pick a tactic from such a project, and never claim its tasks;
+   - its project ID is not `ECAF491A-328C-4C52-ABE0-92CC5D5EAF87`; always exclude every tactic of
+     that Ecelyo App project, and never claim its tasks;
    - the tactic is not `accomplished` or archived. A `wip` tactic is eligible and resumable;
    - its persisted `objective` is non-empty;
    - it has at least one `pending` task; and
