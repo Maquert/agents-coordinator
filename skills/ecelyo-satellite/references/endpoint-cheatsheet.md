@@ -5,10 +5,12 @@ Use this reference only when you need the exact endpoint or payload shape.
 ## Base URL
 
 ```text
-http://$ECELYO_SERVER_IP:8080
+$SATELLITE_BASE_URL
 ```
 
-Use the cached `ECELYO_SERVER_IP` environment variable when available and reachable. When `ECELYO_SERVER_IP` is unset or unreachable, discover the current host through Bonjour using `_ecelyo._tcp.local.`, then cache the resolved IP in `ECELYO_SERVER_IP` for subsequent operations.
+Resolve exactly one current Satellite service through Bonjour using `_ecelyo._tcp.local.` before
+constructing this base URL. Keep the verified host and port only in the current shell; never use or
+persist `ECELYO_SERVER_IP`.
 
 ## Authentication
 
@@ -47,12 +49,12 @@ Responses use JSON by default. Clients may opt into Token-Oriented Object Notati
 
 **TOON query example:**
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?format=toon"
+satellite_request "$SATELLITE_BASE_URL/tasks?format=toon"
 ```
 
 **TOON header example:**
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks" -H "Accept: text/toon"
+satellite_request "$SATELLITE_BASE_URL/tasks" -H "Accept: text/toon"
 ```
 
 ---
@@ -78,7 +80,7 @@ Expected success body:
 ### Systems
 
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/systems"
+satellite_request "$SATELLITE_BASE_URL/systems"
 ```
 
 Fields:
@@ -90,8 +92,8 @@ Fields:
 ### Projects
 
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/projects"
-satellite_request "http://$ECELYO_SERVER_IP:8080/projects?systemId=<system-id>"
+satellite_request "$SATELLITE_BASE_URL/projects"
+satellite_request "$SATELLITE_BASE_URL/projects?systemId=<system-id>"
 ```
 
 Fields:
@@ -102,9 +104,9 @@ Fields:
 ### Tactics
 
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/tactics"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tactics?systemId=<system-id>"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tactics?projectId=<project-id>"
+satellite_request "$SATELLITE_BASE_URL/tactics"
+satellite_request "$SATELLITE_BASE_URL/tactics?systemId=<system-id>"
+satellite_request "$SATELLITE_BASE_URL/tactics?projectId=<project-id>"
 ```
 
 Fields:
@@ -116,11 +118,11 @@ Fields:
 ### Tasks
 
 ```bash
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks/priority"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks?systemId=<system-id>&state=pending"
-satellite_request "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
+satellite_request "$SATELLITE_BASE_URL/tasks/priority"
+satellite_request "$SATELLITE_BASE_URL/tasks"
+satellite_request "$SATELLITE_BASE_URL/tasks?state=pending"
+satellite_request "$SATELLITE_BASE_URL/tasks?systemId=<system-id>&state=pending"
+satellite_request "$SATELLITE_BASE_URL/tasks/<task-id>"
 ```
 
 Use `GET /tasks/priority` first when selecting the next task to execute. It returns the active queue grouped by project, excludes `finished` work, and preserves the server's priority ordering.
@@ -167,7 +169,7 @@ When taking a task, set `state` and `deeplinkUrl` together in the same
 `PATCH` call:
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
 ```
@@ -183,7 +185,7 @@ without changing state.
 ### Finish work
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"finished"}'
 ```
@@ -191,7 +193,7 @@ satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 ### Block work
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"blocked"}'
 ```
@@ -202,7 +204,7 @@ You may also update `title`, `description`, `branch`, `repositoryTaskId`,
 ### Set the agent conversation deeplink
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"deeplinkUrl":"claude://agents/<session-id>"}'
 ```
@@ -220,7 +222,7 @@ need to be set manually.
 ### Replace task relationships
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"parentIds":["<task-uuid>"],"childIds":["<task-uuid>"]}'
 ```
@@ -236,7 +238,7 @@ partially mutating the graph. Do not combine relationship replacement with
 Move a task to another tactic in its current project:
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"tacticId":"<tactic-id>"}'
 ```
@@ -244,7 +246,7 @@ satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
 Move a task to another project and tactic:
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -258,7 +260,7 @@ partial mutation.
 ### Reassign project and/or tactic
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
 ```
@@ -281,7 +283,7 @@ Error responses:
 ### Rename a tactic or change its objective
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"title":"New name","objective":"Updated objective"}'
 ```
@@ -291,7 +293,7 @@ Send either or both fields. `title` cannot be empty after trimming.
 ### Mark a tactic accomplished
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"status":"accomplished"}'
 ```
@@ -313,7 +315,7 @@ is reserved for the human owner.
 ### Restore an accomplished tactic
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tactics/<tactic-id>" \
   -H 'Content-Type: application/json' \
   -d '{"status":"ready"}'
 ```
@@ -327,7 +329,7 @@ requesting a restore.
 ### Delete a tactic
 
 ```bash
-satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tactics/<tactic-id>"
+satellite_request -X DELETE "$SATELLITE_BASE_URL/tactics/<tactic-id>"
 ```
 
 **Destructive and cascading.** Deleting a tactic deletes every task nested
@@ -354,7 +356,7 @@ Only use these when the workflow explicitly needs app-side object creation.
 ### System
 
 ```bash
-satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
+satellite_request -X POST "$SATELLITE_BASE_URL/systems" \
   -H 'Content-Type: application/json' \
   -d '{"name":"Public Health System","isActive":false,"isShared":false}'
 ```
@@ -367,7 +369,7 @@ Fields:
 ### Project
 
 ```bash
-satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
+satellite_request -X POST "$SATELLITE_BASE_URL/projects" \
   -H 'Content-Type: application/json' \
   -d '{"title":"New Project","systemId":"<system-id>"}'
 ```
@@ -375,7 +377,7 @@ satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/projects" \
 ### Tactic
 
 ```bash
-satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/projects/<project-id>/tactics" \
+satellite_request -X POST "$SATELLITE_BASE_URL/projects/<project-id>/tactics" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Core Development","objective":"Ship the v1 features"}'
 ```
@@ -390,7 +392,7 @@ of silently omitting it.
 ### Task
 
 ```bash
-satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
+satellite_request -X POST "$SATELLITE_BASE_URL/tasks" \
   -H 'Content-Type: application/json' \
   -d '{
     "title":"Fix login button",
@@ -428,7 +430,7 @@ swift run --package-path tools/mock-agent mock-agent delete-task <task-id>
 ### Delete a task
 
 ```bash
-satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>"
+satellite_request -X DELETE "$SATELLITE_BASE_URL/tasks/<task-id>"
 ```
 
 Permanently removes the task and returns the deleted task in the response body.
@@ -451,7 +453,7 @@ active queue. The deletion is immediate and cannot be undone through the API.
 ### Create an acceptance criterion
 
 ```bash
-satellite_request -X POST "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria" \
+satellite_request -X POST "$SATELLITE_BASE_URL/tasks/<task-id>/acceptance-criteria" \
   -H 'Content-Type: application/json' \
   -d '{"text": "Task builds correctly", "isCompleted": false}'
 ```
@@ -480,7 +482,7 @@ Accepts `text` or `title` keys and optional `isCompleted`. Also, `PATCH /tasks/<
 ### Update an acceptance criterion
 
 ```bash
-satellite_request -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>" \
+satellite_request -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>/acceptance-criteria/<criterion-id>" \
   -H 'Content-Type: application/json' \
   -d '{"isCompleted": true, "text": "Updated text"}'
 ```
@@ -506,7 +508,7 @@ Toggles `isCompleted` and/or updates `text` for a single acceptance criterion.
 ### Delete an acceptance criterion
 
 ```bash
-satellite_request -X DELETE "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>/acceptance-criteria/<criterion-id>"
+satellite_request -X DELETE "$SATELLITE_BASE_URL/tasks/<task-id>/acceptance-criteria/<criterion-id>"
 ```
 
 Removes a single acceptance criterion from the task.

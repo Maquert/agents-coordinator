@@ -33,10 +33,10 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 
 ## macOS Constraint
 
-Ecelyo Satellite is **macOS-only** and advertises its address on the LAN. When `ECELYO_SERVER_IP`
-is already set in the environment and reachable, reuse it directly to avoid unnecessary discovery steps.
-Run Bonjour discovery only when `ECELYO_SERVER_IP` is unset, empty, or unreachable, and cache the
-resolved IP in `ECELYO_SERVER_IP` for subsequent requests.
+Ecelyo Satellite is **macOS-only** and advertises its address on the LAN. Do not use
+`ECELYO_SERVER_IP` or another persisted host/IP cache. Resolve exactly one advertised service with
+Bonjour for the current workflow, keep the verified host and port only in the current shell, and
+discard that endpoint when the workflow ends.
 
 Authenticated endpoints use one canonical generic-password item in the macOS Keychain:
 
@@ -63,9 +63,10 @@ rtk /usr/bin/security find-generic-password -s com.ecelyo.local-server -a server
   context limitation instead of inferring that the item is missing. Report only the exit code and
   error; never print the password.
 - If the host-level lookup succeeds, use the authenticated request helper for a read-only
-  `GET /systems` before diagnosing credentials further. A connection/DNS failure after a successful
-  Keychain read is an endpoint reachability problem; probe the cached host once, then use Bonjour
-  discovery as described below. Do not label that failure a missing or invalid credential.
+  `GET /systems` against the host resolved by Bonjour before diagnosing credentials further. A
+  connection/DNS failure after a successful Keychain read is an endpoint reachability problem;
+  repeat the complete Bonjour resolution instead of retrying a stale address. Do not label that
+  failure a missing or invalid credential.
 - If the host-level probe reports item not found, inspect the user's search list with
   `rtk /usr/bin/security list-keychains -d user`. Repeat the exact lookup with the owner's login
   Keychain path appended. Use only the canonical service and account throughout. Do not ask for
@@ -79,17 +80,16 @@ rtk /usr/bin/security find-generic-password -s com.ecelyo.local-server -a server
   arguments, or logs.
 
 - Do not expect the server to be present on iPhone or iPad.
-- If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers (and no
-  valid cached `ECELYO_SERVER_IP` responds), stop and ask the user to select or provide the intended
-  server. Do not silently guess `localhost`.
+- If Bonjour discovery is unavailable, returns zero servers, or returns multiple servers, stop and
+  ask the user to select or provide the intended server. Do not silently guess `localhost`.
 
 ## Network Discovery (mDNS / Bonjour)
 
 Ecelyo Satellite instances advertise their presence on the local network via Multicast DNS (mDNS) / Bonjour under service type `_ecelyo._tcp.local.` (port 8080).
 
-- **On-demand discovery**: Run discovery only when `ECELYO_SERVER_IP` is not yet cached or fails connectivity check.
+- **Per-workflow discovery**: Run discovery before constructing the Satellite base URL for each workflow; do not reuse a persisted IP or host cache.
 - **Resolution flow**: browse `_ecelyo._tcp.local.`, resolve exactly one service with `dns-sd -L`,
-  then resolve its advertised hostname with `dns-sd -G v4` to obtain the current IP and port. Cache the resulting IP in `ECELYO_SERVER_IP`.
+  then resolve its advertised hostname with `dns-sd -G v4` to obtain the current IP and port. Keep the resulting host and port only in a current-shell `SATELLITE_BASE_URL` value.
 - **Repository client**: `swift run --package-path tools/mock-agent mock-agent discover` performs
   the same Bonjour resolution and prints the current base URL.
 - Discovery must fail clearly when zero or multiple servers are advertised; never choose an arbitrary server.
@@ -97,11 +97,9 @@ Ecelyo Satellite instances advertise their presence on the local network via Mul
 
 ## Connectivity Troubleshooting
 
-When the agent cannot connect, treat the cached `ECELYO_SERVER_IP` as a hint, never as proof that
-the server is still at that address. Probe it once with `GET /`; if it fails, stop retrying the stale
-address and run Bonjour discovery. After resolving a new service host and port, replace the cached
-IP for the current shell and any supported persistent cache, then verify `GET /` against the new
-address before continuing. Do not discover a new address and then leave the old cached IP in place.
+When the agent cannot connect, run the complete Bonjour resolution again and verify `GET /` against
+the newly resolved host and port before continuing. Do not persist the resolved IP or retain a stale
+endpoint between workflows.
 
 - If a connection or discovery command fails with a sandbox, network-policy, DNS, or permission
   error, retry the same read-only command outside the restrictive sandbox or request the required
@@ -141,9 +139,9 @@ address before continuing. Do not discover a new address and then leave the old 
   registered system with pending data from an unknown system; do not return 404 for the pending
   download. Preserve 404 for genuinely unknown system or resource IDs. Never block a server event
   loop or wait longer than the 6-second cap.
-- After updating the IP, perform one fresh authenticated request using the new value and only then
-  resume task work. If the refreshed address also fails, stop and report the exact address source,
-  host/port result, and failure class.
+- After resolving a new host and port, perform one fresh authenticated request using that
+  current-shell endpoint and only then resume task work. If it fails, stop and report the discovery
+  result and failure class without retaining the address as a cache.
 
 ## Shared Rules
 
@@ -174,7 +172,7 @@ address before continuing. Do not discover a new address and then leave the old 
 
 ## Quick Start
 
-1. Use cached `ECELYO_SERVER_IP` if set and reachable; if unset or unreachable, discover the server via Bonjour (`_ecelyo._tcp.local.`) and cache the resolved IP in `ECELYO_SERVER_IP`.
+1. Discover exactly one server via Bonjour (`_ecelyo._tcp.local.`), construct a current-shell `SATELLITE_BASE_URL`, and read the bearer token from the canonical Keychain item.
 2. Check connectivity with `GET /`.
 3. Discover systems with authenticated `GET /systems`.
 4. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
@@ -210,20 +208,20 @@ tasks[2]{id,title,priority,state,project,tactic}:
 ### curl
 
 ```bash
-curl -s "http://$ECELYO_SERVER_IP:8080/"
-curl -s "http://$ECELYO_SERVER_IP:8080/systems"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks/priority"
-curl -s "http://$ECELYO_SERVER_IP:8080/tasks?state=pending"
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+curl -s "$SATELLITE_BASE_URL/"
+curl -s "$SATELLITE_BASE_URL/systems"
+curl -s "$SATELLITE_BASE_URL/tasks/priority"
+curl -s "$SATELLITE_BASE_URL/tasks?state=pending"
+curl -s -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"state":"wip","deeplinkUrl":"codex://threads/<thread-id>"}'
-curl -s -X PATCH "http://$ECELYO_SERVER_IP:8080/tasks/<task-id>" \
+curl -s -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
   -d '{"projectId":"<project-id>","tacticId":"<tactic-id>"}'
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/systems" \
+curl -s -X POST "$SATELLITE_BASE_URL/systems" \
   -H 'Content-Type: application/json' \
   -d '{"name":"Public Health System","isActive":false}'
-curl -s -X POST "http://$ECELYO_SERVER_IP:8080/tasks" \
+curl -s -X POST "$SATELLITE_BASE_URL/tasks" \
   -H 'Content-Type: application/json' \
   -d '{"title":"Refine onboarding copy","projectId":"<project-id>","tacticId":"<tactic-id>","priority":"Medium","state":"pending","agentRole":"Localization Team"}'
 ```
@@ -274,7 +272,7 @@ Use this pairing when executing an existing task and the app should reflect curr
 
 ## Failure Handling
 
-- If `GET /` fails, report the connection error and likely cause: server not running, `ECELYO_SERVER_IP` unset or stale, or non-macOS host.
+- If `GET /` fails, report the connection error and likely cause: server not running, Bonjour discovery failure, or non-macOS host.
 - If `404 Not Found` occurs, verify the endpoint against the reference file before retrying.
 - If a `PATCH` returns `404`, confirm the task ID first with `GET /tasks` or `GET /tasks/{id}`.
 - If the app server is unavailable, stop and ask the user to start it or confirm the IP. Do not continue task work without Ecelyo connectivity.
