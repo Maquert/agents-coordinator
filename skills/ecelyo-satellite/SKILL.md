@@ -54,13 +54,22 @@ To diagnose a read failure, discard the password output and inspect only the exi
 rtk /usr/bin/security find-generic-password -s com.ecelyo.local-server -a server-token -w >/dev/null
 ```
 
-- If the read fails in a sandbox or background runner, retry the same probe in the owner's macOS
-  login session outside the sandbox using the normal approval flow. A remote runner cannot read
-  the owner's local Keychain.
+- A sandboxed or background lookup error such as `item not found` is **inconclusive**; it does not
+  prove that the canonical item is absent. Do not report it missing, start credential recovery, or
+  create/replace an item based on a sandbox result.
+- Retry the exact probe above, with its output still redirected, in the owner's macOS login session
+  outside the sandbox through the normal approval flow. Confirm `id -un` matches the user who owns
+  the item. If this runtime cannot perform a host-level check on that Mac, stop and report that
+  context limitation instead of inferring that the item is missing. Report only the exit code and
+  error; never print the password.
+- If the host-level lookup succeeds, use the authenticated request helper for a read-only
+  `GET /systems` before diagnosing credentials further. A connection/DNS failure after a successful
+  Keychain read is an endpoint reachability problem; probe the cached host once, then use Bonjour
+  discovery as described below. Do not label that failure a missing or invalid credential.
 - If the host-level probe reports item not found, inspect the user's search list with
-  `rtk /usr/bin/security list-keychains -d user`. To diagnose lookup order, repeat the exact same
-  lookup with the owner's login Keychain path appended. Use only the canonical service and account
-  throughout. Do not ask for alternate items or create an agent-specific copy.
+  `rtk /usr/bin/security list-keychains -d user`. Repeat the exact lookup with the owner's login
+  Keychain path appended. Use only the canonical service and account throughout. Do not ask for
+  alternate items or create an agent-specific copy.
 - If the same item remains inaccessible, report the exact Keychain error after the host-level retry.
   If macOS requires interaction, have the owner unlock the Keychain or approve the trusted reader
   in their login session. Keep the existing item and access controls intact.
