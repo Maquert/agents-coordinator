@@ -12,8 +12,12 @@ Use this skill for Ecelyo macOS and iOS App Store release preparation. It comple
 - Read the target task and tactic from Ecelyo. Check the project is not archived, the tactic is not accomplished, the task graph is coherent, and there are no duplicate release tasks.
 - Read the app marketing version from `Configuration/Base.xcconfig`. Do not change the marketing version or build-number policy as part of release notes or screenshot work.
 - Use the task's source branch and commit as the note-generation boundary. For public version notes, use the latest reachable version tag as the release baseline and follow the repository's 40-commit cap and three-day recency rule.
-- If the requested release version does not match `MARKETING_VERSION`, record the exact tag, source commit, and configured version in the task, set it to `in_review`, and leave public release-note files and release screenshots untouched until the owner resolves the target. Do not solve a mismatch by changing the version.
+- If the requested release version does not match `MARKETING_VERSION`, pause active-release metadata and ask the owner to resolve the target. Historical preparation may proceed only when the owner explicitly names or approves an immutable release tag; keep all historical notes, screenshots, manifests, and product-page canvases under `release-metadata/versions/<version>/` so active-version files remain unchanged. Do not solve a mismatch by changing the version.
 - Keep already-published release notes as evidence. Do not roll current release metadata backward to recreate an older version's note set.
+
+## Shared repository guidance
+
+Read the shared [`~/.agents/AGENTS.md`](../../AGENTS.md) for execution, privacy, worktree, validation, screenshot, and pull-request requirements. Repository `AGENTS.md` files add project-specific constraints; follow both.
 
 ## Plan the task graph
 
@@ -35,8 +39,9 @@ When a matching task already exists, update its description, role, review gate, 
 - Capture real app renders from the shipped example systems. Never fabricate or edit the UI captures.
 - For iPhone App Store assets, use **iPhone 17 only**. Do not capture, keep, select, or upload iPhone 16 or iPhone 17 Pro Max variants.
 - Use the approved iPad model recorded in the task; the current Ecelyo release workflow uses iPad Pro 13-inch (M5). macOS captures use the task's supported Mac target.
-- Store assets under `release-metadata/screenshots/<Platform>/raw/` and `release-metadata/screenshots/<Platform>/marketing/`, retaining filenames such as `Ecelyo-iPhone17-1-projects.png`. Keep each platform's raw and marketing order aligned.
-- Keep capture scripts, marketing composition, validator, upload manifest, search-results-canvas inputs, asset manifest, and screenshot README in sync when paths change. For iPhone captures, regenerate the search-results canvas after the raw source images change.
+- Store assets as `screenshots/<Platform>/{raw,marketing}/`, retaining filenames such as `screenshots/iPhone/raw/Ecelyo-iPhone17-1-projects.png`. Use `macOS`, `iPhone`, or `iPad` as the platform folder. Keep each platform's raw and marketing names and order aligned.
+- For an active release, the screenshot root is `release-metadata/screenshots/`. For an explicitly approved historical release, use `release-metadata/versions/<version>/screenshots/`; keep the version-scoped upload manifest there and never replace the active root manifest or images. A historical capture should build from the named tag while derived data and temporary artifacts stay in the task worktree. Set explicit source, artifact, and output roots on capture wrappers when supported.
+- Keep capture scripts, marketing composition, validator, upload manifest, search-results-canvas inputs, asset manifest, and screenshot README in sync when paths change. The normal uploader reads only the active root manifest; a version-scoped manifest is an archival upload handoff. Add only marketing images to an upload manifest. For iPhone captures, regenerate the search-results canvas from that version's `iPhone/raw/` inputs and save it inside the same version package.
 - Read `specifications/v1/app-store-screenshot-refresh-workflow.md` and `scripts/appstore/README.md`. Use the narrowest platform capture wrapper for the task; do not run the all-platform wrapper if it would create or use devices outside the approved task set.
 - Inspect changed images at full size. Validate exact dimensions, opacity, nonblank content, duplicates, filenames, ordering, and the product-page canvas when iPhone source captures change.
 
