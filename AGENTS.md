@@ -158,6 +158,7 @@ When a tactic reaches its completed (`finished`) state, include a Markdown table
 - When the first non-whitespace text in a user prompt is `New task:` (case-insensitive), always load and use `task-processor`, capture the remainder as task-intake content, and do not execute the captured work unless explicitly asked to do both.
 - When the user asks about the Ecelyo way of work, tactic structure, completion-first planning, WIP discipline, or the general Ecelyo philosophy, load and use the `ecelyo-methodology` skill.
 - When task state must be read, updated, synchronized, or created through the Ecelyo system, load and use the `ecelyo-satellite` skill.
+- When planning or executing Ecelyo App Store releases, including version-gated notes, platform screenshot work, and submission/release task chains, load `ecelyo-release-appstore` from `~/.agents/skills/ecelyo-release-appstore/SKILL.md`.
 - When an agent needs to communicate task-manager status, ask for or document clarification, challenge scope, request human review, share artifacts or visuals, or report a blocker, load and use the `task-manager-assistant` skill.
 - When a task-manager workflow enters or may enter a blocked state, automatically activate `task-manager-assistant` before reporting or asking about the blocker; include the exact gate, owner, evidence, and smallest unblocking action.
 - When the user asks to create, configure, export, package, or document a custom ChatGPT GPT/agent, load and use the `chatgpt-agent-creator` skill.
