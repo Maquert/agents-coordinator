@@ -25,8 +25,10 @@ When the first non-whitespace text is `New task:` (case-insensitive):
 3. Check Ecelyo for an equivalent existing task before creating a duplicate.
 4. Resolve an eligible project and tactic. A project is eligible when it is not archived. A tactic
    may be active, completed, or archived when its persisted goal clearly matches the new requirement;
-   follow the reopen/restore rules below before adding work. Infer them only when the context makes
-   the assignment reliable; otherwise ask the user.
+   follow the reopen/restore rules below before adding work. Determine the restored tactic's target
+   version as part of this resolution; if it is not explicit or reliably inferable, ask the user
+   what target version to use before restoring or attaching the task. Infer assignments only when
+   the context makes them reliable; otherwise ask the user.
 5. Create the task in Ecelyo with state `pending`, an explicit branch slug, an explicit priority, and
    an explicit `agentRole`, and an explicit boolean `needsHumanReview` value (shown as “needs
    review” in Ecelyo). Determine this value from the actual review or decision gate required by the
@@ -47,8 +49,8 @@ For any explicit backlog-intake request:
 3. Check the destination project is not archived and the task fits the destination tactic's
    persisted goal. A derived `finished` tactic may be reused directly when it fits; an
    `accomplished` or archived tactic may be reused only after the reopen/restore rules below
-   succeed. Do not reject a tactic merely because its derived status is `finished`; adding pending
-   work may make it `ready` again.
+   succeed. Resolve and verify the target version before attaching the task. Do not reject a tactic
+   merely because its derived status is `finished`; adding pending work may make it `ready` again.
 4. If the user requests a new project or tactic, create it in Ecelyo under the active system with a clear title and objective.
 5. Preserve an explicit due date supplied by the source or required by project policy. For a bug or
    `Critical` task without an explicit due date, use the current calendar date plus 2 calendar days
@@ -155,17 +157,23 @@ derived `finished`, `accomplished`, or archived tactic only when all of these co
 - the owning project is not archived and the tactic is not permanently deleted or otherwise marked
   non-restorable;
 - no active tactic is a better, more coherent destination; and
-- reopening or restoring it will not mix unrelated work into the tactic.
+- reopening or restoring it will not mix unrelated work into the tactic;
+- its target version is explicit or can be determined without guessing.
 
 For a derived `finished` tactic, no lifecycle mutation is needed: reread it and verify that it still
 accepts new tasks. For an `accomplished` or archived tactic, use Ecelyo's supported canonical reopen
-or restore mutation for the exact tactic. Do not invent an endpoint or simulate restoration by
-creating a duplicate tactic. After the mutation, reread the tactic and verify that it is active and
-accepts new tasks before creating or attaching any task. Report that the tactic was reopened or
-restored. If the server does not expose the required operation, record the missing capability under
-`local server improvements` and stop or ask the human for the supported lifecycle action; do not
-silently attach work to a completed or archived tactic. If the lifecycle action is explicitly
-human-owned or ambiguous, use the human review gate instead of assuming permission.
+or restore mutation for the exact tactic. If the new requirement belongs to a different target
+version, it is acceptable to update the tactic's target-version metadata during this restoration.
+Use the version field and mutation shape supported by Ecelyo; do not invent an endpoint or field
+name, or simulate restoration by creating a duplicate tactic. If the target version is missing or
+ambiguous, ask: `What target version should this restored tactic use?` before changing lifecycle
+state. After any reopen, restore, or version update, reread the tactic and verify its active state,
+target version, and acceptance of new tasks before creating or attaching any task. Report every
+reopen, restore, and target-version change. If the server does not expose a required operation,
+record the missing capability under `local server improvements` and stop or ask the human for the
+supported lifecycle action; do not silently attach work to a completed or archived tactic. If the
+lifecycle action is explicitly human-owned or ambiguous, use the human review gate instead of
+assuming permission.
 
 ## Complete tactic requests
 
