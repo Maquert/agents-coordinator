@@ -235,6 +235,25 @@ substitute an app-navigation URL or another made-up value.
 
 ## Execution
 
+### Permission escalation and rerouting
+
+Before any action that needs new or higher permissions than the current task grants, stop and
+explain the request in the task thread before running or retrying the action. Use the `? ` prefix
+and `in_review` state while waiting. Keep the request short but explicit:
+
+```text
+Permission: <exact capability, command, service, or path>
+Why: <purpose and expected result>
+Scope: <data/system affected and whether it is reversible>
+Decision: approve this scope, approve a narrower alternative, reroute to <suggested option>, or deny
+```
+
+The human must be able to accept or deny the exact permission and choose a safe reroute within the
+same task. Do not broaden an approval, retry after denial, or substitute a different privileged
+action silently. If denied, offer the smallest viable alternatives—read-only inspection, a narrower
+path or command, a user-run step, another supported tool, or stopping the task—and record the
+decision and selected route in the task. A permission decision is a review gate, not a blocker.
+
 ### UI and device verification
 
 - Never inspect, launch, click, or otherwise interact with the app that is already running on the
