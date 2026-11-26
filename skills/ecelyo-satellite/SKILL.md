@@ -101,6 +101,11 @@ When the agent cannot connect, run the complete Bonjour resolution again and ver
 the newly resolved host and port before continuing. Do not persist the resolved IP or retain a stale
 endpoint between workflows.
 
+If the HTTP service responds but Ecelyo is missing from the Codex session's MCP tools, follow
+[Codex MCP connection troubleshooting](references/codex-mcp-troubleshooting.md). Bonjour discovery
+does not register a server in Codex, and a successful `GET /mcp` does not prove that authenticated
+MCP tools are loaded.
+
 - If a connection or discovery command fails with a sandbox, network-policy, DNS, or permission
   error, retry the same read-only command outside the restrictive sandbox or request the required
   network escalation. Do not conclude that Satellite is stopped until the host-level check has
