@@ -31,7 +31,7 @@ If the company folder has no identifiable current ATS CV, or has only a PDF when
 - Ask the user whether they want the current ATS CV created in that company folder.
 - If the user agrees, create the company-specific ATS CV from the generic ATS source in the central `CV` folder:
   `/Users/mhjaso/Library/Mobile Documents/com~apple~CloudDocs/Documents/Nuevo trabajo/CV/CV - Miguel Hernández Jaso - ATS.md`.
-  Use the equivalent Spanish ATS source when the application is in Spanish. Tailor that copy to the offer, save it in the company folder, and then run `job_match` again so the table and CV-based changes are regenerated from the new current CV.
+  Use the equivalent Spanish ATS source when the application is in Spanish. Tailor that copy to the offer and save it in the company folder using a company-specific filename that begins with the company name: `<Company> CV ATS - Miguel Hernandez Jaso.md` for English or `<Company> CV ATS ES - Miguel Hernandez Jaso.md` for Spanish. For example: `Wizeline CV ATS - Miguel Hernandez Jaso.md`. Then run `job_match` again so the table and CV-based changes are regenerated from the new current CV.
 
 Do not treat an absent CV keyword as evidence that the user lacks the skill. After every comparison, actively review every missing required skill and every missing nice-to-have for possible inclusion. First add items supported by the existing CV, the generic ATS CV, verified project material or prior user statements. Then present the remaining plausible additions to the user in a concise confirmation question, grouped when practical, using explicit prompts such as “Have you used Firebase, GraphQL or MVC/MVVM, and may I add them to the CV?” Include nice-to-have candidates too, clearly marked as lower priority. Before adding any item that is not already supported, ask whether it is accurate and may be included. Add only the items the user confirms, record that confirmation in the change summary, and rerun the match analysis after updating the CV. Never silently discard a potentially useful missing skill and never infer it merely because the job description requests it.
 
@@ -40,7 +40,7 @@ By default, update Markdown sources only. Do not modify or regenerate PDFs unles
 ## Required workflow
 
 1. Extract the company, position, location/remote terms, salary, sector, required skills, nice-to-have skills, seniority, responsibilities, and any distinctive product or culture detail from the offer. Mark unknown fields as `Not stated` rather than guessing.
-2. Read the selected company's ATS CV and existing `cover-letter.md` when they exist. The CV match score must be based on that exact file, including its wording and keywords. If the ATS CV does not exist, follow the no-CV rule above instead of stopping the analysis.
+2. Read the selected company's company-specific ATS CV and existing `cover-letter.md` when they exist. Prefer the company-prefixed naming convention `<Company> CV ATS - Miguel Hernandez Jaso.md` or its Spanish equivalent. The CV match score must be based on that exact file, including its wording and keywords. If the ATS CV does not exist, follow the no-CV rule above instead of stopping the analysis.
 3. Compare the offer with two different perspectives:
    - **Profile match:** how well the user's known experience, mobile specialisation, Staff-level scope, product interests, location constraints, and other verified personal strengths fit the role, regardless of whether the CV currently says so.
    - **Current CV match:** how convincingly the selected ATS CV already demonstrates the offer's requirements through explicit or close-equivalent wording. Do not give credit merely because a skill is plausible.
@@ -78,7 +78,7 @@ Use `Not stated` for missing salary or sector information. Use `-` only for CV-d
 ## Completion checklist
 
 - [ ] Offer and company were researched from web sources.
-- [ ] Correct company folder was selected and its ATS CV was used for the CV score, or the score is `-` because no current ATS CV exists.
+- [ ] Correct company folder was selected and its company-prefixed ATS CV was used for the CV score, or the score is `-` because no current ATS CV exists.
 - [ ] Required table is transposed, has exactly the `Field` and `Value` columns, and contains one row for each required analysis field in the specified order.
 - [ ] Profile match and current CV match use App Store-style star ratings, or `-` for the current CV match when no current ATS CV exists.
 - [ ] Missing keywords are concrete and do not invent experience, or the field is `-` because no current ATS CV exists.
