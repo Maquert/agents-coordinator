@@ -1,0 +1,18 @@
+{
+  "builtin": "schedule",
+  "restart_policy": "always",
+  "args": [
+    "CRON_TZ=Europe/Madrid 0 */6 * * *",
+    "agentapi",
+    "new-conversation",
+    "--",
+    "Follow instructions in ~/.agents/commands/to-execute-next-open-tactic.md to pick a tactic and complete its tasks exclusively within the Maintenance project of the Cartenario system (resolve it by name \"Maintenance\" within the Cartenario system via Ecelyo Satellite GET /systems; do not use Ecelyo App's Maintenance project ID 7052D534-0D70-45D1-BFB5-4A6C5B77E08D). Scope override for Cartenario (/Users/mhjaso/Developer/Projects/Cartenario) is authorized for this automation; do not select tactics from any other project or system.\n\nSort the tactics by version and always start with the lowest version (tactics use semver; if tactics have no version, fall back to priority). Then from the selected tactic pick the free task with the top priority.\n\nDo not complete more than 2 tasks. Create one thread for each task if they are not related (do not reuse the same thread for unrelated tasks)."
+  ],
+  "display_name": "Cartenario Tactic Maintenance",
+  "description": "Every 6 hours (Europe/Madrid), picks a tactic from the Cartenario Maintenance project and completes up to 2 tasks.",
+  "agent_permissions": {
+    "workspace_uris": [
+      "file:///Users/mhjaso/Developer/Projects/Cartenario"
+    ]
+  }
+}
