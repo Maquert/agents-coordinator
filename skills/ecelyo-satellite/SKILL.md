@@ -176,7 +176,11 @@ endpoint between workflows.
 2. Check connectivity with `GET /`.
 3. Discover systems with authenticated `GET /systems`.
 4. Narrow to projects or tactics with `GET /projects?systemId=...` and `GET /tactics?...`.
-5. Read the active task queue with `GET /tasks/priority` first when selecting work. Use `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does not answer.
+5. Read the active task queue with `GET /tasks/priority` first when selecting work. When working
+   within one system, filter the queue with its exact `systemId`, for example
+   `GET /tasks/priority?systemId=<system-id>` (add `format=json` or `format=toon` as needed). Use
+   `GET /tasks?...` only when you need a broader list or a task lookup that the priority queue does
+   not answer.
 6. Update task state or assignment with `PATCH /tasks/{id}`.
 
 ## Preferred Commands
@@ -210,7 +214,7 @@ tasks[2]{id,title,priority,state,project,tactic}:
 ```bash
 curl -s "$SATELLITE_BASE_URL/"
 curl -s "$SATELLITE_BASE_URL/systems"
-curl -s "$SATELLITE_BASE_URL/tasks/priority"
+curl -s "$SATELLITE_BASE_URL/tasks/priority?systemId=<system-id>"
 curl -s "$SATELLITE_BASE_URL/tasks?state=pending"
 curl -s -X PATCH "$SATELLITE_BASE_URL/tasks/<task-id>" \
   -H 'Content-Type: application/json' \
@@ -261,7 +265,9 @@ scope, use its live task state and do not create local task-record files.
 
 Use this pairing when executing an existing task and the app should reflect current progress.
 
-- Read `GET /tasks/priority` first to select the next available task from the active queue.
+- Read `GET /tasks/priority?systemId=<system-id>` first to select the next available task from the
+  intended system's active queue. Do not request the unfiltered cross-system queue when a target
+  system is known.
 - Treat `pending` tasks from that queue as available to start and `wip` tasks as already taken by another agent unless the user says otherwise.
 - Use `GET /tasks?state=pending` or a narrower filtered query only when you need extra detail outside the grouped priority queue.
 - When handing candidate tasks to another agent, prefer a compact TOON list over narrative summaries.
@@ -276,6 +282,32 @@ Use this pairing when executing an existing task and the app should reflect curr
 - If `404 Not Found` occurs, verify the endpoint against the reference file before retrying.
 - If a `PATCH` returns `404`, confirm the task ID first with `GET /tasks` or `GET /tasks/{id}`.
 - If the app server is unavailable, stop and ask the user to start it or confirm the IP. Do not continue task work without Ecelyo connectivity.
+
+## Troubleshooting Appendix (Optional)
+
+Use this appendix only when an agent needs extra help distinguishing discovery, network access,
+authentication, and client registration. The normal Satellite workflow remains the authenticated
+HTTP API described above and in `references/endpoint-cheatsheet.md`; MCP is optional.
+
+- Bonjour discovery confirms only that a service advertises itself. It does not prove that the
+  Codex session has registered or authenticated an MCP server.
+- If plain `GET /` or `GET /mcp` fails inside a sandbox, retry the same credential-free request
+  with the approved host-network permission before concluding that the server is unreachable.
+  An HTTP `200` from both endpoints confirms reachability and MCP endpoint metadata, not an
+  authenticated MCP session.
+- Use the documented `satellite_request` helper for authenticated HTTP. It reads the canonical
+  Keychain item in memory and passes the Bearer header through stdin; never print the token, put it
+  in command arguments, write it to a file, or export it to an environment variable.
+- Do not test a user-pasted token with a separate client or script, or probe Keychain outside the
+  approved helper workflow. If a policy review blocks credential transport, report that precisely
+  and stop; a rejected request does not establish that the network is down.
+- Only if choosing MCP, register the server URL in the MCP client and complete that client's
+  supported authentication handshake. Do not treat a Bonjour record or `GET /mcp` metadata as
+  registration. If no secure Bearer method is supported, continue through the normal HTTP skill
+  workflow instead.
+- In non-interactive shells, the `rtk` wrapper may not be on `PATH`. Use the skill's documented
+  wrapper path/configuration or an approved interactive shell; never print or capture credential
+  output while debugging a missing wrapper.
 
 ## References
 
