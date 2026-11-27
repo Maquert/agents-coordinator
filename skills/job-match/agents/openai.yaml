@@ -1,0 +1,4 @@
+interface:
+  display_name: "job_match"
+  short_description: "Match a job offer to the folder CV and tailor its cover letter"
+  default_prompt: "Match this job offer to my folder CV, build the required comparison table, and tailor the CV and cover letter."
