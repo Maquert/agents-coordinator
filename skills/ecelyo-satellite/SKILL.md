@@ -35,6 +35,38 @@ Use plain JSON when the payload is irregular, deeply nested, or needs to stay cl
 - Ensure every created Ecelyo task has an explicit `agentRole`.
 - Load and follow `ecelyo-methodology` before registering any task, including task intake and reassignment.
 
+## Runtime and LAN Access Preflight
+
+Before Bonjour discovery, local-address probes, MCP HTTP requests, or Keychain access, determine
+whether this agent session has a verified route to the Mac running Ecelyo Satellite.
+
+- Use explicit current-session runtime metadata and documented tool capabilities to classify the
+  session as a local Mac runtime, a cloud/hosted runtime, or unknown. Do not infer that “Work” means
+  local work. A macOS kernel name, a `/Users/...` path, shell access, a `security` executable, or
+  the mere availability of a `require_escalated` option does not by itself prove that commands run
+  on the user's Mac or can reach its LAN.
+- Treat the agent's MCP tool inventory and its shell's LAN access as separate capabilities. A
+  registered Ecelyo Satellite MCP connection is a bridge only when its tool description identifies
+  Satellite and a read-only MCP operation actually succeeds. Its presence does not prove the shell
+  can reach the LAN. Conversely, a shell that can reach Satellite does not mean an Ecelyo MCP
+  connector is registered.
+- A cloud/hosted runtime may proceed only when an explicitly configured and documented bridge to
+  this Satellite is available and verified. Do not assume that elevating a command on a cloud host
+  connects it to the user's Mac.
+- A local Mac desktop runtime whose shell is sandboxed may use the documented host-network
+  permission flow. Treat that as a usable bridge only when the command runner confirms the approved
+  command ran in the Mac host context. If approval is rejected or the runtime cannot establish that
+  context, stop; do not switch to another shell, browser, or UI path to bypass the restriction.
+- If the session is cloud/hosted, sandboxed without a verified local bridge, or its runtime location
+  cannot be established, stop before Bonjour, testing any IP or `localhost`, or accessing the
+  Keychain. Tell the user clearly: “This session cannot verify access to the LAN on the Mac running
+  Ecelyo Satellite. Continue from a local Mac runtime or provide an explicitly configured, authorized
+  MCP/network bridge. This result does not indicate whether Satellite is running.”
+
+Proceed to the normal discovery and authentication workflow only after the local Mac runtime or
+authorized bridge is verified. Runtime classification is a gate before connection attempts, not a
+substitute for the later health check and MCP handshake.
+
 ## macOS Constraint
 
 Ecelyo Satellite is **macOS-only** and advertises its address on the LAN. Do not use
